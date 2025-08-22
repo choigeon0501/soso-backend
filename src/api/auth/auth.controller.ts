@@ -71,8 +71,8 @@ export class AuthController {
       ],
     },
   })
-  async refresh(@Body() refreshTokenDTO: RefreshTokenDTO) {
-    return new SuccessResponseDTO(await this.authService.refresh(refreshTokenDTO));
+  async refreshToken(@Body() refreshTokenDTO: RefreshTokenDTO) {
+    return new SuccessResponseDTO(await this.authService.refreshToken(refreshTokenDTO));
   }
 
   @Get('/test')

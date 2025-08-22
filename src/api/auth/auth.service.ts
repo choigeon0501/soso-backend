@@ -24,7 +24,6 @@ export class AuthService {
   async googleAuthLogin(googleAuthLoginDTO: GoogleAuthLoginDTO) {
     try {
       const { code, redirectUri } = googleAuthLoginDTO;
-      if (!code || !redirectUri) throw new BadRequestException('Not Found Code Or RedirectUri');
 
       const tokenResponse = await axios.post(
         this.googleTokenUrl,
@@ -70,27 +69,33 @@ export class AuthService {
   }
 
   async appleAuthLogin(appleAuthLoginDTO: AppleAuthLoginDto) {
-    const payload = await this.validateAppleToken(appleAuthLoginDTO.idToken);
+    try {
+      const { idToken } = appleAuthLoginDTO;
+      const payload = await this.validateAppleToken(idToken);
 
-    const appleId = payload.sub;
-    const email = payload.email;
+      const appleId = payload.sub;
+      const email = payload.email;
 
-    const existUser = await this.userRepository.findUserByUUID(appleId);
-    if (!existUser) {
-      await this.userRepository.createUser(appleId, email, AuthProvider.APPLE, null);
+      const existUser = await this.userRepository.findUserByUUID(appleId);
+      if (!existUser) {
+        await this.userRepository.createUser(appleId, email, AuthProvider.APPLE, null);
+      }
+
+      const role = appleId === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
+
+      const accessToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
+        expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
+      });
+
+      const refreshToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
+        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
+      });
+
+      return new AuthTokenResponseDTO(accessToken, refreshToken);
+    } catch (err) {
+      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
+      throw new InternalServerErrorException();
     }
-
-    const role = appleId === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
-
-    const accessToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
-      expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
-    });
-
-    const refreshToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
-      expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
-    });
-
-    return new AuthTokenResponseDTO(accessToken, refreshToken);
   }
 
   async validateAppleToken(idToken: string) {
@@ -105,19 +110,15 @@ export class AuthService {
     }
   }
 
-  async refresh(refreshTokenDTO: RefreshTokenDTO) {
+  async refreshToken(refreshTokenDTO: RefreshTokenDTO) {
     const { refreshToken } = refreshTokenDTO;
     try {
-      if (!refreshToken) throw new UnauthorizedException('Not Fount Refresh Token In Header');
-
       const payload = jwt.verify(refreshToken, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')) as { uuid: string };
-
       const role = payload.uuid === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
 
       const newAccessToken = jwt.sign({ uuid: payload.uuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
       });
-
       const newRefreshToken = jwt.sign({ uuid: payload.uuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
       });
