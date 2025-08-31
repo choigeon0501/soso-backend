@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
-import { SubmitUserRecord } from '../../database/entity/submit-user.entity';
+import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
 import { Shop } from '../../database/entity/shop.entity';
-import { OperatingHours } from '../../database/entity/operating-hours.entity';
-import { ProductMapping } from '../../database/entity/product_mapping.entity';
+import { OperatingHours } from '../../database/entity/shop-operating-hour.entity';
+import { ProductMapping } from '../../database/entity/shop-product-mapping.entity';
 import { SubmitStatus, SubmitType, UsingType } from '../../common/enum/role.enum';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../shop/dto/requests/submit_shop_requests.dto';
 

@@ -16,7 +16,7 @@ import { UserWishlistRecordDTO } from './dto/responses/wishlist_responses.dto';
 import { UserReviewsRecordDTO } from './dto/responses/review_responses.dto';
 import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
 
-import { SubmitUserRecord } from '../../database/entity/submit-user.entity';
+import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
 import { DeleteUserTransactionsRepository } from '../transactions/delete-user.repository';
 import { RecentSearchRepository } from '../recent-search/recent-search.repository';
 import { SubmitType } from '../../common/enum/role.enum';

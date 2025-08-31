@@ -1,22 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity('notice')
+@Entity('notices')
 export class Notice {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  text: string;
-
-  @Column()
+  @Column('varchar', { length: 255 })
   title: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date; // 생성 시간 자동 저장
+  @Column('text')
+  content: string;
 
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date; // 업데이트 시간 자동 갱신
+  @CreateDateColumn()
+  created_at: Date;
 
-  @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date | null; // 소프트 삭제 시간 (Soft Delete)\\
+  @UpdateDateColumn()
+  updated_at: Date;
 }

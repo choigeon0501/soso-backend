@@ -1,19 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { User } from './user.entity';
+import { Shop } from './shop.entity';
 
-@Entity('recent_search')
+@Entity('recent_searches')
 export class RecentSearch {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  uuid: string;
+  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column()
-  shopName: string;
+  @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'shop_id' })
+  shop: Shop;
 
-  @Column()
-  shopId: number;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date; // 생성 시간 자동 저장
+  @CreateDateColumn()
+  created_at: Date;
 }

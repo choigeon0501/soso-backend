@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PageInfoDTO, Pagination_responsesDto } from './pagination_responses.dto';
-import { Wishlist } from '../../../../database/entity/wishlist.entity';
+import { Wishlist } from '../../../../database/entity/user-favorite.entity';
 
 export class ShopItemDTO {
   @ApiProperty({ description: '소품샵 ID', example: 7 })

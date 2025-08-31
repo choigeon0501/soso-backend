@@ -1,16 +1,18 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { User } from './user.entity';
 
-@Entity('feedback')
+@Entity('feedbacks')
 export class Feedback {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  uuid: string;
+  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'uuid' })
+  user: User;
 
-  @Column()
-  text: string;
+  @Column('text')
+  content: string;
 
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date; // 생성 시간 자동 저장
+  @CreateDateColumn()
+  created_at: Date;
 }

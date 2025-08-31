@@ -1,19 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { User } from './user.entity';
+import { Shop } from './shop.entity';
 
-@Entity('shop_report')
+@Entity('shop_reports')
 export class ShopReport {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  user: string;
+  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column()
-  shopId: number;
+  @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'shop_id' })
+  shop: Shop;
 
-  @Column() //
-  status: number;
+  @Column('int')
+  report_type: number;
 
-  @Column({ default: null }) // status가 기타일 경우 Text가 들어감
+  @Column('text')
   message: string;
+
+  @CreateDateColumn()
+  created_at: Date;
 }

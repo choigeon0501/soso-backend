@@ -1,20 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { User } from './user.entity';
+import { Review } from './review.entity';
 
-@Entity('review_report')
+@Entity('review_reports')
 export class ReviewReport {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  user: string;
+  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column()
-  reviewId: number;
+  @ManyToOne(() => Review, (review) => review.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'review_id' })
+  review: Review;
 
-  // 0. 관련 없는 후기입니다. 1. 음란, 욕설 등 부적절한 내용입니다 2. 개인정보를 노출했습니다. 3. 홍보 및 광고 후기입니다. 4. 같은 내용을 도배하였습니다. 5. 기타
-  @Column()
-  status: number;
+  @Column('int')
+  report_type: number;
 
-  @Column({ default: null }) // status가 기타(5)일 경우 message가 들어감
+  @Column('text')
   message: string;
+
+  @CreateDateColumn()
+  created_at: Date;
 }

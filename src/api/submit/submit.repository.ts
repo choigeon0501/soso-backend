@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubmitUserRecord } from 'src/database/entity/submit-user.entity';
+import { SubmitUserRecord } from 'src/database/entity/submit-user-record.entity';
 import { LoggerService } from '../logger/logger.service';
 
 export class SubmitRepository {

@@ -10,5 +10,5 @@ export class Region {
   name: string;
 
   @OneToMany(() => Shop, (shop) => shop.region)
-  shop: Shop;
+  shops: Shop[];
 }

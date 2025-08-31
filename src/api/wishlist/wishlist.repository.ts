@@ -1,6 +1,6 @@
 import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Wishlist } from 'src/database/entity/wishlist.entity';
+import { Wishlist } from 'src/database/entity/user-favorite.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { Injectable } from '@nestjs/common';

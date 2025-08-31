@@ -1,28 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Shop } from './shop.entity';
-import { Image } from './image.entity';
 
-@Entity('review')
+@Entity('reviews')
 export class Review {
   @PrimaryGeneratedColumn()
-  id: number; // 고유 ID
+  id: number;
 
-  @Column()
+  @Column('text')
   content: string;
 
-  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Shop, (shop) => shop.reviews, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 
-  @ManyToMany(() => Image, (image) => image.reviews, { onDelete: 'CASCADE' })
-  @JoinTable({
-    name: 'image_mapping',
-  })
-  images: Image[];
-
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

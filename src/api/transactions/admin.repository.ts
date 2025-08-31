@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
-import { SubmitUserRecord } from '../../database/entity/submit-user.entity';
-import { ProductMapping } from '../../database/entity/product_mapping.entity';
+import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
+import { ProductMapping } from '../../database/entity/shop-product-mapping.entity';
 import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
-import { OperatingHours } from '../../database/entity/operating-hours.entity';
+import { OperatingHours } from '../../database/entity/shop-operating-hour.entity';
 import { Shop } from '../../database/entity/shop.entity';
 
 @Injectable()
@@ -48,7 +48,7 @@ export class AdminTransactionsRepository {
       });
 
       if (usingProductsMapping.length > 0) {
-        await productRepo.remove(usingProductsMapping); 
+        await productRepo.remove(usingProductsMapping);
       }
 
       // 유저의 uuid와 shopId로 product_mapping 테이블을 서칭해서 유저가 제안한 products의 type 0으로 업데이트하기
@@ -333,4 +333,4 @@ export class AdminTransactionsRepository {
       await queryRunner.release();
     }
   }
-} 
+}

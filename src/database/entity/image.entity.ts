@@ -1,14 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
-import { Review } from './review.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('image')
+@Entity('images')
 export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  url: string;
-
-  @ManyToMany(() => Review, (review) => review.images)
-  reviews: Review[];
+  @Column('varchar', { length: 255 })
+  file_key: string;
 }

@@ -1,46 +1,27 @@
-import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { Wishlist } from './wishlist.entity';
-import { Review } from './review.entity';
-import { AuthProvider } from '../../common/enum/auth.enum';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Unique } from 'typeorm';
 
-@Entity()
-export class User extends BaseEntity {
-  @PrimaryColumn()
+@Entity('users')
+@Unique(['email'])
+@Unique(['nick_name'])
+export class User {
+  @PrimaryColumn('char', { length: 36 })
   uuid: string;
 
-  @Column({ nullable: true })
+  @Column('varchar', { length: 255, nullable: true })
   email: string;
 
-  @Column({ default: '', nullable: true })
-  photoUrl: string;
+  @Column('varchar', { length: 512, nullable: true })
+  profile_img: string;
 
-  @Column({
-    unique: true,
-    nullable: true,
-  })
-  nickName: string;
+  @Column('varchar', { length: 50 })
+  nick_name: string;
 
-  @Column({ default: true })
-  isNew: boolean;
+  @CreateDateColumn()
+  created_at: Date;
 
-  @Column({ type: 'enum', enum: AuthProvider })
-  provider: AuthProvider;
+  @UpdateDateColumn()
+  updated_at: Date;
 
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
-  wishlists: Wishlist[]; // 사용자가 소유한 위시리스트 목록
-
-  @OneToMany(() => Review, (review) => review.user)
-  reviews: Review[]; // 사용자가 소유한 위시리스트 목록
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date; // 생성 시간 자동 저장
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date; // 업데이트 시간 자동 갱신
-
-  @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deletedAt?: Date | null; // 소프트 삭제 시간 (Soft Delete)
-
-  @Column({ nullable: true })
-  deleteType: number; // 0:앱을 자주 사용 ~...
+  @DeleteDateColumn({ nullable: true })
+  deleted_at: Date;
 }
