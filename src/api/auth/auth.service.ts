@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import * as qs from 'querystring';
+import { v4 as uuidv4 } from 'uuid';
 import * as appleSignin from 'apple-signin-auth';
 import { UserRepository } from '../user/user.repository';
 import axios from 'axios';
@@ -9,6 +10,7 @@ import { AppleAuthLoginDto, AuthTokenResponseDTO, GoogleAuthLoginDTO, RefreshTok
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../../common/enum/role.enum';
 import { AuthProvider } from '../../common/enum/auth.enum';
+import { AuthIdentityRepository } from '../auth-identity/auth-identity.repository';
 
 @Injectable()
 export class AuthService {
@@ -17,41 +19,52 @@ export class AuthService {
 
   constructor(
     private userRepository: UserRepository,
+    private authIdentityRepository: AuthIdentityRepository,
     private readonly loggerService: LoggerService,
     private readonly configService: ConfigService,
   ) {}
 
+  private async getGoogleUserByCode(code: string, redirectUri: string) {
+    const tokenResponse = await axios.post(
+      this.googleTokenUrl,
+      qs.stringify({
+        code,
+        client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+        client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+    );
+
+    const accessToken = tokenResponse.data.access_token;
+    if (!accessToken) {
+      throw new Error('Google OAuth: access_token not found');
+    }
+
+    const userResponse = await axios.get(this.googleUserInfoUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    return userResponse.data;
+  }
+
   async googleAuthLogin(googleAuthLoginDTO: GoogleAuthLoginDTO) {
     try {
-      const { code, redirectUri } = googleAuthLoginDTO;
+      const userData = await this.getGoogleUserByCode(googleAuthLoginDTO.code, googleAuthLoginDTO.redirectUri);
 
-      const tokenResponse = await axios.post(
-        this.googleTokenUrl,
-        qs.stringify({
-          code: code,
-          client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-          client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-          redirect_uri: redirectUri,
-          grant_type: 'authorization_code',
-        }),
-        {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        },
-      );
+      const authIdentity = await this.authIdentityRepository.findAuthIdentityByAuthProviderId(userData.id, AuthProvider.GOOGLE);
+      const userUuid = authIdentity?.user.uuid ?? uuidv4();
 
-      const { access_token } = tokenResponse.data;
-
-      const userResponse = await axios.get(this.googleUserInfoUrl, {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
-
-      const userData = userResponse.data;
-      const existUser = await this.userRepository.findUserByUUID(userData.id);
-      if (!existUser) {
-        await this.userRepository.createUser(userData.id, userData.email, AuthProvider.GOOGLE, userData.picture);
+      if (!authIdentity) {
+        // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
+        // 트랜잭션으로 묶기
+        await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
+        await this.userRepository.createUser(userUuid, userData.email, userData.picture);
       }
 
-      const role = userData.id === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
+      const adminUuid = this.configService.get<string>('ADMIN_UUID');
+      const role = userUuid === adminUuid ? Role.Admin : Role.User;
 
       const accessToken = jwt.sign({ uuid: userData.id, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
@@ -68,6 +81,18 @@ export class AuthService {
     }
   }
 
+  private async validateAppleToken(idToken: string) {
+    try {
+      const payload = await appleSignin.verifyIdToken(idToken, {
+        audience: this.configService.get<string>('APPLE_AUDIENCE_ID'),
+      });
+      return payload;
+    } catch (err) {
+      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
+      throw new UnauthorizedException('Apple ID Token 검증 실패');
+    }
+  }
+
   async appleAuthLogin(appleAuthLoginDTO: AppleAuthLoginDto) {
     try {
       const { idToken } = appleAuthLoginDTO;
@@ -76,12 +101,18 @@ export class AuthService {
       const appleId = payload.sub;
       const email = payload.email;
 
-      const existUser = await this.userRepository.findUserByUUID(appleId);
-      if (!existUser) {
-        await this.userRepository.createUser(appleId, email, AuthProvider.APPLE, null);
+      const authIdentity = await this.authIdentityRepository.findAuthIdentityByAuthProviderId(appleId, AuthProvider.APPLE);
+      const userUuid = authIdentity?.user.uuid ?? uuidv4();
+
+      if (!authIdentity) {
+        // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
+        // 트랜잭션으로 묶기
+        await this.authIdentityRepository.createAuthIdentity(appleId, AuthProvider.APPLE, userUuid);
+        await this.userRepository.createUser(userUuid, email, null);
       }
 
-      const role = appleId === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
+      const adminUuid = this.configService.get<string>('ADMIN_UUID');
+      const role = userUuid === adminUuid ? Role.Admin : Role.User;
 
       const accessToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
@@ -95,18 +126,6 @@ export class AuthService {
     } catch (err) {
       this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
       throw new InternalServerErrorException();
-    }
-  }
-
-  async validateAppleToken(idToken: string) {
-    try {
-      const payload = await appleSignin.verifyIdToken(idToken, {
-        audience: this.configService.get<string>('APPLE_AUDIENCE_ID'),
-      });
-      return payload;
-    } catch (err) {
-      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
-      throw new UnauthorizedException('Apple ID Token 검증 실패');
     }
   }
 

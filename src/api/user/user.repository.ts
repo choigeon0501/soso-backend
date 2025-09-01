@@ -17,7 +17,6 @@ export class UserRepository {
       return await this.userRepository.findOne({
         where: {
           uuid: uuid,
-          deletedAt: null,
         },
       });
     } catch (err) {
@@ -25,6 +24,7 @@ export class UserRepository {
       throw new InternalServerErrorException();
     }
   }
+
   async findUserByNickName(nickName: string) {
     try {
       return await this.userRepository.findOne({ where: { nickName } });
@@ -33,19 +33,21 @@ export class UserRepository {
       throw new InternalServerErrorException();
     }
   }
-  async createUser(uuid: string, email: string, provider: AuthProvider, photoUrl?: string) {
+
+  async createUser(uuid: string, email: string, provider: AuthProvider, profileImgKey?: string) {
     try {
       return await this.userRepository.save({
         uuid,
         email,
         provider,
-        photoUrl,
+        profileImgKey,
       });
     } catch (err) {
       this.loggerService.warn(`User/ createUser Error: ${err}`);
       throw new InternalServerErrorException('User signup failed');
     }
   }
+
   async updateNickName(uuid: string, nickName: string) {
     try {
       return await this.userRepository.update({ uuid }, { nickName, isNew: false });
@@ -54,6 +56,7 @@ export class UserRepository {
       throw new InternalServerErrorException();
     }
   }
+
   async updateUserPhotoUrl(uuid: string, profileImgKey: string) {
     try {
       return await this.userRepository.update({ uuid }, { photoUrl: profileImgKey });

@@ -21,6 +21,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TransactionsModule } from './api/transactions/transactions.module';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
+import { AuthIdentityModule } from './api/auth-identity/auth-identity.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
     AdminModule,
     JwtModule,
     TransactionsModule,
+    AuthIdentityModule,
   ],
   controllers: [AppController],
   providers: [

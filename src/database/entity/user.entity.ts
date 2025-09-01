@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, Dele
 
 @Entity('users')
 @Unique(['email'])
-@Unique(['nick_name'])
+@Unique(['nickName'])
 export class User {
   @PrimaryColumn('char', { length: 36 })
   uuid: string;
@@ -10,18 +10,18 @@ export class User {
   @Column('varchar', { length: 255, nullable: true })
   email: string;
 
-  @Column('varchar', { length: 512, nullable: true })
-  profile_img: string;
+  @Column('varchar', { length: 512, nullable: true, name: 'profile_img' })
+  profileImg: string;
 
-  @Column('varchar', { length: 50 })
-  nick_name: string;
+  @Column('varchar', { length: 50, name: 'nick_name' })
+  nickName: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
-  @DeleteDateColumn({ nullable: true })
-  deleted_at: Date;
+  @DeleteDateColumn({ nullable: true, name: 'deleted_at' })
+  deletedAt: Date;
 }
