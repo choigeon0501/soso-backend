@@ -60,7 +60,7 @@ export class AuthService {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
         // 트랜잭션으로 묶기
         await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
-        await this.userRepository.createUser(userUuid, userData.email, userData.picture);
+        await this.userRepository.createUser(userUuid, userData.email, null);
       }
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
