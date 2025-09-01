@@ -2,10 +2,10 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
-import { ProductMapping } from '../../database/entity/shop-product-mapping.entity';
 import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
-import { OperatingHours } from '../../database/entity/shop-operating-hour.entity';
 import { Shop } from '../../database/entity/shop.entity';
+import { ShopProductMapping } from '../../database/entity/shop-product-mapping.entity';
+import { ShopOperatingHour } from '../../database/entity/shop-operating-hour.entity';
 
 @Injectable()
 export class AdminTransactionsRepository {
@@ -21,7 +21,7 @@ export class AdminTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       // 해당 유저가 제출한 submit status를 완료로 바꾸기
       const userSubmitData = await submitRepo.findOne({
@@ -39,11 +39,11 @@ export class AdminTransactionsRepository {
       userSubmitData.status = SubmitStatus.Approved;
       await submitRepo.save(userSubmitData);
 
-      // shopId로 product_mapping 테이블을 서칭해서 현재 type:0 인 정보 delete하기
+      // shopId로 product_mapping 테이블을 서칭해서 사용중인 소품샵 판매목록 삭제하기
       const usingProductsMapping = await productRepo.find({
         where: {
-          shopId,
-          type: 0,
+          shop: { id: shopId },
+          isVerified: true,
         },
       });
 
@@ -54,9 +54,9 @@ export class AdminTransactionsRepository {
       // 유저의 uuid와 shopId로 product_mapping 테이블을 서칭해서 유저가 제안한 products의 type 0으로 업데이트하기
       const submitProductMappings = await productRepo.find({
         where: {
-          shopId,
-          user: userUUID,
-          type: 1,
+          shop: { id: shopId },
+          submitRecord: { id: submitId },
+          isVerified: false,
         },
       });
 
@@ -66,7 +66,7 @@ export class AdminTransactionsRepository {
 
       await Promise.all(
         submitProductMappings.map(async (data) => {
-          data.type = 0;
+          data.isVerified = true;
           return productRepo.save(data);
         }),
       );
@@ -91,7 +91,7 @@ export class AdminTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const userSubmitData = await submitRepo.findOne({
         where: {
@@ -110,8 +110,8 @@ export class AdminTransactionsRepository {
       await submitRepo.save(userSubmitData);
 
       await productRepo.delete({
-        shopId,
-        user: userUUID,
+        shop: { id: shopId },
+        submitRecord: { id: submitId },
       });
 
       await queryRunner.commitTransaction();
@@ -134,7 +134,7 @@ export class AdminTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
       const shopRepo = queryRunner.manager.getRepository(Shop);
 
       const userSubmitData = await submitRepo.findOne({
@@ -164,7 +164,7 @@ export class AdminTransactionsRepository {
 
       await operatingRepo.delete({
         shop: { id: shopId },
-        type: 0,
+        isVerified: true,
       });
 
       const submitOperating = await operatingRepo.findOne({
@@ -178,7 +178,7 @@ export class AdminTransactionsRepository {
         throw new NotFoundException('Not Found Submit Operating Info');
       }
 
-      submitOperating.type = 0;
+      submitOperating.isVerified = true;
       await operatingRepo.save(submitOperating);
 
       await queryRunner.commitTransaction();
@@ -201,7 +201,7 @@ export class AdminTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       const userSubmitData = await submitRepo.findOne({
         where: {
@@ -270,7 +270,7 @@ export class AdminTransactionsRepository {
         throw new NotFoundException('Not Found Shop');
       }
 
-      shop.type = 0;
+      shop.isVerified = true;
       await shopRepo.save(shop);
 
       await queryRunner.commitTransaction();
@@ -294,7 +294,7 @@ export class AdminTransactionsRepository {
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
       const shopRepo = queryRunner.manager.getRepository(Shop);
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const userSubmitData = await submitRepo.findOne({
         where: {
@@ -318,7 +318,7 @@ export class AdminTransactionsRepository {
       });
 
       await productRepo.delete({
-        shopId: newShopId,
+        shop: { id: newShopId },
       });
 
       await queryRunner.commitTransaction();
