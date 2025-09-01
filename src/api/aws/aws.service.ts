@@ -118,15 +118,20 @@ export class AwsService {
     return { items: results, ttlSec };
   }
 
-  async deleteImageFromS3(imageUrl: string) {
-    // 올바른 Key 추출 방법
-    const fileName = imageUrl.split(`.amazonaws.com/`)[1];
+  async deleteImageFromS3(imgKey: string) {
+    if (!imgKey || typeof imgKey !== 'string') {
+      throw new BadRequestException('Invalid S3 object key');
+    }
 
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucketName,
-      Key: fileName,
-    });
-
-    await this.s3Client.send(command);
+    try {
+      const cmd = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: imgKey,
+      });
+      await this.s3Client.send(cmd);
+    } catch (err) {
+      this.loggerService.warn(`S3/ Delete Error (key=${imgKey}): ${err}`);
+      throw new InternalServerErrorException('Failed to delete object from S3');
+    }
   }
 }

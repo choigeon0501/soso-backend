@@ -21,8 +21,8 @@ export class ReportRepository {
     try {
       return await this.reviewReportRepository.findOne({
         where: {
-          user: uuid,
-          reviewId,
+          user: { uuid },
+          review: { id: reviewId },
         },
       });
     } catch (err) {
@@ -34,10 +34,10 @@ export class ReportRepository {
   async saveReviewReport(uuid: string, reviewId: number, status: number, message: string | null = null) {
     try {
       return await this.reviewReportRepository.save({
-        user: uuid,
-        reviewId,
-        status,
-        message,
+        user: { uuid },
+        review: { id: reviewId },
+        report_type: status,
+        report_message: message,
       });
     } catch (err) {
       this.loggerService.warn(`Report/ saveReviewReport Error: ${err}`);
@@ -49,8 +49,8 @@ export class ReportRepository {
     try {
       return await this.shopReportRepository.findOne({
         where: {
-          user: uuid,
-          shopId,
+          user: { uuid },
+          shop: { id: shopId },
         },
       });
     } catch (err) {
@@ -62,10 +62,10 @@ export class ReportRepository {
   async saveShopReport(uuid: string, shopId: number, status: number, message: string | null = null) {
     try {
       return await this.shopReportRepository.save({
-        user: uuid,
-        shopId,
-        status,
-        message,
+        user: { uuid },
+        shop: { id: shopId },
+        report_type: status,
+        report_message: message,
       });
     } catch (err) {
       this.loggerService.warn(`Report/ saveShopReport Error: ${err}`);

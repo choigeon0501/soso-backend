@@ -11,6 +11,6 @@ export class Recent_search_responsesDto {
   }
 
   static fromEntities(entities: RecentSearch[]): Recent_search_responsesDto[] {
-    return entities.map((e) => new Recent_search_responsesDto({ id: e.id, shopName: e.shopName, shopId: e.shopId }));
+    return entities.map((e) => new Recent_search_responsesDto({ id: e.id, shopName: e.shop.name, shopId: e.shop.id }));
   }
 }

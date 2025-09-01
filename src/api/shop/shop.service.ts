@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ShopRepository } from './shop.repository';
-import { WishlistRepository } from '../wishlist/wishlist.repository';
+import { WishlistRepository } from '../user-favorite/user-favorite.repository';
 import { RegionRepository } from '../region/region.repository';
 import { RecentSearchRepository } from '../recent-search/recent-search.repository';
 import { convertTimeToAmPm } from '../../common/function/time-to-am-pm.function';
@@ -159,10 +159,10 @@ export class ShopService {
     if (uuid) {
       const checkRecentSearchByShopName = await this.recentSearchRepository.checkRecentSearchByShopName(uuid, shop.name);
       if (!checkRecentSearchByShopName) {
-        const newUserRecentSearch = await this.recentSearchRepository.createRecentSearch(uuid, shop.name, shopId);
+        const newUserRecentSearch = await this.recentSearchRepository.createRecentSearch(uuid, shopId);
         if (userRecenSearchtList.length == 10) {
           const deleteData = userRecenSearchtList.pop();
-          await this.recentSearchRepository.deleteRecentSearch(deleteData.uuid, deleteData.id);
+          await this.recentSearchRepository.deleteRecentSearch(deleteData.user.uuid, deleteData.id);
         }
         userRecenSearchtList.unshift(newUserRecentSearch);
         await this.recentSearchRepository.saveRecentSearch(userRecenSearchtList);

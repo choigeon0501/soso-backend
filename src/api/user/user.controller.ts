@@ -6,17 +6,17 @@ import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
 import { ProfileImagePresignedDTO, UpdateProfileDTO } from './dto/requests/user_requests.dto';
-import { DeleteUserDto, ValidateNickNameDTO } from './dto/query/user.dto';
+import { WithdrawalReasonDTO, ValidateNickNameDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
-import { PageInfoDTO, Pagination_responsesDto } from './dto/responses/pagination_responses.dto';
+import { PageInfoDTO, PaginationResponsesDto } from './dto/responses/pagination_responses.dto';
 import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
 import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
-import { UserWishlistRecordDTO, UserWishlistRecordItemDTO } from './dto/responses/wishlist_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
-import { Wishlist_requestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
-import { WishlistPageNationDTO } from './dto/query/wishlist.dto';
+import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
+import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
+import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -92,8 +92,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '회원탈퇴' })
   @ApiOkResponse({ description: '회원탈퇴 성공', type: SuccessNoResultResponseDTO })
-  async deleteUser(@Query() deleteTypeDTO: DeleteUserDto, @GetUUID() uuid: string) {
-    await this.userService.deleteUser(uuid, deleteTypeDTO);
+  async deleteUser(@Query() withdrawalReasonDTO: WithdrawalReasonDTO, @GetUUID() uuid: string) {
+    await this.userService.deleteUser(uuid, withdrawalReasonDTO);
     return new SuccessNoResultResponseDTO();
   }
 
@@ -113,7 +113,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '사용자가 등록/제안한 소품샵 정보' })
-  @ApiExtraModels(UserSubmitRecordDTO, UserSubmitRecordItemDTO, PageInfoDTO, Pagination_responsesDto)
+  @ApiExtraModels(UserSubmitRecordDTO, UserSubmitRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
   @ApiOkResponse({
     description: '사용자가 등록/제안한 소품샵 정보 조회 성공',
     schema: {
@@ -138,7 +138,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '사용자가 등록한 리뷰 정보' })
-  @ApiExtraModels(UserReviewsRecordDTO, UserReviewsRecordItemDTO, PageInfoDTO, Pagination_responsesDto)
+  @ApiExtraModels(UserReviewsRecordDTO, UserReviewsRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
   @ApiOkResponse({
     description: '사용자가 등록한 리뷰 조회 성공',
     schema: {
@@ -149,28 +149,28 @@ export class UserController {
     return new SuccessResponseDTO(await this.userService.findUserReviews(reviewPageNation, uuid));
   }
 
-  @Get('/me/wishlist')
+  @Get('/me/favorite')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '사용자가 찜한 소품샵 리스트' })
-  @ApiExtraModels(UserWishlistRecordDTO, UserWishlistRecordItemDTO, PageInfoDTO, Pagination_responsesDto)
+  @ApiExtraModels(UserFavoriteRecordDTO, UserFavoriteRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
   @ApiOkResponse({
     description: '찜한 소품샵 리스트 조회 성공',
     schema: {
-      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserWishlistRecordDTO) } } }],
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserFavoriteRecordDTO) } } }],
     },
   })
-  async getUserWishlists(@GetUUID() uuid: string, @Query() pageNation: WishlistPageNationDTO) {
-    return new SuccessResponseDTO(await this.userService.getUserWishlists(pageNation as any, uuid));
+  async getUserFavorites(@GetUUID() uuid: string, @Query() pageNation: UserFavoritePageNationDTO) {
+    return new SuccessResponseDTO(await this.userService.getUserFavorites(pageNation as any, uuid));
   }
 
-  @Post('/me/wishlist')
+  @Post('/me/favorite')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '소품샵 찜하기', description: '찜하기 리스트에 해당 소품샵을 넣습니다.' })
   @ApiOkResponse({ description: '찜하기 성공', type: SuccessNoResultResponseDTO })
-  async addUserWishlist(@GetUUID() uuid: string, @Body() saveWishListDto: Wishlist_requestsDto) {
-    await this.userService.addUserWishlist(saveWishListDto as any, uuid);
+  async addUserFavorite(@GetUUID() uuid: string, @Body() userFavoriteRequestsDto: UserFavoriteRequestsDto) {
+    await this.userService.addUserFavorite(userFavoriteRequestsDto, uuid);
     return new SuccessNoResultResponseDTO();
   }
 

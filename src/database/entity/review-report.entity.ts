@@ -19,7 +19,7 @@ export class ReviewReport {
   report_type: number;
 
   @Column('text')
-  message: string;
+  report_message: string;
 
   @CreateDateColumn()
   created_at: Date;

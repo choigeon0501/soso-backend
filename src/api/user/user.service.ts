@@ -3,17 +3,16 @@ import { UserRepository } from './user.repository';
 import { AwsService } from '../aws/aws.service';
 import { ReviewRepository } from '../review/review.repository';
 import { SubmitRepository } from '../submit/submit.repository';
-import { WishlistRepository } from '../wishlist/wishlist.repository';
+import { UserFavoriteRepository } from '../user-favorite/user-favorite.repository';
 
-import { DeleteUserDto, ValidateNickNameDTO } from './dto/query/user.dto';
+import { ValidateNickNameDTO, WithdrawalReasonDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
 import { ProfileImagePresignedDTO, UpdateProfileDTO } from './dto/requests/user_requests.dto';
 
 import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
 import { PageInfoDTO } from './dto/responses/pagination_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
-import { UserWishlistRecordDTO } from './dto/responses/wishlist_responses.dto';
-import { UserReviewsRecordDTO } from './dto/responses/review_responses.dto';
+import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
 import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
 
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
@@ -22,9 +21,11 @@ import { RecentSearchRepository } from '../recent-search/recent-search.repositor
 import { SubmitType } from '../../common/enum/role.enum';
 import { SubmitTransactionsRepository } from '../transactions/submit.repository';
 import { ShopRepository } from '../shop/shop.repository';
-import { Wishlist_requestsDto } from './dto/requests/wishlist_requests.dto';
+import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
-import { WishlistPageNationDTO } from './dto/query/wishlist.dto';
+import { UserWithdrawalRepository } from '../user-withdrawal/user-withdrawal.repository';
+import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
+import { UserFavoriteRecordDTO } from './dto/responses/user_favorite_responses.dto';
 
 @Injectable()
 export class UserService {
@@ -32,17 +33,21 @@ export class UserService {
     private userRepository: UserRepository,
     private awsService: AwsService,
     private reviewRepository: ReviewRepository,
-    private wishlistRepository: WishlistRepository,
+    private userFavoriteRepository: UserFavoriteRepository,
     private submitRepository: SubmitRepository,
     private recentSearchRepository: RecentSearchRepository,
     private deleteUserTransactionsRepository: DeleteUserTransactionsRepository,
     private submitTransactionsRepository: SubmitTransactionsRepository,
     private shopRepository: ShopRepository,
+    private userWithdrawalRepository: UserWithdrawalRepository,
   ) {}
 
   async getUserProfile(uuid: string): Promise<UserProfileResponsesDTO> {
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
+
+    // PresignedURL 발급
+    user.profileImg = user.profileImg ? await this.awsService.getPresignedGetUrlByKey(user.profileImg) : null;
 
     return new UserProfileResponsesDTO(user);
   }
@@ -63,7 +68,7 @@ export class UserService {
       const isExistImg = await this.awsService.assertObjectExists(profileImgKey);
       if (!isExistImg) throw new NotFoundException('Not Found Image');
 
-      const updateUrl = await this.userRepository.updateUserPhotoUrl(uuid, profileImgKey);
+      const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImgKey);
       if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
     }
   }
@@ -81,18 +86,17 @@ export class UserService {
     if (!user) throw new NotFoundException('Not Found User');
 
     // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
-    await this.awsService.assertObjectExists(user.photoUrl);
+    await this.awsService.assertObjectExists(user.profileImg);
 
-    const userProfilePresignedURL = await this.awsService.getPresignedGetUrlByKey(user.photoUrl, expirseIn);
+    const userProfilePresignedURL = await this.awsService.getPresignedGetUrlByKey(user.profileImg, expirseIn);
     return new PresignedUserProfileImgResponsesDTO(userProfilePresignedURL, expirseIn);
   }
 
-  async deleteUser(uuid: string, deleteTypeDTO: DeleteUserDto) {
+  async deleteUser(uuid: string, withdrawalReasonDTO: WithdrawalReasonDTO) {
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
 
-    // deleteTypeDTO.type에 있는 number 데이터 WithdrawalReason[deleteTypeDTO.type] 이런식으로 접근해서 String 값으로 DB에 저장하기
-    await this.deleteUserTransactionsRepository.deleteUser(user, deleteTypeDTO.type);
+    await this.deleteUserTransactionsRepository.deleteUser(user, withdrawalReasonDTO);
   }
 
   async findUserNickName(nickNameDTO: ValidateNickNameDTO): Promise<boolean> {
@@ -114,32 +118,59 @@ export class UserService {
   async findUserReviews(reviewPageNation: ReviewPaginationDTO, uuid: string) {
     const { sort, page, limit } = reviewPageNation;
     const totalCount = await this.reviewRepository.findUserReviewByUUID(uuid);
-    const rows = await this.reviewRepository.findUserReviewByPageNation(uuid, page, limit, sort);
+    const reviews = await this.reviewRepository.findUserReviewByPageNation(uuid, page, limit, sort);
+
+    // ✅ Promise.all로 비동기 map 처리
+    const rows: UserReviewsRecordItemDTO[] = await Promise.all(
+      reviews.map(async (review) => {
+        const mainImageUrl = review.shop.mainImage ? await this.awsService.getPresignedGetUrlByKey(review.shop.mainImage) : null;
+
+        const images = await Promise.all(
+          (review.images ?? []).map(async (img) => ({
+            id: img.id,
+            fileKey: img.file_key,
+            url: await this.awsService.getPresignedGetUrlByKey(img.file_key),
+          })),
+        );
+
+        return {
+          id: review.id,
+          createdAt: review.createdAt,
+          content: review.content,
+          shop: {
+            id: review.shop.id,
+            name: review.shop.name,
+            mainImage: mainImageUrl,
+          },
+          images,
+        };
+      }),
+    );
 
     const pageInfo = new PageInfoDTO(page, limit, totalCount);
     return new UserReviewsRecordDTO(rows, pageInfo);
   }
 
-  async getUserWishlists(wishlistPageNation: WishlistPageNationDTO, uuid: string) {
+  async getUserFavorites(wishlistPageNation: UserFavoritePageNationDTO, uuid: string) {
     const { page, limit, areaId } = wishlistPageNation;
 
-    const totalCount = await this.wishlistRepository.findUserWishlistByUUID(uuid, areaId);
-    const rows = await this.wishlistRepository.findUserWishlistByPageNation(uuid, page, limit, areaId);
+    const totalCount = await this.userFavoriteRepository.findUserWishlistByUUID(uuid, areaId);
+    const rows = await this.userFavoriteRepository.findUserFavoritesByPageNation(uuid, page, limit, areaId);
 
     const pageInfo = new PageInfoDTO(page, limit, totalCount);
-    return new UserWishlistRecordDTO(rows, pageInfo);
+    return new UserFavoriteRecordDTO(rows, pageInfo);
   }
 
-  async addUserWishlist(saveWishListDTO: Wishlist_requestsDto, uuid: string) {
-    const { shopId } = saveWishListDTO;
+  async addUserFavorite(userFavoriteDto: UserFavoriteRequestsDto, uuid: string) {
+    const { shopId } = userFavoriteDto;
 
     const shop = await this.shopRepository.findShopByShopId(shopId);
-    if (!shop) throw new NotFoundException('Not Found Shop'); // 오타 수정
+    if (!shop) throw new NotFoundException('Not Found Shop');
 
-    const wishlist = await this.wishlistRepository.findWishlistByShopIdAndUUID(shopId, uuid);
-    if (wishlist) return await this.wishlistRepository.deleteWishlistByWishlistId(wishlist.id);
+    const userFavorite = await this.userFavoriteRepository.findUserFavoriteByShopIdAndUUID(shopId, uuid);
+    if (userFavorite) return await this.userFavoriteRepository.deleteUserFavoriteByUserFavoritesId(userFavorite.id);
 
-    return await this.wishlistRepository.addWishlistByShopIdAndUUID(shopId, uuid);
+    return await this.userFavoriteRepository.addUserFavoriteByShopIdAndUUID(shopId, uuid);
   }
 
   async getUserRecentSearches(uuid: string) {
@@ -165,7 +196,7 @@ export class UserService {
         await this.submitTransactionsRepository.deleteShopSubmission(submitRecord.shop.id);
         break;
       case SubmitType.NewOperating:
-        await this.submitTransactionsRepository.deleteOperatingHoursSubmission(submitId, submitRecord.operatingId);
+        await this.submitTransactionsRepository.deleteOperatingHoursSubmission(submitId, submitRecord.shopOperatingHour.id);
         break;
       case SubmitType.NewProduct:
         await this.submitTransactionsRepository.deleteProductSubmission(submitRecord.shop.id, uuid);

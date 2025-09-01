@@ -3,10 +3,10 @@ import { DataSource } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
 import { Shop } from '../../database/entity/shop.entity';
-import { OperatingHours } from '../../database/entity/shop-operating-hour.entity';
-import { ProductMapping } from '../../database/entity/shop-product-mapping.entity';
 import { SubmitStatus, SubmitType, UsingType } from '../../common/enum/role.enum';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../shop/dto/requests/submit_shop_requests.dto';
+import { ShopOperatingHour } from '../../database/entity/shop-operating-hour.entity';
+import { ShopProductMapping } from '../../database/entity/shop-product-mapping.entity';
 
 @Injectable()
 export class SubmitTransactionsRepository {
@@ -24,8 +24,8 @@ export class SubmitTransactionsRepository {
     try {
       const shopRepo = queryRunner.manager.getRepository(Shop);
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const createShop = await shopRepo.save({
         ...shop,
@@ -80,13 +80,13 @@ export class SubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
       const shopRepo = queryRunner.manager.getRepository(Shop);
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
 
       // Step 1: Delete product mappings
-      await productRepo.delete({ shopId });
+      await productRepo.delete({ shop: { id: shopId } });
 
       // Step 2: Delete operating hours
       await operatingRepo.delete({ shop: { id: shopId } });
@@ -116,7 +116,7 @@ export class SubmitTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       const newOperatingHours = await operatingRepo.save({
         shop: { id: shopId },
@@ -152,11 +152,10 @@ export class SubmitTransactionsRepository {
 
     try {
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const operatingRepo = queryRunner.manager.getRepository(OperatingHours);
+      const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       await operatingRepo.delete({
         id: operatingId,
-        type: UsingType.Verifying,
       });
 
       await submitRepo.delete({ id: submitId });
@@ -178,7 +177,7 @@ export class SubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-    const productRepo = queryRunner.manager.getRepository(ProductMapping);
+    const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
     try {
       const productMappings = products.map((product) => ({
@@ -215,14 +214,12 @@ export class SubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const productRepo = queryRunner.manager.getRepository(ProductMapping);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
       const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
 
       // Step 1: Delete product mappings of type Verifying by this user
       await productRepo.delete({
-        shopId: shopId,
-        user: uuid,
-        type: UsingType.Verifying,
+        shop: { id: shopId },
       });
 
       // Step 2: Delete submit record for NewProduct

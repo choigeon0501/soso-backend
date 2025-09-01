@@ -1,5 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity('user_withdrawals')
 export class UserWithdrawal {
@@ -14,8 +13,4 @@ export class UserWithdrawal {
 
   @CreateDateColumn()
   created_at: Date;
-
-  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 }

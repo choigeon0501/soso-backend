@@ -4,7 +4,7 @@ import { Shop } from './shop.entity';
 import { SubmitUserRecord } from './submit-user-record.entity';
 
 @Entity('shop_product_mappings')
-export class ShopProductMappings {
+export class ShopProductMapping {
   @PrimaryGeneratedColumn()
   id: number;
 

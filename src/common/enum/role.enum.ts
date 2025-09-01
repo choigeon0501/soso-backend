@@ -4,15 +4,15 @@ export enum Role {
 }
 
 export enum SubmitType {
-  NewShop = 0,
-  NewOperating = 1,
-  NewProduct = 2,
+  NewShop = 'new_shop',
+  NewOperating = 'new_operating',
+  NewProduct = 'new_product',
 }
 
 export enum SubmitStatus {
-  Pending = 0,
-  Approved = 1,
-  Rejected = 2,
+  Pending = 'pending',
+  Approved = 'approved',
+  Rejected = 'rejected',
 }
 
 export enum UsingType {

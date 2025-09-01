@@ -15,6 +15,6 @@ export class RecentSearch {
   @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }

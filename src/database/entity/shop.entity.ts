@@ -10,10 +10,10 @@ export class Shop {
   name: string;
 
   @Column('varchar', { length: 500, nullable: true })
-  main_image: string;
+  mainImage: string;
 
   @Column('tinyint', { default: 0 })
-  is_verified: boolean;
+  isVerified: boolean;
 
   @Column('varchar', { length: 255, nullable: true })
   instagram: string;
@@ -28,12 +28,12 @@ export class Shop {
   location: string;
 
   @ManyToOne(() => Region, (region) => region.shops, { nullable: false, onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'region_id' })
+  @JoinColumn({ name: 'regionId' })
   region: Region;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 }

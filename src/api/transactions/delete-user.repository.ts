@@ -1,23 +1,23 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
 import { DataSource } from 'typeorm';
 import { User } from '../../database/entity/user.entity';
-import { Wishlist } from '../../database/entity/user-favorite.entity';
-import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
-import { RecentSearch } from '../../database/entity/recent-search.entity';
 import { LoggerService } from '../logger/logger.service';
 import { Image } from '../../database/entity/image.entity';
+import { UserWithdrawal } from '../../database/entity/user-withdrawal.entity';
+import { WithdrawalReasonDTO } from '../user/dto/query/user.dto';
+import { AwsService } from '../aws/aws.service';
 
 @Injectable()
 export class DeleteUserTransactionsRepository {
   constructor(
     private dataSource: DataSource,
+    private awsService: AwsService,
     private loggerService: LoggerService,
   ) {}
 
-  async deleteUser(user: User, deleteType: number): Promise<void> {
-    const { uuid, photoUrl } = user;
-    const newUUID = uuidv4();
+  async deleteUser(user: User, withdrawalReason: WithdrawalReasonDTO): Promise<void> {
+    const { uuid, profileImg } = user;
+    const { withdrawalReasonCode, withdrawalReasonText } = withdrawalReason;
 
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -26,28 +26,17 @@ export class DeleteUserTransactionsRepository {
 
     try {
       const userRepo = queryRunner.manager.getRepository(User);
+      const userWithdrawalRepo = queryRunner.manager.getRepository(UserWithdrawal);
       const imgRepo = queryRunner.manager.getRepository(Image);
-      const wishlistRepo = queryRunner.manager.getRepository(Wishlist);
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-      const recentSearchRepo = queryRunner.manager.getRepository(RecentSearch);
 
-      await imgRepo.delete({ url: photoUrl });
-      await wishlistRepo.delete({ user: { uuid } });
-      await submitRepo.delete({ user: { uuid } });
-      await recentSearchRepo.delete({ uuid });
-      await userRepo
-        .createQueryBuilder()
-        .update(User)
-        .set({
-          uuid: newUUID,
-          deleteType,
-          photoUrl: null,
-          nickName: null,
-          email: null,
-        })
-        .where('uuid = :uuid', { uuid })
-        .execute();
-      await userRepo.softDelete({ uuid: newUUID });
+      await imgRepo.delete({ file_key: profileImg });
+      await this.awsService.deleteImageFromS3(profileImg);
+
+      await userWithdrawalRepo.save({
+        reason_code: withdrawalReasonCode,
+        reason_text: withdrawalReasonText,
+      });
+      await userRepo.delete({ uuid });
 
       await queryRunner.commitTransaction();
     } catch (err) {

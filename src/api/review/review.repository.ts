@@ -35,7 +35,8 @@ export class ReviewRepository {
         .createQueryBuilder('review') // ✅ 엔티티 별칭 수정
         .where('review.user.uuid = :uuid', { uuid }) // ✅ where 절 수정
         .leftJoinAndSelect('review.shop', 'shop') // ✅ shop 관계 조인
-        .leftJoinAndSelect('review.images', 'image') // ✅ shop의 images도 함께 가져오기
+        .leftJoinAndSelect('review.imageMappings', 'rim') // 매핑 엔티티
+        .leftJoinAndSelect('rim.image', 'image') // 실제 이미지
         .orderBy('review.createdAt', sort) // ✅ createdAt 기준 내림차순 정렬 (최신순)
         .skip(limit * (page - 1)) // ✅ offset 설정
         .take(limit) // ✅ limit 설정

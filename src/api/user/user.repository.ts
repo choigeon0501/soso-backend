@@ -50,18 +50,18 @@ export class UserRepository {
 
   async updateNickName(uuid: string, nickName: string) {
     try {
-      return await this.userRepository.update({ uuid }, { nickName, isNew: false });
+      return await this.userRepository.update({ uuid }, { nickName });
     } catch (err) {
       this.loggerService.warn(`User/ updateNickName Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }
 
-  async updateUserPhotoUrl(uuid: string, profileImgKey: string) {
+  async updateUserProfileImg(uuid: string, profileImgKey: string) {
     try {
-      return await this.userRepository.update({ uuid }, { photoUrl: profileImgKey });
+      return await this.userRepository.update({ uuid }, { profileImg: profileImgKey });
     } catch (err) {
-      this.loggerService.warn(`User/  updateUserPhotoUrl Error: ${err}`);
+      this.loggerService.warn(`User/  updateUserProfileImg Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }

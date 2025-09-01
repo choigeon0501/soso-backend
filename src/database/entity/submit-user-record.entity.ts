@@ -1,26 +1,29 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Shop } from './shop.entity';
+import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
+import { ShopOperatingHour } from './shop-operating-hour.entity';
 
 @Entity('submit_user_records')
 export class SubmitUserRecord {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('enum', { enum: ['initial_submission', 'operation_info_update', 'sales_info_update'] })
-  type: string;
+  @Column('enum', { enum: SubmitType })
+  type: SubmitType;
 
-  @Column('enum', { enum: ['pending', 'approved', 'rejected'], default: 'pending' })
-  status: string;
+  @Column('enum', { enum: SubmitStatus, default: SubmitStatus.Pending })
+  status: SubmitStatus;
 
-  @Column('text', { nullable: true })
-  reject_message: string;
+  @Column('text', { name: 'reject_message', nullable: true })
+  rejectMessage: string;
 
-  @Column('bigint', { nullable: true })
-  operating_id: number;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @ManyToOne(() => ShopOperatingHour, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'shop_operating_id' })
+  shopOperatingHour: ShopOperatingHour | null;
 
   @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })

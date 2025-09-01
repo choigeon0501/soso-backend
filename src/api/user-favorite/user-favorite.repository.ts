@@ -1,25 +1,21 @@
 import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Wishlist } from 'src/database/entity/user-favorite.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { UserFavorite } from '../../database/entity/user-favorite.entity';
 
 @Injectable()
-export class WishlistRepository extends Repository<Wishlist> {
+export class UserFavoriteRepository {
   constructor(
-    @InjectRepository(Wishlist)
-    private whishlistRepository: Repository<Wishlist>,
+    @InjectRepository(UserFavorite)
+    private favoriteRepository: Repository<UserFavorite>,
     private loggerService: LoggerService,
-    private dataSource: DataSource,
-  ) {
-    super(Wishlist, dataSource.createEntityManager());
-  }
+  ) {}
 
-  async findWishlistByShopIdAndUUID(shopId: number, uuid: string) {
+  async findUserFavoriteByShopIdAndUUID(shopId: number, uuid: string) {
     try {
-      return await this.whishlistRepository.findOne({
+      return await this.favoriteRepository.findOne({
         where: {
           user: { uuid },
           shop: { id: shopId },
@@ -32,10 +28,10 @@ export class WishlistRepository extends Repository<Wishlist> {
     }
   }
 
-  async deleteWishlistByWishlistId(wishlistId: number) {
+  async deleteUserFavoriteByUserFavoritesId(userFavoriteId: number) {
     try {
-      return await this.whishlistRepository.delete({
-        id: wishlistId,
+      return await this.favoriteRepository.delete({
+        id: userFavoriteId,
       });
     } catch (err) {
       this.loggerService.warn(`Wishlist/ deleteWishlistByWishlistId Error: ${err}`);
@@ -43,9 +39,9 @@ export class WishlistRepository extends Repository<Wishlist> {
     }
   }
 
-  async addWishlistByShopIdAndUUID(shopId: number, uuid: string) {
+  async addUserFavoriteByShopIdAndUUID(shopId: number, uuid: string) {
     try {
-      return await this.whishlistRepository.save({
+      return await this.favoriteRepository.save({
         user: { uuid }, // User 엔티티와 연결
         shop: { id: shopId }, // Shop 엔티티와 연결
       });
@@ -60,11 +56,11 @@ export class WishlistRepository extends Repository<Wishlist> {
 
   async findUserWishlistByUUID(uuid: string, areaId?: number) {
     try {
-      const query = this.whishlistRepository
+      const query = this.favoriteRepository
         .createQueryBuilder('wishlist')
-        .leftJoinAndSelect('wishlist.shop', 'shop')
+        .leftJoinAndSelect('userFavorite.shop', 'shop')
         .leftJoinAndSelect('shop.region', 'region')
-        .where('wishlist.userUuid = :uuid', { uuid });
+        .where('user-favorite.userUuid = :uuid', { uuid });
 
       if (areaId) {
         query.andWhere('region.id = :areaId', { areaId });
@@ -77,13 +73,13 @@ export class WishlistRepository extends Repository<Wishlist> {
     }
   }
 
-  async findUserWishlistByPageNation(uuid: string, page: number, limit: number, areaId?: number) {
+  async findUserFavoritesByPageNation(uuid: string, page: number, limit: number, areaId?: number) {
     try {
-      const query = this.whishlistRepository
-        .createQueryBuilder('wishlist')
-        .leftJoinAndSelect('wishlist.shop', 'shop')
+      const query = this.favoriteRepository
+        .createQueryBuilder('userFavorite')
+        .leftJoinAndSelect('userFavorite.shop', 'shop')
         .leftJoinAndSelect('shop.region', 'region')
-        .where('wishlist.userUuid = :uuid', { uuid });
+        .where('userFavorite.userUuid = :uuid', { uuid });
 
       if (areaId) {
         query.andWhere('region.id = :areaId', { areaId });
@@ -101,7 +97,7 @@ export class WishlistRepository extends Repository<Wishlist> {
 
   async isShopInUserWishlist(shopId: number, uuid: string) {
     try {
-      return await this.whishlistRepository.findOne({
+      return await this.favoriteRepository.findOne({
         where: {
           user: { uuid },
           shop: { id: shopId },
@@ -111,14 +107,5 @@ export class WishlistRepository extends Repository<Wishlist> {
       this.loggerService.warn(`Wishlist/ isShopInUserWishlist Error: ${err}`);
       throw new InternalServerErrorException();
     }
-  }
-
-  async findWishlistShopsByUser(userUUID: string) {
-    return this.find({
-      where: {
-        user: { uuid: userUUID },
-      },
-      relations: ['shop'],
-    });
   }
 }

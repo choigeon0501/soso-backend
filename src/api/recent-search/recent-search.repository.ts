@@ -14,7 +14,9 @@ export class RecentSearchRepository {
   async findRecentSearchListByUUID(uuid: string): Promise<RecentSearch[]> {
     try {
       return await this.recentSearchRepository.find({
-        where: { uuid },
+        where: {
+          user: { uuid },
+        },
         order: { createdAt: 'DESC' }, // 최신 순 정렬
       });
     } catch (err) {
@@ -23,9 +25,9 @@ export class RecentSearchRepository {
     }
   }
 
-  async createRecentSearch(uuid: string, shopName: string, shopId: number): Promise<RecentSearch> {
+  async createRecentSearch(uuid: string, shopId: number): Promise<RecentSearch> {
     try {
-      return await this.recentSearchRepository.create({ uuid, shopName, shopId });
+      return await this.recentSearchRepository.create({ user: { uuid }, shop: { id: shopId } });
     } catch (err) {
       this.loggerService.warn(`Recent-Search/ createRecentSearch Error: ${err}`);
       throw new InternalServerErrorException();
@@ -44,7 +46,10 @@ export class RecentSearchRepository {
   async checkRecentSearchByShopName(uuid: string, shopName: string): Promise<RecentSearch | null> {
     try {
       return await this.recentSearchRepository.findOne({
-        where: { uuid, shopName },
+        where: {
+          user: { uuid },
+          shop: { name: shopName },
+        },
       });
     } catch (err) {
       this.loggerService.warn(`Recent-Search/ checkRecentSearchByShopName Error: ${err}`);
@@ -56,7 +61,7 @@ export class RecentSearchRepository {
     try {
       await this.recentSearchRepository.delete({
         id: recentSearchId,
-        uuid,
+        user: { uuid },
       });
     } catch (err) {
       this.loggerService.warn(`Recent-Search/ deleteRecentSearch Error: ${err}`);
@@ -66,7 +71,7 @@ export class RecentSearchRepository {
 
   async deleteAllRecentSearch(uuid: string): Promise<void> {
     try {
-      await this.recentSearchRepository.delete({ uuid });
+      await this.recentSearchRepository.delete({ user: { uuid } });
     } catch (err) {
       this.loggerService.warn(`Recent-Search/ deleteRecentSearch Error: ${err}`);
       throw new InternalServerErrorException();
