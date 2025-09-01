@@ -6,24 +6,25 @@ export class ShopOperatingHour {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('tinyint', { default: 0 })
-  is_verified: boolean;
+  @Column('tinyint', { name: 'is_verified', default: 0 })
+  isVerified: boolean;
 
-  @Column('varchar', { length: 20, nullable: true })
-  phone_number: string;
+  @Column('varchar', { name: 'phone_number', length: 20, nullable: true })
+  phoneNumber: string;
 
   @Column('set', {
     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    name: 'days_of_week',
   })
-  days_of_week: string[];
+  daysOfWeek: string[];
 
-  @Column('time')
-  start_time: string;
+  @Column('time', { name: 'start_time' })
+  startTime: string;
 
-  @Column('time')
-  end_time: string;
+  @Column('time', { name: 'end_time' })
+  endTime: string;
 
-  @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Shop, (shop) => shop.operatingHours, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 }

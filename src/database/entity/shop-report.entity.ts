@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Shop } from './shop.entity';
+import { ShopReportType } from '../../common/enum/report.enum';
 
 @Entity('shop_reports')
 export class ShopReport {
@@ -15,12 +16,12 @@ export class ShopReport {
   @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 
-  @Column('int')
-  report_type: number;
+  @Column('enum', { name: 'report_type' })
+  reportType: ShopReportType;
 
-  @Column('text')
-  report_message: string;
+  @Column('text', { name: 'report_message' })
+  reportMessage: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }

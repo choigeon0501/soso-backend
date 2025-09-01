@@ -1,15 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiOkResponse,
-  getSchemaPath,
-  ApiExtraModels,
-  ApiConsumes,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { ShopService } from './shop.service';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
 import { GetUUID } from '../../common/deco/get-user.deco';
@@ -94,15 +84,6 @@ export class ShopController {
   })
   async getSearchPageShop(@Query() getSearchPageShopDTO: GetSearchPageShopDTO) {
     return new SuccessResponseDTO(await this.shopService.findShopsByKeyword(getSearchPageShopDTO));
-  }
-
-  @Get('/temp')
-  @ApiResponse({
-    status: 200,
-    description: '임시 데이터 조회 성공',
-  })
-  async getTemp() {
-    return new SuccessResponseDTO(await this.shopService.findTemp());
   }
 
   @Get('/:shopId')

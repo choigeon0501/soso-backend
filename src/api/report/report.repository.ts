@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ShopReport } from '../../database/entity/shop-report.entity';
 import { LoggerService } from '../logger/logger.service';
+import { ReviewReportType, ShopReportType } from '../../common/enum/report.enum';
+import { ReviewReportDto, ShopReportDto } from '../shop/dto/requests/report_request';
 
 @Injectable()
 export class ReportRepository {
@@ -31,13 +33,13 @@ export class ReportRepository {
     }
   }
 
-  async saveReviewReport(uuid: string, reviewId: number, status: number, message: string | null = null) {
+  async saveReviewReport(uuid: string, reviewId: number, reviewReportType: ReviewReportDto) {
     try {
       return await this.reviewReportRepository.save({
         user: { uuid },
         review: { id: reviewId },
-        report_type: status,
-        report_message: message,
+        reportType: reviewReportType.reportType,
+        reportMessage: reviewReportType.reportMessage,
       });
     } catch (err) {
       this.loggerService.warn(`Report/ saveReviewReport Error: ${err}`);
@@ -59,13 +61,13 @@ export class ReportRepository {
     }
   }
 
-  async saveShopReport(uuid: string, shopId: number, status: number, message: string | null = null) {
+  async saveShopReport(uuid: string, shopId: number, shopReportType: ShopReportDto) {
     try {
       return await this.shopReportRepository.save({
         user: { uuid },
         shop: { id: shopId },
-        report_type: status,
-        report_message: message,
+        reportType: shopReportType.reportType,
+        reportMessage: shopReportType.reportMessage,
       });
     } catch (err) {
       this.loggerService.warn(`Report/ saveShopReport Error: ${err}`);

@@ -1,36 +1,35 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { ReviewReportType, ShopReportType } from '../../../../common/enum/report.enum';
 
 export class ShopReportDto {
   @ApiProperty({
-    description: '신고 상태 코드 (예: 0: 잘못된 정보, 1: 부적절한 내용 등)',
-    example: 0,
+    description: '신고 상태 코드',
   })
   @IsNotEmpty()
-  @IsNumber()
-  status: number;
+  @IsEnum(ShopReportType)
+  reportType: ShopReportType;
 
   @ApiPropertyOptional({
     description: '신고 사유 메시지 (선택 사항, 최대 100자)',
     example: '정보가 실제와 다릅니다.',
   })
   @IsOptional()
-  message?: string;
+  reportMessage?: string;
 }
 
 export class ReviewReportDto {
   @ApiProperty({
-    description: '신고 상태',
-    example: 0,
+    description: '신고 상태 코드',
   })
   @IsNotEmpty()
-  @IsNumber()
-  status: number;
+  @IsEnum(ReviewReportType)
+  reportType: ReviewReportType;
 
   @ApiPropertyOptional({
     description: '신고 사유 메시지 (선택 사항, 최대 100자)',
     example: '광고성 내용입니다.',
   })
   @IsOptional()
-  message?: string;
+  reportMessage?: string;
 }

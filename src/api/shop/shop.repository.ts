@@ -30,8 +30,8 @@ export class ShopRepository extends Repository<Shop> {
           'distance',
         )
         .where('(shop.name LIKE :keyword OR shop.location LIKE :keyword)', { keyword: `%${keyword}%` })
-        .andWhere('shop.type = :type', { type: 0 })
-        .setParameters({ lat, lng, type: 0 })
+        .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+        .setParameters({ lat, lng, isVerified: true })
         .skip(limit * (page - 1))
         .take(limit)
         .getRawMany();
@@ -47,7 +47,7 @@ export class ShopRepository extends Repository<Shop> {
         .createQueryBuilder('shop')
         .where('shop.name LIKE :keyword', { keyword: `%${keyword}%` }) // 부분 검색
         .orWhere('shop.location LIKE :keyword', { keyword: `%${keyword}%` }) // 도로명 검색
-        .andWhere('shop.type = :type', { type: 0 }) // 특정 타입 필터링
+        .andWhere('shop.isVerified = :isVerified', { isVerified: true }) // 특정 타입 필터링
         .getCount();
     } catch (err) {
       this.loggerService.warn(`Shop/ findAllShopsCountByKeyword Error: ${err}`);
@@ -60,7 +60,7 @@ export class ShopRepository extends Repository<Shop> {
       return await this.shopRepository.findOne({
         where: {
           id: shopId,
-          type: 0,
+          isVerified: true,
         },
       });
     } catch (err) {
@@ -73,11 +73,11 @@ export class ShopRepository extends Repository<Shop> {
     try {
       return await this.shopRepository
         .createQueryBuilder('shop')
-        .leftJoinAndSelect('shop.operatingHours', 'operatingHours', 'operatingHours.type = :operatingHoursType', { operatingHoursType: 0 }) // 운영 시간 필터링
-        .leftJoinAndSelect('shop.productMappings', 'productMapping', 'productMapping.type = :productMappingType', { productMappingType: 0 }) // product_mapping에서 type=0 필터링
+        .leftJoinAndSelect('shop.operatingHours', 'operatingHours', 'operatingHours.isVerified= :operatingHoursType', { operatingHoursType: true }) // 운영 시간 필터링
+        .leftJoinAndSelect('shop.productMappings', 'productMapping', 'productMapping.isVerified = :productMappingType', { productMappingType: true }) // product_mapping에서 type=0 필터링
         .leftJoinAndSelect('productMapping.product', 'product') // product_mapping을 통해 product 조인
         .where('shop.id = :shopId', { shopId })
-        .andWhere('shop.type = :type', { type: 0 }) // shop.type = 0 필터링
+        .andWhere('shop.isVerified = :isVerified', { isVerified: true })
         .getOne();
     } catch (err) {
       this.loggerService.warn(`Shop/ findShopByShopId Error: ${err}`);
@@ -104,7 +104,7 @@ export class ShopRepository extends Repository<Shop> {
         ))`,
           'distance',
         )
-        .where('shop.type = :type', { type: 0 })
+        .where('shop.isVerified = :isVerified', { isVerified: true })
         .having('distance < :distanceLimit', { distanceLimit })
         .setParameters({ lat, lng });
 
@@ -124,13 +124,5 @@ export class ShopRepository extends Repository<Shop> {
       .innerJoin('shop.productMappings', 'productMapping')
       .where('productMapping.product.id IN (:...productIds)', { productIds })
       .getMany();
-  }
-
-  async findTemp() {
-    return await this.shopRepository.find({
-      where: {
-        type: 0,
-      },
-    });
   }
 }

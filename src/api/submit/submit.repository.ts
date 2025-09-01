@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubmitUserRecord } from 'src/database/entity/submit-user-record.entity';
 import { LoggerService } from '../logger/logger.service';
+import { SubmitType } from '../../common/enum/role.enum';
 
 export class SubmitRepository {
   constructor(
@@ -28,7 +29,7 @@ export class SubmitRepository {
     }
   }
 
-  async findUserSubmitRecordByType(uuid: string, shopId: number, type: number): Promise<SubmitUserRecord> {
+  async findUserSubmitRecordByType(uuid: string, shopId: number, type: SubmitType): Promise<SubmitUserRecord> {
     try {
       return await this.submitUserRecordRepository.findOne({
         where: {
@@ -37,7 +38,6 @@ export class SubmitRepository {
             id: shopId,
           },
           type,
-          status: 0, // 확인중
         },
       });
     } catch (err) {

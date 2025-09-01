@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Region } from './region.entity';
+import { ShopOperatingHour } from './shop-operating-hour.entity';
+import { ShopProductMapping } from './shop-product-mapping.entity';
 
 @Entity('shops')
 export class Shop {
@@ -30,6 +32,12 @@ export class Shop {
   @ManyToOne(() => Region, (region) => region.shops, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'region_id' })
   region: Region;
+
+  @OneToMany(() => ShopOperatingHour, (oh) => oh.shop)
+  operatingHours: ShopOperatingHour[];
+
+  @OneToMany(() => ShopProductMapping, (mapping) => mapping.shop)
+  productMappings: ShopProductMapping[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

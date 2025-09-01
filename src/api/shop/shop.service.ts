@@ -1,6 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ShopRepository } from './shop.repository';
-import { WishlistRepository } from '../user-favorite/user-favorite.repository';
 import { RegionRepository } from '../region/region.repository';
 import { RecentSearchRepository } from '../recent-search/recent-search.repository';
 import { convertTimeToAmPm } from '../../common/function/time-to-am-pm.function';
@@ -18,13 +17,15 @@ import { PostReviewDto, PresignPutListRequestDto, UpdateReviewDto } from './dto/
 import { Paging } from './dto/responses/pagination_response.dto';
 import { ShopSearchPageNationResultDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
+import { UserFavoriteRepository } from '../user-favorite/user-favorite.repository';
+import { SubmitType } from '../../common/enum/role.enum';
 
 @Injectable()
 export class ShopService {
   constructor(
     private shopRepository: ShopRepository,
     private reviewService: ReviewService,
-    private wishlistRepository: WishlistRepository,
+    private userFavoriteRepository: UserFavoriteRepository,
     private regionRepository: RegionRepository,
     private recentSearchRepository: RecentSearchRepository,
     private submitTransactionsRepository: SubmitTransactionsRepository,
@@ -43,11 +44,11 @@ export class ShopService {
     let shops = await this.shopRepository.findShopsWithin1Km(lat, lng, distanceLimit, radius, sorting);
 
     // shop_ 프리픽스 제거 + 필요한 필드만 추출
-    shops = shops.map((shop) => ({
+    shops = shops.map(async (shop) => ({
       id: shop.shop_id,
       name: shop.shop_name,
       type: shop.shop_type,
-      image: shop.shop_image,
+      main_image: await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image),
       reportStatus: shop.shop_reportStatus,
       lat: shop.shop_lat,
       lng: shop.shop_lng,
@@ -57,9 +58,9 @@ export class ShopService {
     }));
 
     if (isWishlist && uuid) {
-      const wishlistShops = await this.wishlistRepository.findWishlistShopsByUser(uuid);
-      const wishlistShopIds = wishlistShops.map((wishlist) => wishlist.shop.id);
-      shops = shops.filter((shop) => wishlistShopIds.includes(shop.id));
+      const userFavoriteShops = await this.userFavoriteRepository.findUserFavoriteShopsByUser(uuid);
+      const userFavoriteShopsIds = userFavoriteShops.map((wishlist) => wishlist.shop.id);
+      shops = shops.filter((shop) => userFavoriteShopsIds.includes(shop.id));
     }
 
     if (productIds && productIds.length > 0) {
@@ -77,13 +78,19 @@ export class ShopService {
 
     const rawResults = await this.shopRepository.findShopsByKeyword(keyword, page, limit, lat, lng, radius);
 
-    const mappedResults = rawResults.map((shop) => ({
-      id: shop.shop_id,
-      name: shop.shop_name,
-      image: shop.shop_image,
-      location: shop.shop_location,
-      distance: shop.distance,
-    }));
+    const mappedResults = await Promise.all(
+      rawResults.map(async (shop) => {
+        const mainImage = shop.shop_main_image ? await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image) : null;
+
+        return {
+          id: shop.shop_id,
+          name: shop.shop_name,
+          mainImage,
+          location: shop.shop_location ?? null,
+          distance: Number(shop.distance),
+        };
+      }),
+    );
 
     const allShopsCount = await this.shopRepository.findAllShopsCountByKeyword(keyword);
     const totalPages = Math.ceil(allShopsCount / limit);
@@ -96,16 +103,6 @@ export class ShopService {
     const region = await this.regionRepository.findRegionByLocation(newShopData.shop.location);
     if (!region) throw new NotFoundException('check region location');
     await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
-  }
-
-  async findTemp() {
-    const shop = await this.shopRepository.findTemp();
-    return shop.map((shop) => ({
-      id: shop.id,
-      name: shop.name,
-      image: shop.image,
-      location: shop.location,
-    }));
   }
 
   async createReviewPresignImages(presignPutListRequestDto: PresignPutListRequestDto) {
@@ -153,35 +150,35 @@ export class ShopService {
       imageList.push(...review.images);
     });
 
-    const wishlist = !!(await this.wishlistRepository.isShopInUserWishlist(shopId, uuid));
+    const wishlist = !!(await this.userFavoriteRepository.isShopInUserWishlist(shopId, uuid));
 
-    const userRecenSearchtList = (await this.recentSearchRepository.findRecentSearchListByUUID(uuid)) || [];
+    const userRecentSearchList = (await this.recentSearchRepository.findRecentSearchListByUUID(uuid)) || [];
     if (uuid) {
       const checkRecentSearchByShopName = await this.recentSearchRepository.checkRecentSearchByShopName(uuid, shop.name);
       if (!checkRecentSearchByShopName) {
         const newUserRecentSearch = await this.recentSearchRepository.createRecentSearch(uuid, shopId);
-        if (userRecenSearchtList.length == 10) {
-          const deleteData = userRecenSearchtList.pop();
+        if (userRecentSearchList.length == 10) {
+          const deleteData = userRecentSearchList.pop();
           await this.recentSearchRepository.deleteRecentSearch(deleteData.user.uuid, deleteData.id);
         }
-        userRecenSearchtList.unshift(newUserRecentSearch);
-        await this.recentSearchRepository.saveRecentSearch(userRecenSearchtList);
+        userRecentSearchList.unshift(newUserRecentSearch);
+        await this.recentSearchRepository.saveRecentSearch(userRecentSearchList);
       }
     }
 
     return {
       shop: transformedShop,
-      userReviews: userReviews.map((review) => ({
+      userReviews: userReviews.map(async (review) => ({
         ...review,
         user: {
-          photoUrl: review.user?.photoUrl,
+          profileImg: await this.awsService.getPresignedGetUrlByKey(review.user?.profileImg),
           nickName: review.user?.nickName,
         },
       })),
-      otherReviews: otherReviews.map((review) => ({
+      otherReviews: otherReviews.map(async (review) => ({
         ...review,
         user: {
-          photoUrl: review.user?.photoUrl,
+          profileImg: await this.awsService.getPresignedGetUrlByKey(review.user?.profileImg),
           nickName: review.user?.nickName,
         },
       })),
@@ -195,7 +192,7 @@ export class ShopService {
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
-    const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, 1);
+    const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, SubmitType.NewOperating);
     if (existData) throw new ConflictException('Exist Data');
 
     await this.submitTransactionsRepository.createOperatingHours(shopId, operatingData, uuid);
@@ -205,7 +202,7 @@ export class ShopService {
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
-    const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, 2);
+    const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, SubmitType.NewProduct);
     if (existData) throw new ConflictException('Exist Data');
 
     await this.submitTransactionsRepository.createProducts(shopId, productsData, uuid);
@@ -251,8 +248,6 @@ export class ShopService {
   }
 
   async reportReview(uuid: string, reviewReportDto: ReviewReportDto, shopId: number, reviewId: number): Promise<void> {
-    const { status, message } = reviewReportDto;
-
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
@@ -262,18 +257,16 @@ export class ShopService {
     const existData = await this.reportRepository.findReviewReport(uuid, reviewId);
     if (existData) throw new ConflictException('Exist Report Review');
 
-    await this.reportRepository.saveReviewReport(uuid, reviewId, status, message);
+    await this.reportRepository.saveReviewReport(uuid, reviewId, reviewReportDto);
   }
 
   async reportShop(uuid: string, shopReportDto: ShopReportDto, shopId: number): Promise<void> {
-    const { status, message } = shopReportDto;
-
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new NotFoundException('Not exist shop');
 
     const existData = await this.reportRepository.findShopReport(uuid, shopId);
     if (existData) throw new ConflictException('Exist Report Shop');
 
-    await this.reportRepository.saveShopReport(uuid, shop.id, status, message);
+    await this.reportRepository.saveShopReport(uuid, shop.id, shopReportDto);
   }
 }

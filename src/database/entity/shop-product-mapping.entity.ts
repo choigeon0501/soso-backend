@@ -8,14 +8,14 @@ export class ShopProductMapping {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('tinyint', { default: 0 })
-  is_verified: boolean;
+  @Column('tinyint', { name: 'is_verified', default: 0 })
+  isVerified: boolean;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 
   @ManyToOne(() => Product, (product) => product.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
@@ -27,5 +27,5 @@ export class ShopProductMapping {
 
   @ManyToOne(() => SubmitUserRecord, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'submit_record_id' })
-  submit_record: SubmitUserRecord;
+  submitRecord: SubmitUserRecord;
 }

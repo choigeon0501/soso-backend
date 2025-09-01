@@ -29,7 +29,7 @@ export class SubmitTransactionsRepository {
 
       const createShop = await shopRepo.save({
         ...shop,
-        type: 1,
+        type: SubmitType.NewShop,
         region: {
           id: regionId,
         },
@@ -38,7 +38,7 @@ export class SubmitTransactionsRepository {
       if (operatingHours) {
         await operatingRepo.save({
           shop: { id: createShop.id },
-          type: UsingType.Using,
+          isVerified: true,
           ...operatingHours,
         });
       }
@@ -48,7 +48,7 @@ export class SubmitTransactionsRepository {
           product: { id: product.id },
           shopId: createShop.id,
           user: uuid,
-          type: UsingType.Using,
+          isVerified: true,
         }));
         await productRepo.save(productMappings);
       }

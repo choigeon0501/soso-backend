@@ -108,4 +108,13 @@ export class UserFavoriteRepository {
       throw new InternalServerErrorException();
     }
   }
+
+  async findUserFavoriteShopsByUser(userUUID: string) {
+    return await this.favoriteRepository.find({
+      where: {
+        user: { uuid: userUUID },
+      },
+      relations: ['shop'],
+    });
+  }
 }

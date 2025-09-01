@@ -41,7 +41,7 @@ export class ShopSearchResultItemDTO {
   name: string;
 
   @ApiProperty({ example: 'https://example.com/image.jpg' })
-  image: string;
+  mainImage: string | null;
 
   @ApiProperty({ example: '서울시 강남구' })
   location: string;

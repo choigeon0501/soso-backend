@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Review } from './review.entity';
+import { ReviewReportType } from '../../common/enum/report.enum';
 
 @Entity('review_reports')
 export class ReviewReport {
@@ -15,12 +16,12 @@ export class ReviewReport {
   @JoinColumn({ name: 'review_id' })
   review: Review;
 
-  @Column('int')
-  report_type: number;
+  @Column('enum', { name: 'report_type' })
+  reportType: ReviewReportType;
 
-  @Column('text')
-  report_message: string;
+  @Column('text', { name: 'report_message' })
+  reportMessage: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }
