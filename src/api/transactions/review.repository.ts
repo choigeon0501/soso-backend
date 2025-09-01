@@ -34,7 +34,7 @@ export class ReviewTransactionsRepository {
         // Review와 Image 연결
         review.images = await Promise.all(
           reviewImgKeys.map(async (key) => {
-            const [image] = await Promise.all([imageRepo.save({ file_key: key })]);
+            const [image] = await Promise.all([imageRepo.save({ fileKey: key })]);
             return image;
           }),
         );
@@ -75,7 +75,7 @@ export class ReviewTransactionsRepository {
         // S3에서 이미지 삭제
         const imagesToDelete = review.images.filter((image) => deleteImages.includes(image.id));
         for (const image of imagesToDelete) {
-          await this.awsService.deleteImageFromS3(image.file_key);
+          await this.awsService.deleteImageFromS3(image.fileKey);
         }
         // DB에서 이미지 삭제
         await imageRepo.delete(deleteImages);
@@ -85,8 +85,8 @@ export class ReviewTransactionsRepository {
       // 새 이미지가 존재하면 추가
       if (newImageUrls.length > 0) {
         const newImages = await Promise.all(
-          newImageUrls.map(async (file_key) => {
-            const image = await imageRepo.save({ file_key });
+          newImageUrls.map(async (fileKey) => {
+            const image = await imageRepo.save({ fileKey });
             return image;
           }),
         );
@@ -135,7 +135,7 @@ export class ReviewTransactionsRepository {
       if (review.images.length > 0) {
         // S3에서 이미지 삭제
         for (const image of review.images) {
-          await this.awsService.deleteImageFromS3(image.file_key);
+          await this.awsService.deleteImageFromS3(image.fileKey);
         }
         // DB에서 이미지 삭제
         await imageRepo.delete(review.images.map((image) => image.id));

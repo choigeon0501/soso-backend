@@ -29,7 +29,7 @@ export class DeleteUserTransactionsRepository {
       const userWithdrawalRepo = queryRunner.manager.getRepository(UserWithdrawal);
       const imgRepo = queryRunner.manager.getRepository(Image);
 
-      await imgRepo.delete({ file_key: profileImg });
+      await imgRepo.delete({ fileKey: profileImg });
       await this.awsService.deleteImageFromS3(profileImg);
 
       await userWithdrawalRepo.save({

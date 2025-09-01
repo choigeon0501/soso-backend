@@ -5,12 +5,12 @@ export class UserWithdrawal {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('varchar', { length: 32 })
-  reason_code: string;
+  @Column('varchar', { name: 'reason_code', length: 32 })
+  reasonCode: string;
 
-  @Column('varchar', { length: 255, nullable: true })
-  reason_text: string;
+  @Column('varchar', { name: 'reason_text', length: 255, nullable: true })
+  reasonText: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }

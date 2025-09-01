@@ -17,7 +17,7 @@ export class ReviewService {
     const transformImages = async (images: Image[]) => {
       return Promise.all(
         images.map(async (image) => {
-          const presignedUrl = await this.awsService.getPresignedGetUrlByKey(image.file_key);
+          const presignedUrl = await this.awsService.getPresignedGetUrlByKey(image.fileKey);
           return {
             ...image,
             url: presignedUrl,

@@ -128,8 +128,8 @@ export class UserService {
         const images = await Promise.all(
           (review.images ?? []).map(async (img) => ({
             id: img.id,
-            fileKey: img.file_key,
-            url: await this.awsService.getPresignedGetUrlByKey(img.file_key),
+            fileKey: img.fileKey,
+            url: await this.awsService.getPresignedGetUrlByKey(img.fileKey),
           })),
         );
 

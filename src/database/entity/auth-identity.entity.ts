@@ -14,6 +14,6 @@ export class AuthIdentity {
   @Column('varchar', { length: 32 })
   provider: string;
 
-  @Column('varchar', { length: 128 })
-  provider_uid: string;
+  @Column('varchar', { name: 'provider_uid', length: 128 })
+  providerUid: string;
 }

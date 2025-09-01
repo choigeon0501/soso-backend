@@ -11,7 +11,7 @@ export class Shop {
   @Column('varchar', { length: 255 })
   name: string;
 
-  @Column('varchar', { length: 500, nullable: true })
+  @Column('varchar', { name: 'main_image', length: 500, nullable: true })
   mainImage: string;
 
   @Column('tinyint', { name: 'is_verified', default: 0 })

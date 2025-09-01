@@ -6,8 +6,8 @@ export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('varchar', { length: 255 })
-  file_key: string;
+  @Column('varchar', { name: 'file_key', length: 255 })
+  fileKey: string;
 
   @ManyToMany(() => Review, (review) => review.images)
   reviews: Review[];

@@ -15,7 +15,7 @@ export class AuthIdentityRepository {
     return await this.authIdentityRepository.findOne({
       where: {
         provider: authProvider,
-        provider_uid: authProviderId,
+        providerUid: authProviderId,
       },
     });
   }
@@ -23,7 +23,7 @@ export class AuthIdentityRepository {
   async createAuthIdentity(authProviderId: string, authProvider: AuthProvider, userUuid: string) {
     return await this.authIdentityRepository.save({
       provider: authProvider,
-      provider_uid: authProviderId,
+      providerUid: authProviderId,
       user: { uuid: userUuid },
     });
   }

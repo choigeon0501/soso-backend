@@ -13,6 +13,6 @@ export class Feedback {
   @Column('text')
   content: string;
 
-  @CreateDateColumn()
-  created_at: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 }
