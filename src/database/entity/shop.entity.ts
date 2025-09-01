@@ -12,7 +12,7 @@ export class Shop {
   @Column('varchar', { length: 500, nullable: true })
   mainImage: string;
 
-  @Column('tinyint', { default: 0 })
+  @Column('tinyint', { name: 'is_verified', default: 0 })
   isVerified: boolean;
 
   @Column('varchar', { length: 255, nullable: true })
@@ -28,12 +28,12 @@ export class Shop {
   location: string;
 
   @ManyToOne(() => Region, (region) => region.shops, { nullable: false, onDelete: 'RESTRICT' })
-  @JoinColumn({ name: 'regionId' })
+  @JoinColumn({ name: 'region_id' })
   region: Region;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

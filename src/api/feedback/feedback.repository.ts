@@ -13,7 +13,7 @@ export class FeedbackRepository {
 
   async saveFeedback(uuid: string, feedback: string) {
     try {
-      const newFeedback = await this.feedbackRepository.create({ uuid, text: feedback });
+      const newFeedback = await this.feedbackRepository.save({ user: { uuid }, text: feedback });
       return await this.feedbackRepository.save(newFeedback);
     } catch (err) {
       this.loggerService.warn(`Feedback/ saveFeedback Error: ${err}`);
