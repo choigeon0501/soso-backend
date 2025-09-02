@@ -16,7 +16,7 @@ import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/
 import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
 
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
-import { DeleteUserTransactionsRepository } from '../transactions/delete-user.repository';
+import { UserTransactionsRepository } from '../transactions/user.repository';
 import { RecentSearchRepository } from '../recent-search/recent-search.repository';
 import { SubmitType } from '../../common/enum/role.enum';
 import { SubmitTransactionsRepository } from '../transactions/submit.repository';
@@ -35,7 +35,7 @@ export class UserService {
     private userFavoriteRepository: UserFavoriteRepository,
     private submitRepository: SubmitRepository,
     private recentSearchRepository: RecentSearchRepository,
-    private deleteUserTransactionsRepository: DeleteUserTransactionsRepository,
+    private userTransactionsRepository: UserTransactionsRepository,
     private submitTransactionsRepository: SubmitTransactionsRepository,
     private shopRepository: ShopRepository,
   ) {}
@@ -53,6 +53,10 @@ export class UserService {
   async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string) {
     const { nickName, profileImgKey } = updateProfileDTO;
 
+    if (nickName && profileImgKey) {
+      return this.userTransactionsRepository.updateUser(nickName, profileImgKey, uuid);
+    }
+
     if (nickName) {
       const existNickName = await this.userRepository.findUserByNickName(nickName);
       if (existNickName) throw new ConflictException('Nickname already exists.');
@@ -63,8 +67,7 @@ export class UserService {
 
     if (profileImgKey) {
       // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
-      const isExistImg = await this.awsService.assertObjectExists(profileImgKey);
-      if (!isExistImg) throw new NotFoundException('Not Found Image');
+      await this.awsService.assertObjectExists(profileImgKey);
 
       const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImgKey);
       if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
@@ -79,22 +82,22 @@ export class UserService {
   }
 
   async getPresignedURLUserProfileImg(uuid: string) {
-    const expirseIn = 300;
+    const expiresIn = 300;
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
 
     // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
     await this.awsService.assertObjectExists(user.profileImg);
 
-    const userProfilePresignedURL = await this.awsService.getPresignedGetUrlByKey(user.profileImg, expirseIn);
-    return new PresignedUserProfileImgResponsesDTO(userProfilePresignedURL, expirseIn);
+    const userProfilePresignedURL = await this.awsService.getPresignedGetUrlByKey(user.profileImg, expiresIn);
+    return new PresignedUserProfileImgResponsesDTO(userProfilePresignedURL, expiresIn);
   }
 
   async deleteUser(uuid: string, withdrawalReasonDTO: WithdrawalReasonDTO) {
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
 
-    await this.deleteUserTransactionsRepository.deleteUser(user, withdrawalReasonDTO);
+    await this.userTransactionsRepository.deleteUser(user, withdrawalReasonDTO);
   }
 
   async findUserNickName(nickNameDTO: ValidateNickNameDTO): Promise<boolean> {

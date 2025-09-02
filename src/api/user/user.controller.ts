@@ -69,7 +69,7 @@ export class UserController {
     return new SuccessResponseDTO(await this.userService.createUserProfileImgPresignedURL(profileImagePresignedDTO));
   }
 
-  @Get('/me/presigend')
+  @Get('/me/presigned')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiExtraModels(SuccessResponseDTO, PresignedUserProfileImgResponsesDTO)
