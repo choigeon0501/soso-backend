@@ -59,18 +59,18 @@ export class AuthService {
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
         // 트랜잭션으로 묶기
-        await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
         await this.userRepository.createUser(userUuid, userData.email, null);
+        await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
       }
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
 
-      const accessToken = jwt.sign({ uuid: userData.id, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
+      const accessToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
       });
 
-      const refreshToken = jwt.sign({ uuid: userData.id, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
+      const refreshToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
       });
 
@@ -107,18 +107,18 @@ export class AuthService {
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
         // 트랜잭션으로 묶기
-        await this.authIdentityRepository.createAuthIdentity(appleId, AuthProvider.APPLE, userUuid);
         await this.userRepository.createUser(userUuid, email, null);
+        await this.authIdentityRepository.createAuthIdentity(appleId, AuthProvider.APPLE, userUuid);
       }
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
 
-      const accessToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
+      const accessToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
       });
 
-      const refreshToken = jwt.sign({ uuid: appleId, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
+      const refreshToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
         expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
       });
 

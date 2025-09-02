@@ -13,7 +13,7 @@ export class User {
   @Column('varchar', { length: 512, nullable: true, name: 'profile_img' })
   profileImg: string;
 
-  @Column('varchar', { length: 50, name: 'nick_name' })
+  @Column('varchar', { length: 50, name: 'nick_name', nullable: true })
   nickName: string;
 
   @CreateDateColumn({ name: 'created_at' })
