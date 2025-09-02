@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './api/user/user.module';
 import { ShopModule } from './api/shop/shop.module';
 import { SubmitModule } from './api/submit/submit.module';
-import { WishlistModule } from './api/user-favorite/user-favorite.module';
 import { ReviewModule } from './api/review/review.module';
 import { AwsModule } from './api/aws/aws.module';
 import { AppController } from './app.controller';
@@ -22,7 +21,7 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TransactionsModule } from './api/transactions/transactions.module';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { AuthIdentityModule } from './api/auth-identity/auth-identity.module';
-import { UserWithdrawalModule } from './api/user-withdrawal/user-withdrawal.module';
+import { UserFavoriteModule } from './api/user-favorite/user-favorite.module';
 
 @Module({
   imports: [
@@ -57,7 +56,7 @@ import { UserWithdrawalModule } from './api/user-withdrawal/user-withdrawal.modu
     UserModule,
     ShopModule,
     SubmitModule,
-    WishlistModule,
+    UserFavoriteModule,
     ReviewModule,
     AwsModule,
     RegionModule,
@@ -70,7 +69,6 @@ import { UserWithdrawalModule } from './api/user-withdrawal/user-withdrawal.modu
     JwtModule,
     TransactionsModule,
     AuthIdentityModule,
-    UserWithdrawalModule,
   ],
   controllers: [AppController],
   providers: [

@@ -6,19 +6,19 @@ import { Shop } from 'src/database/entity/shop.entity';
 import { ShopRepository } from './shop.repository';
 import { ReviewModule } from '../review/review.module';
 import { SubmitModule } from '../submit/submit.module';
-import { WishlistModule } from '../user-favorite/user-favorite.module';
 import { RegionModule } from '../region/region.module';
 import { RecentSearchModule } from '../recent-search/recent-search.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { AwsModule } from '../aws/aws.module';
 import { ReportModule } from '../report/report.module';
+import { UserFavoriteModule } from '../user-favorite/user-favorite.module';
 
 @Module({
   imports: [
     forwardRef(() => SubmitModule),
     TypeOrmModule.forFeature([Shop]),
     ReviewModule,
-    WishlistModule,
+    UserFavoriteModule,
     RegionModule,
     RecentSearchModule,
     TransactionsModule,

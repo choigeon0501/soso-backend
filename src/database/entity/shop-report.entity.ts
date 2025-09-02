@@ -16,7 +16,7 @@ export class ShopReport {
   @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 
-  @Column('enum', { name: 'report_type' })
+  @Column({ name: 'report_type', type: 'varchar', length: 50 })
   reportType: ShopReportType;
 
   @Column('text', { name: 'report_message' })

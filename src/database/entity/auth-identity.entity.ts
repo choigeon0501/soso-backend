@@ -1,8 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { User } from './user.entity';
+import { AuthProvider } from '../../common/enum/auth.enum';
 
 @Entity('auth_identities')
-@Unique(['provider', 'provider_uid'])
+@Unique(['provider', 'providerUid'])
 export class AuthIdentity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -12,7 +13,7 @@ export class AuthIdentity {
   user: User;
 
   @Column('varchar', { length: 32 })
-  provider: string;
+  provider: AuthProvider;
 
   @Column('varchar', { name: 'provider_uid', length: 128 })
   providerUid: string;

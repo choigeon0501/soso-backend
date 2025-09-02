@@ -23,7 +23,6 @@ import { SubmitTransactionsRepository } from '../transactions/submit.repository'
 import { ShopRepository } from '../shop/shop.repository';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
-import { UserWithdrawalRepository } from '../user-withdrawal/user-withdrawal.repository';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRecordDTO } from './dto/responses/user_favorite_responses.dto';
 
@@ -39,7 +38,6 @@ export class UserService {
     private deleteUserTransactionsRepository: DeleteUserTransactionsRepository,
     private submitTransactionsRepository: SubmitTransactionsRepository,
     private shopRepository: ShopRepository,
-    private userWithdrawalRepository: UserWithdrawalRepository,
   ) {}
 
   async getUserProfile(uuid: string): Promise<UserProfileResponsesDTO> {

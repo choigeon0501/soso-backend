@@ -16,7 +16,7 @@ export class ReviewReport {
   @JoinColumn({ name: 'review_id' })
   review: Review;
 
-  @Column('enum', { name: 'report_type' })
+  @Column({ name: 'report_type', type: 'varchar', length: 50 })
   reportType: ReviewReportType;
 
   @Column('text', { name: 'report_message' })

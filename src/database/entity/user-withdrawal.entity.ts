@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { WithdrawalReasonCode } from '../../common/enum/users.enum';
 
 @Entity('user_withdrawals')
 export class UserWithdrawal {
@@ -6,7 +7,7 @@ export class UserWithdrawal {
   id: number;
 
   @Column('varchar', { name: 'reason_code', length: 32 })
-  reasonCode: string;
+  reasonCode: WithdrawalReasonCode;
 
   @Column('varchar', { name: 'reason_text', length: 255, nullable: true })
   reasonText: string;

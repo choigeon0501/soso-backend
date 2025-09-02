@@ -33,8 +33,8 @@ export class DeleteUserTransactionsRepository {
       await this.awsService.deleteImageFromS3(profileImg);
 
       await userWithdrawalRepo.save({
-        reason_code: withdrawalReasonCode,
-        reason_text: withdrawalReasonText,
+        reasonCode: withdrawalReasonCode,
+        reasonText: withdrawalReasonText,
       });
       await userRepo.delete({ uuid });
 
