@@ -13,7 +13,7 @@ import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProf
 import { PageInfoDTO } from './dto/responses/pagination_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
-import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
+import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
 
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
 import { UserTransactionsRepository } from '../transactions/user.repository';
@@ -24,7 +24,7 @@ import { ShopRepository } from '../shop/shop.repository';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
-import { UserFavoriteRecordDTO } from './dto/responses/user_favorite_responses.dto';
+import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
 
 @Injectable()
 export class UserService {
@@ -124,8 +124,6 @@ export class UserService {
     // ✅ Promise.all로 비동기 map 처리
     const rows: UserReviewsRecordItemDTO[] = await Promise.all(
       reviews.map(async (review) => {
-        const mainImageUrl = review.shop.mainImage ? await this.awsService.getPresignedGetUrlByKey(review.shop.mainImage) : null;
-
         const images = await Promise.all(
           (review.images ?? []).map(async (img) => ({
             id: img.id,
@@ -141,7 +139,7 @@ export class UserService {
           shop: {
             id: review.shop.id,
             name: review.shop.name,
-            mainImage: mainImageUrl,
+            mainImage: review.shop.mainImage,
           },
           images,
         };
@@ -155,17 +153,18 @@ export class UserService {
   async getUserFavorites(wishlistPageNation: UserFavoritePageNationDTO, uuid: string) {
     const { page, limit, areaId } = wishlistPageNation;
 
-    const totalCount = await this.userFavoriteRepository.findUserWishlistByUUID(uuid, areaId);
+    const totalCount = await this.userFavoriteRepository.findUserFavoritesCountByUUID(uuid, areaId);
     const rows = await this.userFavoriteRepository.findUserFavoritesByPageNation(uuid, page, limit, areaId);
 
+    const mapped = rows.map((r) => new UserFavoriteRecordItemDTO(r));
     const pageInfo = new PageInfoDTO(page, limit, totalCount);
-    return new UserFavoriteRecordDTO(rows, pageInfo);
+    return new UserFavoriteRecordDTO(mapped, pageInfo);
   }
 
   async addUserFavorite(userFavoriteDto: UserFavoriteRequestsDto, uuid: string) {
     const { shopId } = userFavoriteDto;
 
-    const shop = await this.shopRepository.findShopByShopId(shopId);
+    const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new NotFoundException('Not Found Shop');
 
     const userFavorite = await this.userFavoriteRepository.findUserFavoriteByShopIdAndUUID(shopId, uuid);
@@ -177,7 +176,7 @@ export class UserService {
   async getUserRecentSearches(uuid: string) {
     if (!uuid) return [];
     const result = await this.recentSearchRepository.findRecentSearchListByUUID(uuid);
-    return Recent_search_responsesDto.fromEntities(result);
+    return RecentSearchResponsesDto.fromEntities(result);
   }
 
   async deleteAllRecentSearch(uuid: string) {

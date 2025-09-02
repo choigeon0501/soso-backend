@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SubmitUserRecord } from '../../../../database/entity/submit-user-record.entity';
-import { PaginationResponsesDto } from './pagination_responses.dto';
+import { PageInfoDTO, PaginationResponsesDto } from './pagination_responses.dto';
 import { SubmitStatus, SubmitType } from '../../../../common/enum/role.enum';
 
 export class ShopResponseDTO {
@@ -18,7 +18,7 @@ export class UserSubmitRecordItemDTO {
   @ApiProperty() status: SubmitStatus;
   @ApiProperty({ nullable: true }) rejectMessage: string | null;
   @ApiProperty() createdAt: Date;
-  @ApiProperty({ type: () => ShopResponseDTO }) shop: ShopResponseDTO;
+  @ApiProperty({ type: ShopResponseDTO }) shop: ShopResponseDTO;
 
   constructor(record: SubmitUserRecord) {
     this.id = record.id;
@@ -26,8 +26,21 @@ export class UserSubmitRecordItemDTO {
     this.status = record.status;
     this.rejectMessage = record.rejectMessage;
     this.createdAt = record.createdAt;
-    this.shop = record.shop;
+    this.shop = {
+      id: record.shop.id,
+      name: record.shop.name,
+      mainImage: record.shop.mainImage ?? null,
+      isVerified: !!record.shop.isVerified,
+      instagram: record.shop.instagram ?? null,
+      location: record.shop.location ?? null,
+    };
   }
 }
 
-export class UserSubmitRecordDTO extends PaginationResponsesDto<UserSubmitRecordItemDTO> {}
+export class UserSubmitRecordDTO extends PaginationResponsesDto<UserSubmitRecordItemDTO> {
+  @ApiProperty({ type: [UserSubmitRecordItemDTO], description: '사용자 제보/등록 리스트' })
+  data: UserSubmitRecordItemDTO[];
+
+  @ApiProperty({ type: () => PageInfoDTO, description: '페이지네이션 정보' })
+  pageInfo: PageInfoDTO;
+}

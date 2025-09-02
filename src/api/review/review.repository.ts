@@ -32,14 +32,14 @@ export class ReviewRepository {
   async findUserReviewByPageNation(uuid: string, page: number, limit: number, sort: SortOrder) {
     try {
       return await this.reviewRepository
-        .createQueryBuilder('review') // ✅ 엔티티 별칭 수정
-        .where('review.user.uuid = :uuid', { uuid }) // ✅ where 절 수정
-        .leftJoinAndSelect('review.shop', 'shop') // ✅ shop 관계 조인
-        .leftJoinAndSelect('review.imageMappings', 'rim') // 매핑 엔티티
-        .leftJoinAndSelect('rim.image', 'image') // 실제 이미지
-        .orderBy('review.createdAt', sort) // ✅ createdAt 기준 내림차순 정렬 (최신순)
-        .skip(limit * (page - 1)) // ✅ offset 설정
-        .take(limit) // ✅ limit 설정
+        .createQueryBuilder('review')
+        .innerJoin('review.user', 'u') // user.uuid 필터용 조인
+        .leftJoinAndSelect('review.shop', 'shop') // 가게 정보
+        .leftJoinAndSelect('review.images', 'image') // ✅ 이미지 ManyToMany 조인
+        .where('u.uuid = :uuid', { uuid }) // 사용자 조건
+        .orderBy('review.createdAt', sort) // 정렬
+        .skip(limit * (page - 1))
+        .take(limit)
         .getMany();
     } catch (err) {
       this.loggerService.warn(`Review/ findUserReviewByPageNation Error: ${err}`);

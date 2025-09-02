@@ -54,19 +54,17 @@ export class UserFavoriteRepository {
     }
   }
 
-  async findUserWishlistByUUID(uuid: string, areaId?: number) {
+  async findUserFavoritesCountByUUID(uuid: string, areaId?: number) {
     try {
-      const query = this.favoriteRepository
-        .createQueryBuilder('wishlist')
-        .leftJoinAndSelect('userFavorite.shop', 'shop')
-        .leftJoinAndSelect('shop.region', 'region')
-        .where('user-favorite.userUuid = :uuid', { uuid });
-
+      const qb = this.favoriteRepository
+        .createQueryBuilder('uf')
+        .leftJoin('uf.shop', 's')
+        .leftJoin('s.region', 'r')
+        .where('uf.user_id = :uuid', { uuid });
       if (areaId) {
-        query.andWhere('region.id = :areaId', { areaId });
+        qb.andWhere('r.id = :areaId', { areaId });
       }
-
-      return await query.getCount();
+      return qb.getCount();
     } catch (err) {
       this.loggerService.warn(`Wishlist/ findUserWishlistByUUID Error: ${err}`);
       throw new InternalServerErrorException();
@@ -75,19 +73,21 @@ export class UserFavoriteRepository {
 
   async findUserFavoritesByPageNation(uuid: string, page: number, limit: number, areaId?: number) {
     try {
-      const query = this.favoriteRepository
-        .createQueryBuilder('userFavorite')
-        .leftJoinAndSelect('userFavorite.shop', 'shop')
-        .leftJoinAndSelect('shop.region', 'region')
-        .where('userFavorite.userUuid = :uuid', { uuid });
+      const qb = this.favoriteRepository
+        .createQueryBuilder('uf')
+        .innerJoin('uf.user', 'u') // ← user 조인
+        .leftJoinAndSelect('uf.shop', 's')
+        .leftJoinAndSelect('s.region', 'r')
+        .where('u.uuid = :uuid', { uuid }); // ← 관계의 uuid로 필터
 
       if (areaId) {
-        query.andWhere('region.id = :areaId', { areaId });
+        qb.andWhere('r.id = :areaId', { areaId });
       }
 
-      return await query
-        .skip(limit * (page - 1)) // ✅ offset 설정 (페이징)
-        .take(limit) // ✅ limit 설정
+      return await qb
+        .orderBy('uf.createdAt', 'DESC') // 페이징 일관성 확보 권장
+        .skip((page - 1) * limit)
+        .take(limit)
         .getMany();
     } catch (err) {
       this.loggerService.warn(`Wishlist/ findUserWishlistByPageNation Error: ${err}`);

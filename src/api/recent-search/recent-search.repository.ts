@@ -18,6 +18,7 @@ export class RecentSearchRepository {
           user: { uuid },
         },
         order: { createdAt: 'DESC' }, // 최신 순 정렬
+        relations: ['shop'],
       });
     } catch (err) {
       this.loggerService.warn(`Recent-Search/ findRecentSearchListByUUID Error: ${err}`);

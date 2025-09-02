@@ -26,7 +26,11 @@ export class UserFavoriteRecordItemDTO {
   constructor(record: UserFavorite) {
     this.id = record.id;
     this.createdAt = record.createdAt;
-    this.shop = record.shop;
+    this.shop = {
+      id: record.shop.id,
+      name: record.shop.name,
+      mainImage: record.shop.mainImage ?? null,
+    };
   }
 }
 

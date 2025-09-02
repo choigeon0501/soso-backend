@@ -97,7 +97,7 @@ export class AwsService {
   /** 존재 확인(선택) */
   async assertObjectExists(key: string) {
     try {
-      await this.s3Client.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }));
+      return await this.s3Client.send(new HeadObjectCommand({ Bucket: this.bucketName, Key: key }));
     } catch {
       this.loggerService.warn(`S3/ Object Not Found: ${key}`);
       return null;

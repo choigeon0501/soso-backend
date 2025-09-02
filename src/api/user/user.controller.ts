@@ -10,7 +10,7 @@ import { WithdrawalReasonDTO, ValidateNickNameDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
 import { PageInfoDTO, PaginationResponsesDto } from './dto/responses/pagination_responses.dto';
 import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
-import { Recent_search_responsesDto } from './dto/responses/recent_search_responses.dto';
+import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
@@ -176,14 +176,15 @@ export class UserController {
 
   @Get('/me/recent-searches')
   @UseGuards(OptionalAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '최근 검색 기록 조회', description: '로그인된 경우 최근 검색한 소품샵 리스트를 반환합니다.' })
-  @ApiExtraModels(SuccessResponseDTO, Recent_search_responsesDto)
+  @ApiExtraModels(SuccessResponseDTO, RecentSearchResponsesDto)
   @ApiOkResponse({
     description: '최근 검색 기록 조회 성공',
     schema: {
       allOf: [
         { $ref: getSchemaPath(SuccessResponseDTO) },
-        { properties: { result: { type: 'array', items: { $ref: getSchemaPath(Recent_search_responsesDto) } } } },
+        { properties: { result: { type: 'array', items: { $ref: getSchemaPath(RecentSearchResponsesDto) } } } },
       ],
     },
   })
