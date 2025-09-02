@@ -15,6 +15,7 @@ export class ShopOperatingHour {
   @Column('set', {
     enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
     name: 'days_of_week',
+    nullable: true,
   })
   daysOfWeek: string[];
 
