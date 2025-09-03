@@ -31,34 +31,6 @@ export class AwsService {
     }
   }
 
-  async uploadImagesToS3(files: Express.Multer.File[] | Express.Multer.File | undefined, ext: string): Promise<string[]> {
-    try {
-      if (!files) return [];
-
-      const fileArray = Array.isArray(files) ? files : [files];
-
-      const uploadPromises = fileArray.map(async (file) => {
-        const fileName = `review/${Date.now()}-${file.originalname}`;
-
-        const command = new PutObjectCommand({
-          Bucket: this.bucketName,
-          Key: fileName,
-          Body: file.buffer,
-          ContentType: file.mimetype || `image/${ext}`,
-        });
-
-        await this.s3Client.send(command);
-
-        return `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${fileName}`;
-      });
-
-      return Promise.all(uploadPromises);
-    } catch (err) {
-      this.loggerService.warn(`S3/ 업로드 에러: ${err}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
   private generateReviewKey(originalName: string) {
     const safe = originalName.replace(/[^\w.\-]/g, '_');
     const yyyy = new Date().toISOString().slice(0, 10).replace(/-/g, '');

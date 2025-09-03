@@ -44,19 +44,17 @@ export class ShopService {
     let shops = await this.shopRepository.findShopsWithin1Km(lat, lng, distanceLimit, radius, sorting);
 
     // shop_ 프리픽스 제거 + 필요한 필드만 추출
-    shops = await Promise.all(
-      shops.map(async (shop) => ({
-        id: shop.shop_id,
-        name: shop.shop_name,
-        isVerified: shop.shop_is_verified,
-        mainImage: await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image),
-        lat: shop.shop_lat,
-        lng: shop.shop_lng,
-        location: shop.shop_location,
-        regionId: shop.shop_region_id,
-        distance: shop.distance,
-      })),
-    );
+    shops = shops.map((shop) => ({
+      id: shop.shop_id,
+      name: shop.shop_name,
+      isVerified: shop.shop_is_verified,
+      mainImage: shop.shop_main_image,
+      lat: shop.shop_lat,
+      lng: shop.shop_lng,
+      location: shop.shop_location,
+      regionId: shop.shop_region_id,
+      distance: shop.distance,
+    }));
 
     if (isWishlist && uuid) {
       const userFavoriteShops = await this.userFavoriteRepository.findUserFavoriteShopsByUser(uuid);
@@ -81,12 +79,10 @@ export class ShopService {
 
     const mappedResults = await Promise.all(
       rawResults.map(async (shop) => {
-        const mainImage = shop.shop_main_image ? await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image) : null;
-
         return {
           id: shop.shop_id,
           name: shop.shop_name,
-          mainImage,
+          mainImage: shop.shop_main_image,
           location: shop.shop_location ?? null,
           distance: Number(shop.distance),
         };
@@ -154,8 +150,8 @@ export class ShopService {
 
     const wishlist = !!(await this.userFavoriteRepository.isShopInUserWishlist(shopId, uuid));
 
-    const userRecentSearchList = (await this.recentSearchRepository.findRecentSearchListByUUID(uuid)) || [];
     if (uuid) {
+      const userRecentSearchList = (await this.recentSearchRepository.findRecentSearchListByUUID(uuid)) || [];
       const checkRecentSearchByShopName = await this.recentSearchRepository.checkRecentSearchByShopName(uuid, shop.name);
       if (!checkRecentSearchByShopName) {
         const newUserRecentSearch = await this.recentSearchRepository.createRecentSearch(uuid, shopId);
