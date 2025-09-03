@@ -5,6 +5,7 @@ import { ReviewReportType, ShopReportType } from '../../../../common/enum/report
 export class ShopReportDto {
   @ApiProperty({
     description: '신고 상태 코드',
+    example: 'closed',
   })
   @IsNotEmpty()
   @IsEnum(ShopReportType)
@@ -21,6 +22,7 @@ export class ShopReportDto {
 export class ReviewReportDto {
   @ApiProperty({
     description: '신고 상태 코드',
+    example: 'irrelevant',
   })
   @IsNotEmpty()
   @IsEnum(ReviewReportType)

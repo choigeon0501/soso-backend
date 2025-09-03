@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class OperatingHoursDto {
   @ApiPropertyOptional({ description: '연락처', example: '010-1234-5678' })
@@ -17,40 +17,17 @@ export class OperatingHoursDto {
   @IsString()
   endTime: string;
 
-  @ApiPropertyOptional({ description: '월요일 운영 여부', example: true })
+  @ApiPropertyOptional({
+    description: '운영 요일',
+    example: ['Monday', 'Tuesday', 'Friday'],
+    isArray: true,
+    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+  })
   @IsOptional()
-  @IsBoolean()
-  monday?: boolean;
-
-  @ApiPropertyOptional({ description: '화요일 운영 여부', example: true })
-  @IsOptional()
-  @IsBoolean()
-  tuesday?: boolean;
-
-  @ApiPropertyOptional({ description: '수요일 운영 여부', example: true })
-  @IsOptional()
-  @IsBoolean()
-  wednesday?: boolean;
-
-  @ApiPropertyOptional({ description: '목요일 운영 여부', example: true })
-  @IsOptional()
-  @IsBoolean()
-  thursday?: boolean;
-
-  @ApiPropertyOptional({ description: '금요일 운영 여부', example: true })
-  @IsOptional()
-  @IsBoolean()
-  friday?: boolean;
-
-  @ApiPropertyOptional({ description: '토요일 운영 여부', example: false })
-  @IsOptional()
-  @IsBoolean()
-  saturday?: boolean;
-
-  @ApiPropertyOptional({ description: '일요일 운영 여부', example: false })
-  @IsOptional()
-  @IsBoolean()
-  sunday?: boolean;
+  @IsEnum(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], {
+    each: true,
+  })
+  daysOfWeek?: string[];
 }
 
 export class SubmitShopOperatingHoursDto {
@@ -84,17 +61,15 @@ export class SubmitNewShopDto {
   shop: SubmitShop;
 
   @ApiPropertyOptional({ description: '운영 시간 정보' })
+  @IsOptional()
   operatingHours?: OperatingHoursDto;
 
   @ApiPropertyOptional({ description: '판매 제품 리스트', type: [Products] })
+  @IsOptional()
   products?: Products[];
 }
 
 export class SubmitNewProductsDto {
-  @ApiProperty({ description: '소품샵 ID', example: 1 })
-  @IsNotEmpty()
-  shopId: number;
-
   @ApiProperty({ description: '제품 리스트', type: [Products] })
   @IsNotEmpty()
   products?: Products[];

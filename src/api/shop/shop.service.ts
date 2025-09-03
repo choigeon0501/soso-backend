@@ -44,18 +44,19 @@ export class ShopService {
     let shops = await this.shopRepository.findShopsWithin1Km(lat, lng, distanceLimit, radius, sorting);
 
     // shop_ 프리픽스 제거 + 필요한 필드만 추출
-    shops = shops.map(async (shop) => ({
-      id: shop.shop_id,
-      name: shop.shop_name,
-      type: shop.shop_type,
-      main_image: await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image),
-      reportStatus: shop.shop_reportStatus,
-      lat: shop.shop_lat,
-      lng: shop.shop_lng,
-      location: shop.shop_location,
-      regionId: shop.shop_regionId,
-      distance: shop.distance,
-    }));
+    shops = await Promise.all(
+      shops.map(async (shop) => ({
+        id: shop.shop_id,
+        name: shop.shop_name,
+        isVerified: shop.shop_is_verified,
+        mainImage: await this.awsService.getPresignedGetUrlByKey(shop.shop_main_image),
+        lat: shop.shop_lat,
+        lng: shop.shop_lng,
+        location: shop.shop_location,
+        regionId: shop.shop_region_id,
+        distance: shop.distance,
+      })),
+    );
 
     if (isWishlist && uuid) {
       const userFavoriteShops = await this.userFavoriteRepository.findUserFavoriteShopsByUser(uuid);
@@ -102,7 +103,9 @@ export class ShopService {
   async createNewShop(newShopData: SubmitNewShopDto, uuid: string): Promise<void> {
     const region = await this.regionRepository.findRegionByLocation(newShopData.shop.location);
     if (!region) throw new NotFoundException('check region location');
-    await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
+
+    console.log(newShopData);
+    // await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
   }
 
   async createReviewPresignImages(presignPutListRequestDto: PresignPutListRequestDto) {
@@ -168,20 +171,8 @@ export class ShopService {
 
     return {
       shop: transformedShop,
-      userReviews: userReviews.map(async (review) => ({
-        ...review,
-        user: {
-          profileImg: await this.awsService.getPresignedGetUrlByKey(review.user?.profileImg),
-          nickName: review.user?.nickName,
-        },
-      })),
-      otherReviews: otherReviews.map(async (review) => ({
-        ...review,
-        user: {
-          profileImg: await this.awsService.getPresignedGetUrlByKey(review.user?.profileImg),
-          nickName: review.user?.nickName,
-        },
-      })),
+      userReviews,
+      otherReviews,
       wishlist,
       imageList,
     };
@@ -218,30 +209,21 @@ export class ShopService {
     await this.reviewTransactionsRepository.createReview(uuid, shopId, content, reviewImgKeys);
   }
 
-  async updateReview(
-    uuid: string,
-    updateReviewDto: UpdateReviewDto,
-    shopId: number,
-    reviewId: number,
-    newFiles?: Express.Multer.File[],
-  ): Promise<void> {
-    const { content, deleteImages } = updateReviewDto;
+  async updateReview(uuid: string, updateReviewDto: UpdateReviewDto, shopId: number, reviewId: number): Promise<void> {
+    const { content, deleteImages, newImageKeys } = updateReviewDto;
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
-    // 새 파일이 존재하면 업로드
-    const newImageUrls = newFiles?.length > 0 ? await this.awsService.uploadImagesToS3(newFiles, 'jpg') : [];
-
     // 트랜잭션을 사용하여 Review 업데이트
-    await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteImages || [], newImageUrls);
+    await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteImages || [], newImageKeys);
   }
 
   async deleteReviewByUUID(uuid: string, shopId: number, reviewId: number): Promise<void> {
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
-    const existData = await this.reportRepository.findReviewReport(uuid, reviewId);
+    const existData = await this.reviewRepository.findOneReviewById(reviewId);
     if (!existData) throw new ConflictException('Not Exist Review');
 
     await this.reviewTransactionsRepository.deleteReview(uuid, reviewId);

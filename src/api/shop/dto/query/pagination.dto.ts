@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class GetShopWithin1KmDTO {
   @ApiProperty({ description: '위도', example: 37.5665 })
@@ -23,10 +23,10 @@ export class GetShopWithin1KmDTO {
   @Type(() => Boolean)
   sorting: boolean;
 
-  @ApiPropertyOptional({ description: '위시리스트 필터링', example: 'true' })
+  @ApiPropertyOptional({ description: '위시리스트 필터링', example: true })
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => value === 'true' || value === true)
   isWishlist?: boolean;
 
   @ApiPropertyOptional({ description: '상품 ID 배열로 필터링', example: [1, 2, 3], type: [Number] })

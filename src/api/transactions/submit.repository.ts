@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm';
 import { LoggerService } from '../logger/logger.service';
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
 import { Shop } from '../../database/entity/shop.entity';
-import { SubmitStatus, SubmitType, UsingType } from '../../common/enum/role.enum';
+import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../shop/dto/requests/submit_shop_requests.dto';
 import { ShopOperatingHour } from '../../database/entity/shop-operating-hour.entity';
 import { ShopProductMapping } from '../../database/entity/shop-product-mapping.entity';
@@ -29,7 +29,7 @@ export class SubmitTransactionsRepository {
 
       const createShop = await shopRepo.save({
         ...shop,
-        type: SubmitType.NewShop,
+        isVerified: false,
         region: {
           id: regionId,
         },
@@ -38,7 +38,7 @@ export class SubmitTransactionsRepository {
       if (operatingHours) {
         await operatingRepo.save({
           shop: { id: createShop.id },
-          isVerified: true,
+          isVerified: false,
           ...operatingHours,
         });
       }
@@ -46,9 +46,8 @@ export class SubmitTransactionsRepository {
       if (products) {
         const productMappings = products.map((product) => ({
           product: { id: product.id },
-          shopId: createShop.id,
-          user: uuid,
-          isVerified: true,
+          shop: { id: createShop.id },
+          isVerified: false,
         }));
         await productRepo.save(productMappings);
       }
@@ -56,12 +55,8 @@ export class SubmitTransactionsRepository {
       await submitRepo.save({
         status: SubmitStatus.Pending,
         type: SubmitType.NewShop,
-        user: {
-          uuid,
-        },
-        shop: {
-          id: createShop.id,
-        },
+        user: { uuid },
+        shop: { id: createShop.id },
       });
 
       await queryRunner.commitTransaction();
@@ -120,20 +115,16 @@ export class SubmitTransactionsRepository {
 
       const newOperatingHours = await operatingRepo.save({
         shop: { id: shopId },
-        type: UsingType.Verifying,
-        operatingHours,
+        isVerified: false,
+        ...operatingHours,
       });
 
       await submitRepo.save({
         status: SubmitStatus.Pending,
         type: SubmitType.NewOperating,
-        user: {
-          uuid,
-        },
-        shop: {
-          id: shopId,
-        },
-        operatingId: newOperatingHours.id,
+        user: { uuid },
+        shop: { id: shopId },
+        shopOperatingHour: { id: newOperatingHours.id },
       });
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -170,25 +161,18 @@ export class SubmitTransactionsRepository {
     }
   }
 
-  async createProducts(shopId: number, prodcutsData: SubmitNewProductsDto, uuid: string) {
-    const { products } = prodcutsData;
+  async createProducts(shopId: number, productsData: SubmitNewProductsDto, uuid: string) {
+    const { products } = productsData;
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
-    const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
-
     try {
-      const productMappings = products.map((product) => ({
-        product: { id: product.id },
-        shopId: shopId,
-        user: uuid,
-        type: UsingType.Verifying,
-      }));
-      await productRepo.save(productMappings);
+      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
-      await submitRepo.save({
+      const createSubmitRecord = await submitRepo.save({
         status: SubmitStatus.Pending,
         type: SubmitType.NewProduct,
         user: {
@@ -198,6 +182,15 @@ export class SubmitTransactionsRepository {
           id: shopId,
         },
       });
+
+      const productMappings = products.map((product) => ({
+        product: { id: product.id },
+        shop: { id: shopId },
+        submitRecord: { id: createSubmitRecord.id },
+        isVerified: false,
+      }));
+
+      await productRepo.save(productMappings);
       await queryRunner.commitTransaction();
     } catch (err) {
       this.loggerService.warn(`Submit/ CreateProducts Error: ${err}`);

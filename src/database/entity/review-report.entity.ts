@@ -19,7 +19,7 @@ export class ReviewReport {
   @Column({ name: 'report_type', type: 'varchar', length: 50 })
   reportType: ReviewReportType;
 
-  @Column('text', { name: 'report_message' })
+  @Column({ name: 'report_message', type: 'varchar', length: 255, nullable: true })
   reportMessage: string;
 
   @CreateDateColumn({ name: 'created_at' })

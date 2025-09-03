@@ -13,33 +13,61 @@ export class ReviewService {
   async findShopReviewsByShopId(shopId: number, uuid: string) {
     const reviews = await this.reviewRepository.findShopReviewsByShopId(shopId);
 
-    // 이미지 presigned URL 변환
-    const transformImages = async (images: Image[]) => {
+    const getPresignedOrNull = async (key?: string | null) => {
+      if (!key) return null;
+      return this.awsService.getPresignedGetUrlByKey(key);
+    };
+
+    const transformImages = async (images: Image[] = []) => {
       return Promise.all(
-        images.map(async (image) => {
-          const presignedUrl = await this.awsService.getPresignedGetUrlByKey(image.fileKey);
-          return {
-            ...image,
-            url: presignedUrl,
-          };
-        }),
+        images
+          .filter((img) => !!img)
+          .map(async (image) => {
+            const url = await getPresignedOrNull(image.fileKey);
+            return { ...image, url };
+          }),
       );
     };
 
-    // 각 리뷰에 대해 images 변환 적용
-    const reviewsWithPresignedUrls = await Promise.all(
-      reviews.map(async (review) => ({
-        ...review,
-        images: await transformImages(review.images || []),
-      })),
-    );
+    // uuid는 필터링용으로만 유지
+    const transformReview = async (review: any) => {
+      const images = await transformImages(review.images ?? []);
+      const profileImg = await getPresignedOrNull(review.user?.profileImg);
 
-    const userReviews = reviewsWithPresignedUrls.filter((review) => review.user?.uuid === uuid);
-    const otherReviews = reviewsWithPresignedUrls.filter((review) => review.user == null || review.user?.uuid !== uuid);
+      return {
+        ...review,
+        images,
+        user: review.user
+          ? {
+              uuid: review.user.uuid, // 👉 필터링 전까진 유지
+              profileImg,
+              nickName: review.user.nickName ?? null,
+            }
+          : null,
+      };
+    };
+
+    const reviewsWithPresigned = await Promise.all(reviews.map(transformReview));
+
+    // uuid 포함 상태에서 필터링
+    const userReviewsRaw = reviewsWithPresigned.filter((r) => r.user?.uuid === uuid);
+    const otherReviewsRaw = reviewsWithPresigned.filter((r) => !r.user || r.user.uuid !== uuid);
+
+    // 이제 uuid 제거
+    const stripUuid = (reviews: any[]) =>
+      reviews.map((r) => ({
+        ...r,
+        user: r.user
+          ? {
+              profileImg: r.user.profileImg,
+              nickName: r.user.nickName,
+            }
+          : null,
+      }));
 
     return {
-      userReviews,
-      otherReviews,
+      userReviews: stripUuid(userReviewsRaw),
+      otherReviews: stripUuid(otherReviewsRaw),
     };
   }
 }

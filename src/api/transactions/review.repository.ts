@@ -51,7 +51,7 @@ export class ReviewTransactionsRepository {
     }
   }
 
-  async updateReview(uuid: string, reviewId: number, content: string, deleteImages: number[], newImageUrls: string[]): Promise<void> {
+  async updateReview(uuid: string, reviewId: number, content: string, deleteImages: number[], newImageKeys: string[]): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -83,11 +83,10 @@ export class ReviewTransactionsRepository {
       }
 
       // 새 이미지가 존재하면 추가
-      if (newImageUrls.length > 0) {
+      if (newImageKeys.length > 0) {
         const newImages = await Promise.all(
-          newImageUrls.map(async (fileKey) => {
-            const image = await imageRepo.save({ fileKey });
-            return image;
+          newImageKeys.map(async (fileKey) => {
+            return await imageRepo.save({ fileKey });
           }),
         );
         review.images = [...review.images, ...newImages];

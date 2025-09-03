@@ -35,12 +35,11 @@ export class UpdateReviewDto {
   deleteImages?: number[];
 
   @ApiPropertyOptional({
-    description: '새로 업로드할 이미지 파일들 (최대 10개)',
-    type: 'string',
-    format: 'binary',
+    description: '새로 업로드할 이미지 키 배열 (최대 10개)',
+    type: String,
     isArray: true,
   })
-  files?: any;
+  newImageKeys?: string[];
 }
 
 export class PresignPutRequestDto {

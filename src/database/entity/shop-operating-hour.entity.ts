@@ -19,10 +19,10 @@ export class ShopOperatingHour {
   })
   daysOfWeek: string[];
 
-  @Column('time', { name: 'start_time' })
+  @Column('time', { name: 'start_time', nullable: true })
   startTime: string;
 
-  @Column('time', { name: 'end_time' })
+  @Column('time', { name: 'end_time', nullable: true })
   endTime: string;
 
   @ManyToOne(() => Shop, (shop) => shop.operatingHours, { onDelete: 'CASCADE' })

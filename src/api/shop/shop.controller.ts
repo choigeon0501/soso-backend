@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiBody } from '@nestjs/swagger';
 import { ShopService } from './shop.service';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
 import { GetUUID } from '../../common/deco/get-user.deco';
 import { OptionalAuthGuard } from 'src/common/gurad/optional-auth-guard.guard';
 import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';
 import { PostReviewDto, PresignPutListRequestDto, UpdateReviewDto } from './dto/requests/review_request.dto';
@@ -182,17 +181,7 @@ export class ShopController {
   @Patch('/:shopId/reviews/:reviewId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @UseInterceptors(
-    FilesInterceptor('files', 10, {
-      limits: { fileSize: 5 * 1024 * 1024 }, // 최대 5MB
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) cb(null, true);
-        else cb(new Error('Only images allowed!'), false);
-      },
-    }),
-  )
   @ApiOperation({ summary: '리뷰 수정', description: '리뷰를 수정합니다.' })
-  @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '리뷰 데이터 및 이미지 파일',
     type: UpdateReviewDto,
@@ -206,9 +195,8 @@ export class ShopController {
     @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() updateReviewDto: UpdateReviewDto,
     @GetUUID() uuid: string,
-    @UploadedFiles() newFiles?: Express.Multer.File[],
   ) {
-    await this.shopService.updateReview(uuid, updateReviewDto, shopId, reviewId, newFiles);
+    await this.shopService.updateReview(uuid, updateReviewDto, shopId, reviewId);
     return new SuccessNoResultResponseDTO();
   }
 

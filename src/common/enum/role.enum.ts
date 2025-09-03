@@ -14,8 +14,3 @@ export enum SubmitStatus {
   Approved = 'approved',
   Rejected = 'rejected',
 }
-
-export enum UsingType {
-  Using = 0,
-  Verifying = 1,
-}
