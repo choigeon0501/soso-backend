@@ -104,8 +104,7 @@ export class ShopService {
     const region = await this.regionRepository.findRegionByLocation(newShopData.shop.location);
     if (!region) throw new NotFoundException('check region location');
 
-    console.log(newShopData);
-    // await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
+    await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
   }
 
   async createReviewPresignImages(presignPutListRequestDto: PresignPutListRequestDto) {
