@@ -1,6 +1,4 @@
 import { Entity, ManyToOne, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
-import { Shop } from './shop.entity';
 
 @Entity('submit_user_record')
 export class SubmitUserRecord {
@@ -19,11 +17,11 @@ export class SubmitUserRecord {
   @Column({ default: null })
   operatingId: number;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-  user: User;
+  @ManyToOne(() => (require('./user.entity').User), { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  user: any;
 
-  @ManyToOne(() => Shop, { onDelete: 'CASCADE' })
-  shop: Shop;
+  @ManyToOne(() => (require('./shop.entity').Shop), { onDelete: 'CASCADE' })
+  shop: any;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

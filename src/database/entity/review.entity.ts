@@ -1,7 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import { User } from './user.entity';
-import { Shop } from './shop.entity';
-import { Image } from './image.entity';
 
 @Entity('review')
 export class Review {
@@ -11,17 +8,17 @@ export class Review {
   @Column()
   content: string;
 
-  @ManyToOne(() => User, (user) => user.reviews, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
-  user: User;
+  @ManyToOne(() => (require('./user.entity').User), (user: any) => user.reviews, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  user: any;
 
-  @ManyToOne(() => Shop, (shop) => shop.reviews, { onDelete: 'CASCADE' })
-  shop: Shop;
+  @ManyToOne(() => (require('./shop.entity').Shop), (shop: any) => shop.reviews, { onDelete: 'CASCADE' })
+  shop: any;
 
-  @ManyToMany(() => Image, (image) => image.reviews, { onDelete: 'CASCADE' })
+  @ManyToMany(() => (require('./image.entity').Image), (image: any) => image.reviews, { onDelete: 'CASCADE' })
   @JoinTable({
     name: 'image_mapping',
   })
-  images: Image[];
+  images: any[];
 
   @CreateDateColumn()
   createdAt: Date;

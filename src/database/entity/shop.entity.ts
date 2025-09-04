@@ -1,8 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
-import { Product } from './product.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { OperatingHours } from './operating-hours.entity';
 import { Review } from './review.entity';
-import { Region } from './region.entity';
 import { ProductMapping } from './product_mapping.entity';
 
 @Entity('shop')
@@ -31,18 +29,15 @@ export class Shop {
   @Column({ type: 'varchar', length: 255, nullable: true })
   location: string;
 
-  @ManyToMany(() => Product, (product) => product.shops)
-  products: Product[];
-
   @OneToMany(() => OperatingHours, (operatingHours) => operatingHours.shop)
   operatingHours: OperatingHours[];
 
   @OneToMany(() => Review, (review) => review.shop)
   reviews: [Review];
 
-  @ManyToOne(() => Region, (region) => region.shop)
+  @ManyToOne(() => (require('./region.entity').Region), (region: any) => region.shop)
   @JoinColumn()
-  region: Region;
+  region: any;
 
   @OneToMany(() => ProductMapping, (productMapping) => productMapping.shop)
   productMappings: ProductMapping[];

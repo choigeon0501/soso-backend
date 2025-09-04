@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
-import { Review } from './review.entity';
 
 @Entity('image')
 export class Image {
@@ -9,6 +8,6 @@ export class Image {
   @Column()
   url: string;
 
-  @ManyToMany(() => Review, (review) => review.images)
-  reviews: Review[];
+  @ManyToMany(() => (require('./review.entity').Review), (review: any) => review.images)
+  reviews: any[];
 }

@@ -1,6 +1,4 @@
 import { BaseEntity, Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryColumn, UpdateDateColumn } from 'typeorm';
-import { Wishlist } from './wishlist.entity';
-import { Review } from './review.entity';
 import { AuthProvider } from '../../common/enum/auth.enum';
 
 @Entity()
@@ -26,11 +24,11 @@ export class User extends BaseEntity {
   @Column({ type: 'enum', enum: AuthProvider })
   provider: AuthProvider;
 
-  @OneToMany(() => Wishlist, (wishlist) => wishlist.user)
-  wishlists: Wishlist[]; // 사용자가 소유한 위시리스트 목록
+  @OneToMany(() => (require('./wishlist.entity').Wishlist), (wishlist: any) => wishlist.user)
+  wishlists: any[]; // 사용자가 소유한 위시리스트 목록
 
-  @OneToMany(() => Review, (review) => review.user)
-  reviews: Review[]; // 사용자가 소유한 위시리스트 목록
+  @OneToMany(() => (require('./review.entity').Review), (review: any) => review.user)
+  reviews: any[]; // 사용자가 소유한 위시리스트 목록
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date; // 생성 시간 자동 저장

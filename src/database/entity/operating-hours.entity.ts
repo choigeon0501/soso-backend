@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Shop } from './shop.entity';
 
 @Entity('operating_hours')
 export class OperatingHours {
@@ -39,6 +38,6 @@ export class OperatingHours {
   @Column({ type: 'time', nullable: true })
   endTime: string;
 
-  @ManyToOne(() => Shop, (shop) => shop.operatingHours, { onDelete: 'CASCADE' })
-  shop: Shop;
+  @ManyToOne(() => (require('./shop.entity').Shop), (shop: any) => shop.operatingHours, { onDelete: 'CASCADE' })
+  shop: any;
 }

@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Shop } from './shop.entity';
 
 @Entity('region')
 export class Region {
@@ -9,6 +8,6 @@ export class Region {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @OneToMany(() => Shop, (shop) => shop.region)
-  shop: Shop;
+  @OneToMany(() => (require('./shop.entity').Shop), (shop: any) => shop.region)
+  shop: any;
 }
