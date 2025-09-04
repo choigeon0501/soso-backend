@@ -103,11 +103,6 @@ export class ShopService {
     await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
   }
 
-  async createReviewPresignImages(presignPutListRequestDto: PresignPutListRequestDto) {
-    const { files } = presignPutListRequestDto;
-    return await this.awsService.getPresignedPutList(files);
-  }
-
   async findShopByShopId(shopId: number, uuid: string) {
     const imageList = [];
 

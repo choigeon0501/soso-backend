@@ -5,11 +5,11 @@ import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/respo
 import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
-import { ProfileImagePresignedDTO, UpdateProfileDTO } from './dto/requests/user_requests.dto';
+import { UpdateProfileDTO } from './dto/requests/user_requests.dto';
 import { WithdrawalReasonDTO, ValidateNickNameDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
 import { PageInfoDTO, PaginationResponsesDto } from './dto/responses/pagination_responses.dto';
-import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
+import { UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
 import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
@@ -49,42 +49,6 @@ export class UserController {
   async updateProfile(@GetUUID() uuid: string, @Body() updateProfileDTO?: UpdateProfileDTO) {
     await this.userService.updateUserProfile(updateProfileDTO, uuid);
     return new SuccessNoResultResponseDTO();
-  }
-
-  @Post('/me/presigned')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiExtraModels(SuccessResponseDTO, PreSignedURLResponsesDTO)
-  @ApiOperation({
-    summary: '유저 프로필 이미지 등록 - presigend',
-    description: 'return 받은 URL을 PUT 메서드로 클라이언트에서 이미지를 등록시키면 됨',
-  })
-  @ApiOkResponse({
-    description: 'Presigned URL 발급 성공',
-    schema: {
-      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(PreSignedURLResponsesDTO) } } }],
-    },
-  })
-  async createUserProfileImgPresignedURL(@Body() profileImagePresignedDTO: ProfileImagePresignedDTO) {
-    return new SuccessResponseDTO(await this.userService.createUserProfileImgPresignedURL(profileImagePresignedDTO));
-  }
-
-  @Get('/me/presigned')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiExtraModels(SuccessResponseDTO, PresignedUserProfileImgResponsesDTO)
-  @ApiOperation({
-    summary: '유저 프로필 이미지 불러오기 - presigend',
-    description: 'ExpriseIn을 참고해서 지날 때마다 호출해야 됨',
-  })
-  @ApiOkResponse({
-    description: 'Presigned URL 발급 성공',
-    schema: {
-      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(PresignedUserProfileImgResponsesDTO) } } }],
-    },
-  })
-  async getPresignedURLUserProfileImg(@GetUUID() uuid: string) {
-    return new SuccessResponseDTO(await this.userService.getPresignedURLUserProfileImg(uuid));
   }
 
   @Delete('/me')

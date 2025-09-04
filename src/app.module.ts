@@ -22,6 +22,7 @@ import { TransactionsModule } from './api/transactions/transactions.module';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { AuthIdentityModule } from './api/auth-identity/auth-identity.module';
 import { UserFavoriteModule } from './api/user-favorite/user-favorite.module';
+import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { UserFavoriteModule } from './api/user-favorite/user-favorite.module';
     JwtModule,
     TransactionsModule,
     AuthIdentityModule,
+    PresignedUrlModule,
   ],
   controllers: [AppController],
   providers: [

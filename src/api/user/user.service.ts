@@ -7,9 +7,9 @@ import { UserFavoriteRepository } from '../user-favorite/user-favorite.repositor
 
 import { ValidateNickNameDTO, WithdrawalReasonDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
-import { ProfileImagePresignedDTO, UpdateProfileDTO } from './dto/requests/user_requests.dto';
+import { UpdateProfileDTO } from './dto/requests/user_requests.dto';
 
-import { PreSignedURLResponsesDTO, PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
+import { PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
 import { PageInfoDTO } from './dto/responses/pagination_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
@@ -72,13 +72,6 @@ export class UserService {
       const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImgKey);
       if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
     }
-  }
-
-  async createUserProfileImgPresignedURL(profileImagePresignedDTO: ProfileImagePresignedDTO) {
-    const { originalName, contentType } = profileImagePresignedDTO;
-    const result = await this.awsService.getPresignedPutUrl(originalName, contentType);
-
-    return new PreSignedURLResponsesDTO(result);
   }
 
   async getPresignedURLUserProfileImg(uuid: string) {

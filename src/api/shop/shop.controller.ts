@@ -7,10 +7,9 @@ import { OptionalAuthGuard } from 'src/common/gurad/optional-auth-guard.guard';
 import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';
-import { PostReviewDto, PresignPutListRequestDto, UpdateReviewDto } from './dto/requests/review_request.dto';
+import { PostReviewDto, UpdateReviewDto } from './dto/requests/review_request.dto';
 import { ShopDetailResponseDTO, ShopSearchPageNationResultDTO, ShopWithin1KmResponseItemDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
-import { PreSignedURLListResponseDTO } from './dto/responses/review_response.dto';
 
 @ApiTags('Shops')
 @Controller('shops')
@@ -159,23 +158,6 @@ export class ShopController {
   async postReview(@Param('shopId', ParseIntPipe) shopId: number, @Body() postReviewDto: PostReviewDto, @GetUUID() uuid: string) {
     await this.shopService.createReview(uuid, postReviewDto, shopId);
     return new SuccessNoResultResponseDTO();
-  }
-
-  @Post('/:shopId/reviews/presigned')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiExtraModels(SuccessResponseDTO, PreSignedURLListResponseDTO)
-  @ApiOperation({
-    summary: '리뷰 이미지 PreSigned',
-    description:
-      '리뷰 이미지 등록을 위한 Presigned PUT URL들을 배치로 발급합니다. 클라이언트는 응답에 포함된 URL로 S3에 직접 업로드한 뒤, 발급받은 `key` 배열을 리뷰 생성 API에 전달하세요.',
-  })
-  @ApiBody({
-    description: '발급받을 파일들의 원본명/콘텐츠 타입 목록과 (선택) TTL(초).',
-    type: PresignPutListRequestDto,
-  })
-  async createReviewPresignImages(@Body() presignPutListRequestDto: PresignPutListRequestDto) {
-    return new SuccessResponseDTO(await this.shopService.createReviewPresignImages(presignPutListRequestDto));
   }
 
   @Patch('/:shopId/reviews/:reviewId')
