@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { LoggerService } from '../logger/logger.service';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { UploadType } from '../../common/enum/image.enum';
-import { PreSignedURLResponsesDTO } from '../presigned-url/dto/responses/create_presigned_url_requests.dto';
+import { PreSignedURLResponsesDTO } from '../presigned-url/dto/responses/create_presigned_url_response.dto';
 
 @Injectable()
 export class AwsService {
@@ -65,7 +65,7 @@ export class AwsService {
       Key: key,
       ResponseContentDisposition: contentDisposition,
     });
-    return getSignedUrl(this.s3Client, cmd, { expiresIn: expiresInSec });
+    return await getSignedUrl(this.s3Client, cmd, { expiresIn: expiresInSec });
   }
 
   /** 존재 확인(선택) */

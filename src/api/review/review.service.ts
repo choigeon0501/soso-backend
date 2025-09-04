@@ -15,7 +15,7 @@ export class ReviewService {
 
     const getPresignedOrNull = async (key?: string | null) => {
       if (!key) return null;
-      return this.awsService.getPresignedGetUrlByKey(key);
+      return await this.awsService.getPresignedGetUrlByKey(key);
     };
 
     const transformImages = async (images: Image[] = []) => {

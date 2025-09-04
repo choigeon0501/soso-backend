@@ -3,12 +3,12 @@ import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
 import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, getSchemaPath } from '@nestjs/swagger';
 import { SuccessResponseDTO } from '../../common/response/response.dto';
 import { PresignedUrlService } from './presigned-url.service';
-import { CreatePresignedDTO, CreatePresignedListDTO } from './dto/requests/create_presigned_url.dto';
-import { PreSignedURLListResponsesDTO, PreSignedURLResponsesDTO } from './dto/responses/create_presigned_url_requests.dto';
+import { CreatePresignedDTO, CreatePresignedListDTO } from './dto/requests/create_presigned_url_request.dto';
+import { PreSignedURLListResponsesDTO, PreSignedURLResponsesDTO } from './dto/responses/create_presigned_url_response.dto';
 
 @Controller('presigned-url')
 export class PresignedUrlController {
-  constructor(private presignedService: PresignedUrlService) {}
+  constructor(private presignedUrlService: PresignedUrlService) {}
 
   @Post('/')
   @UseGuards(JwtAuthGuard)
@@ -25,7 +25,7 @@ export class PresignedUrlController {
     },
   })
   async createPresignedURL(@Body() createPresignedDTO: CreatePresignedDTO) {
-    return new SuccessResponseDTO(await this.presignedService.createPresignedURL(createPresignedDTO));
+    return new SuccessResponseDTO(await this.presignedUrlService.createPresignedURL(createPresignedDTO));
   }
 
   @Post('/list')
@@ -53,6 +53,6 @@ export class PresignedUrlController {
     },
   })
   async createPresignedURLList(@Body() createPresignedListDTO: CreatePresignedListDTO) {
-    return new SuccessResponseDTO(await this.presignedService.createPresignedURLList(createPresignedListDTO));
+    return new SuccessResponseDTO(await this.presignedUrlService.createPresignedURLList(createPresignedListDTO));
   }
 }

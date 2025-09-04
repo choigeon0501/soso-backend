@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AwsService } from '../aws/aws.service';
-import { CreatePresignedDTO, CreatePresignedListDTO } from './dto/requests/create_presigned_url.dto';
-import { PreSignedURLListResponsesDTO, PreSignedURLResponsesDTO } from './dto/responses/create_presigned_url_requests.dto';
+import { CreatePresignedDTO, CreatePresignedListDTO } from './dto/requests/create_presigned_url_request.dto';
+import { PreSignedURLListResponsesDTO, PreSignedURLResponsesDTO } from './dto/responses/create_presigned_url_response.dto';
 
 @Injectable()
 export class PresignedUrlService {
