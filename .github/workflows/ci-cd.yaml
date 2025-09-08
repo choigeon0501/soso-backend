@@ -47,6 +47,16 @@ jobs:
           ssh-add $HOME/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.LIGHTSAIL_HOST }} >> $HOME/.ssh/known_hosts
 
+      - name: 배포 디렉토리 권한 정리
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ env.LIGHTSAIL_USERNAME }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            sudo chown -R bitnami:bitnami /home/bitnami/soso-backend
+            sudo chmod -R 755 /home/bitnami/soso-backend
+
       - name: 애플리케이션 파일 배포
         uses: appleboy/scp-action@master
         with:
