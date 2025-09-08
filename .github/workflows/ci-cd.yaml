@@ -76,4 +76,4 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             cd /home/bitnami/soso-backend
-            pm2 restart main || pm2 start dist/main.js
+            sudo pm2 restart main || sudo pm2 start dist/main.js --name main
