@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
 import * as qs from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 import * as appleSignin from 'apple-signin-auth';
@@ -11,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { Role } from '../../common/enum/role.enum';
 import { AuthProvider } from '../../common/enum/auth.enum';
 import { AuthIdentityRepository } from '../auth-identity/auth-identity.repository';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +22,7 @@ export class AuthService {
     private authIdentityRepository: AuthIdentityRepository,
     private readonly loggerService: LoggerService,
     private readonly configService: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
   private async getGoogleUserByCode(code: string, redirectUri: string) {
@@ -65,13 +66,12 @@ export class AuthService {
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
+      const jwtPayload = { uuid: userUuid, role };
 
-      const accessToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
-      });
-
-      const refreshToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
+      const accessToken = this.jwtService.sign(jwtPayload);
+      const refreshToken = this.jwtService.sign(jwtPayload, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
       });
 
       return new AuthTokenResponseDTO(accessToken, refreshToken);
@@ -83,10 +83,9 @@ export class AuthService {
 
   private async validateAppleToken(idToken: string) {
     try {
-      const payload = await appleSignin.verifyIdToken(idToken, {
+      return await appleSignin.verifyIdToken(idToken, {
         audience: this.configService.get<string>('APPLE_AUDIENCE_ID'),
       });
-      return payload;
     } catch (err) {
       this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
       throw new UnauthorizedException('Apple ID Token 검증 실패');
@@ -113,13 +112,12 @@ export class AuthService {
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
+      const jwtPayload = { uuid: userUuid, role };
 
-      const accessToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
-      });
-
-      const refreshToken = jwt.sign({ uuid: userUuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
+      const accessToken = this.jwtService.sign(jwtPayload);
+      const refreshToken = this.jwtService.sign(jwtPayload, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
       });
 
       return new AuthTokenResponseDTO(accessToken, refreshToken);
@@ -132,15 +130,21 @@ export class AuthService {
   async refreshToken(refreshTokenDTO: RefreshTokenDTO) {
     const { refreshToken } = refreshTokenDTO;
     try {
-      const payload = jwt.verify(refreshToken, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')) as { uuid: string };
-      const role = payload.uuid === this.configService.get<string>('ADMIN_UUID') ? Role.Admin : Role.User;
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        ignoreExpiration: false,
+      });
 
-      const newAccessToken = jwt.sign({ uuid: payload.uuid, role }, this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN'),
-      });
-      const newRefreshToken = jwt.sign({ uuid: payload.uuid, role }, this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'), {
-        expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
-      });
+      const { uuid, role } = payload;
+
+      const newAccessToken = this.jwtService.sign({ uuid, role });
+      const newRefreshToken = this.jwtService.sign(
+        { uuid, role },
+        {
+          secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+          expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+        },
+      );
 
       return new AuthTokenResponseDTO(newAccessToken, newRefreshToken);
     } catch (err) {
@@ -150,17 +154,13 @@ export class AuthService {
   }
 
   async test() {
-    const accessToken = jwt.sign(
-      { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin },
-      this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-      { expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN') },
-    );
+    const payload = { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin };
 
-    const refreshToken = jwt.sign(
-      { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin },
-      this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-      { expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN') },
-    );
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+    });
 
     return new AuthTokenResponseDTO(accessToken, refreshToken);
   }

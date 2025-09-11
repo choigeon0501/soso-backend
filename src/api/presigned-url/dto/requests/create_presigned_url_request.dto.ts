@@ -14,11 +14,11 @@ export class PresignedFileDTO {
 
   @ApiProperty({
     description: '콘텐츠 타입(MIME). 허용되는 이미지 타입만 전달',
-    enum: ['image/jpeg', 'image/png', 'image/webp'],
+    enum: ['image/jpeg', 'image/png', 'image/jpg'],
     example: 'image/png',
   })
   @IsString()
-  @IsIn(['image/jpeg', 'image/png', 'image/webp'])
+  @IsIn(['image/jpeg', 'image/png', 'image/jpg'])
   contentType: string;
 }
 

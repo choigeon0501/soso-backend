@@ -4,8 +4,8 @@ import { SuccessResponseDTO } from '../../common/response/response.dto';
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { NoticeDTO } from './dto/notice-response.dto';
 
-@ApiTags('Notice')
-@Controller('notice')
+@ApiTags('Notices')
+@Controller('notices')
 export class NoticeController {
   constructor(private readonly noticeService: NoticeService) {}
   @Get('/')

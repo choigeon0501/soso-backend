@@ -10,7 +10,7 @@ import { User } from '../../database/entity/user.entity';
 @Global()
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule,
     TypeOrmModule.forFeature([User]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     NestJsJwtModule.registerAsync({
@@ -19,12 +19,12 @@ import { User } from '../../database/entity/user.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN'),
+          expiresIn: configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
         },
       }),
     }),
   ],
   providers: [JwtStrategy, JwtAuthGuard],
-  exports: [JwtStrategy, JwtAuthGuard],
+  exports: [JwtStrategy, JwtAuthGuard, NestJsJwtModule],
 })
 export class JwtModule {}
