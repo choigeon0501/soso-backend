@@ -60,7 +60,7 @@ export class AuthService {
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
         // 트랜잭션으로 묶기
-        await this.userRepository.createUser(userUuid, userData.email, null);
+        await this.userRepository.createUser(userUuid, userData.email, AuthProvider.GOOGLE, null);
         await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
       }
 
@@ -106,7 +106,7 @@ export class AuthService {
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
         // 트랜잭션으로 묶기
-        await this.userRepository.createUser(userUuid, email, null);
+        await this.userRepository.createUser(userUuid, email, AuthProvider.APPLE, null);
         await this.authIdentityRepository.createAuthIdentity(appleId, AuthProvider.APPLE, userUuid);
       }
 
