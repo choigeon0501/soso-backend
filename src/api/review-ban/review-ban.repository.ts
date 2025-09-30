@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { ReviewBan } from '../../database/entity/review-ban.entity';
 import { Injectable } from '@nestjs/common';
 
@@ -10,10 +10,12 @@ export class ReviewBanRepository {
     private reviewBanRepository: Repository<ReviewBan>,
   ) {}
 
-  async findUserReviewBanByUuid(uuid: string) {
+  async findUserReviewBanByUuid(uuid: string, nowDate: Date = new Date()) {
     return await this.reviewBanRepository.findOne({
       where: {
         user: { uuid: uuid },
+        banStartAt: LessThanOrEqual(nowDate),
+        banEndAt: MoreThanOrEqual(nowDate),
       },
     });
   }
