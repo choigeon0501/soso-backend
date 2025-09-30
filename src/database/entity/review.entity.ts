@@ -12,7 +12,7 @@ export class Review {
   content: string;
 
   @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'uuid' })
   user: User;
 
   @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })

@@ -23,6 +23,7 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { AuthIdentityModule } from './api/auth-identity/auth-identity.module';
 import { UserFavoriteModule } from './api/user-favorite/user-favorite.module';
 import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
+import { ReviewBanModule } from './api/review-ban/review-ban.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
     TransactionsModule,
     AuthIdentityModule,
     PresignedUrlModule,
+    ReviewBanModule,
   ],
   controllers: [AppController],
   providers: [

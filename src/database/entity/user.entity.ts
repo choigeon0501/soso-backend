@@ -1,4 +1,5 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Unique } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Unique, OneToMany } from 'typeorm';
+import { ReviewBan } from './review-ban.entity';
 
 @Entity('users')
 @Unique(['email'])
@@ -15,6 +16,9 @@ export class User {
 
   @Column('varchar', { length: 50, name: 'nick_name', nullable: true })
   nickName: string;
+
+  @OneToMany(() => ReviewBan, (reviewBan) => reviewBan.user)
+  reviewBans: ReviewBan[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

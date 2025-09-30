@@ -9,7 +9,7 @@ export class ShopReport {
   id: number;
 
   @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'uuid' })
   user: User;
 
   @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })

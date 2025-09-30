@@ -12,6 +12,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
 import { AwsModule } from '../aws/aws.module';
 import { ReportModule } from '../report/report.module';
 import { UserFavoriteModule } from '../user-favorite/user-favorite.module';
+import { ReviewBanModule } from '../review-ban/review-ban.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserFavoriteModule } from '../user-favorite/user-favorite.module';
     TransactionsModule,
     AwsModule,
     ReportModule,
+    ReviewBanModule,
   ],
   controllers: [ShopController],
   providers: [ShopService, ShopRepository],

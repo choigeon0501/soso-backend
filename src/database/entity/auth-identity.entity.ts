@@ -9,7 +9,7 @@ export class AuthIdentity {
   id: number;
 
   @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'uuid' })
   user: User;
 
   @Column('varchar', { length: 32 })

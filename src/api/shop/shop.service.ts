@@ -7,18 +7,18 @@ import { getLastSegment } from 'src/common/function/get-insta-id';
 import { SubmitTransactionsRepository } from '../transactions/submit.repository';
 import { SubmitRepository } from '../submit/submit.repository';
 import { ReviewRepository } from '../review/review.repository';
-import { AwsService } from '../aws/aws.service';
 import { ReviewTransactionsRepository } from '../transactions/review.repository';
 import { ReviewService } from '../review/review.service';
 import { ReportRepository } from '../report/report.repository';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';
-import { PostReviewDto, PresignPutListRequestDto, UpdateReviewDto } from './dto/requests/review_request.dto';
+import { PostReviewDto, UpdateReviewDto } from './dto/requests/review_request.dto';
 import { Paging } from './dto/responses/pagination_response.dto';
 import { ShopSearchPageNationResultDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
 import { UserFavoriteRepository } from '../user-favorite/user-favorite.repository';
 import { SubmitType } from '../../common/enum/role.enum';
+import { ReviewBanRepository } from '../review-ban/review-ban.repository';
 
 @Injectable()
 export class ShopService {
@@ -31,9 +31,9 @@ export class ShopService {
     private submitTransactionsRepository: SubmitTransactionsRepository,
     private submitRepository: SubmitRepository,
     private reviewRepository: ReviewRepository,
-    private awsService: AwsService,
     private reviewTransactionsRepository: ReviewTransactionsRepository,
     private reportRepository: ReportRepository,
+    private reviewBanRepository: ReviewBanRepository,
   ) {}
 
   async findShopsWithin1Km(getShopWithin1KmDTO: GetShopWithin1KmDTO, uuid: string) {
@@ -195,6 +195,10 @@ export class ShopService {
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
+    // 리뷰 밴 테이블에 사용자가 존재하는지 검사
+    const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);
+    if (isExistUser) throw new ConflictException('Can not post review.');
+
     // 트랜잭션을 사용하여 Review 생성
     await this.reviewTransactionsRepository.createReview(uuid, shopId, content, reviewImgKeys);
   }
@@ -204,6 +208,10 @@ export class ShopService {
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
+
+    // 리뷰 밴 테이블에 사용자가 존재하는지 검사
+    const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);
+    if (isExistUser) throw new ConflictException('Can not post review.');
 
     // 트랜잭션을 사용하여 Review 업데이트
     await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteImages || [], newImageKeys);
