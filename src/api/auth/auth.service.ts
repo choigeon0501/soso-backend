@@ -141,20 +141,4 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
-
-  async test() {
-    const accessToken = jwt.sign(
-      { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin },
-      this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-      { expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRESIN') },
-    );
-
-    const refreshToken = jwt.sign(
-      { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin },
-      this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-      { expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRESIN') },
-    );
-
-    return { accessToken, refreshToken };
-  }
 }
