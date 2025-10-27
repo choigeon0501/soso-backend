@@ -17,7 +17,7 @@ export function setupSwagger(app: INestApplication): void {
       },
       'JWT-auth',
     )
-    .addServer('/v1/api')
+    .addServer('/v2/api')
     .build();
 
   // SwaggerModule.createDocument를 사용해 자동 생성된 문서 생성

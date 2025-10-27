@@ -51,7 +51,7 @@ async function bootstrap() {
   });
   setupSwagger(app);
 
-  app.setGlobalPrefix('v1/api');
+  app.setGlobalPrefix('v2/api');
   // HTTPS 포트 443 사용
   await app.listen(port);
 }
