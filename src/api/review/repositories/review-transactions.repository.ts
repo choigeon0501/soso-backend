@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
-import { Review } from '../../database/entity/review.entity';
-import { Image } from '../../database/entity/image.entity';
-import { AwsService } from '../aws/aws.service';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { Review } from '../../../database/entity/review.entity';
+import { Image } from '../../../database/entity/image.entity';
+import { AwsService } from '../../../common/aws/aws.service';
 
 @Injectable()
 export class ReviewTransactionsRepository {

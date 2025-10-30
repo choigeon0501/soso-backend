@@ -2,7 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Shop } from 'src/database/entity/shop.entity';
 import { Repository } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../../common/logger/logger.service';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 

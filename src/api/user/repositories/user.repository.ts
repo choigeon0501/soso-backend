@@ -2,8 +2,8 @@ import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { User } from 'src/database/entity/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoggerService } from '../logger/logger.service';
-import { AuthProvider } from '../../common/enum/auth.enum';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { AuthProvider } from '../../../common/enum/auth.enum';
 
 export class UserRepository {
   constructor(

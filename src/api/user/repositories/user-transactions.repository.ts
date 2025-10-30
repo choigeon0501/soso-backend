@@ -1,11 +1,11 @@
 import { ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../database/entity/user.entity';
-import { LoggerService } from '../logger/logger.service';
-import { Image } from '../../database/entity/image.entity';
-import { UserWithdrawal } from '../../database/entity/user-withdrawal.entity';
-import { WithdrawalReasonDTO } from '../user/dto/query/user.dto';
-import { AwsService } from '../aws/aws.service';
+import { User } from '../../../database/entity/user.entity';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { Image } from '../../../database/entity/image.entity';
+import { UserWithdrawal } from '../../../database/entity/user-withdrawal.entity';
+import { WithdrawalReasonDTO } from '../dto/query/user.dto';
+import { AwsService } from '../../../common/aws/aws.service';
 
 @Injectable()
 export class UserTransactionsRepository {

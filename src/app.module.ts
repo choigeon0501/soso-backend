@@ -3,27 +3,20 @@ import { AuthModule } from './api/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './api/user/user.module';
 import { ShopModule } from './api/shop/shop.module';
-import { SubmitModule } from './api/submit/submit.module';
 import { ReviewModule } from './api/review/review.module';
-import { AwsModule } from './api/aws/aws.module';
+import { AwsModule } from './common/aws/aws.module';
 import { AppController } from './app.controller';
 import { RegionModule } from './api/region/region.module';
 import { NoticeModule } from './api/notice/notice.module';
 import { FeedbackModule } from './api/feedback/feedback.module';
-import { RecentSearchModule } from './api/recent-search/recent-search.module';
-import { LoggerModule } from './api/logger/logger.module';
-import { ReportModule } from './api/report/report.module';
-import { AdminModule } from './api/admin/admin.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from './api/jwt/jwt.module';
+import { JwtModule } from './common/jwt/jwt.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { TransactionsModule } from './api/transactions/transactions.module';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
-import { AuthIdentityModule } from './api/auth-identity/auth-identity.module';
-import { UserFavoriteModule } from './api/user-favorite/user-favorite.module';
 import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
-import { ReviewBanModule } from './api/review-ban/review-ban.module';
+import { AdminModule } from './api/admin/admin.module';
 
 @Module({
   imports: [
@@ -57,22 +50,15 @@ import { ReviewBanModule } from './api/review-ban/review-ban.module';
     AuthModule,
     UserModule,
     ShopModule,
-    SubmitModule,
-    UserFavoriteModule,
     ReviewModule,
     AwsModule,
     RegionModule,
     NoticeModule,
     FeedbackModule,
-    RecentSearchModule,
     LoggerModule,
-    ReportModule,
-    AdminModule,
     JwtModule,
-    TransactionsModule,
-    AuthIdentityModule,
     PresignedUrlModule,
-    ReviewBanModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

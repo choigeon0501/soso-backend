@@ -1,6 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, NotFoundException } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { LoggerService } from '../../api/logger/logger.service';
+import { LoggerService } from '../logger/logger.service';
 
 @Catch() // 모든 예외를 잡음
 export class HttpExceptionFilter implements ExceptionFilter {

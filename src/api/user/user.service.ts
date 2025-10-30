@@ -1,9 +1,9 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepository } from './user.repository';
-import { AwsService } from '../aws/aws.service';
-import { ReviewRepository } from '../review/review.repository';
-import { SubmitRepository } from '../submit/submit.repository';
-import { UserFavoriteRepository } from '../user-favorite/user-favorite.repository';
+import { UserRepository } from './repositories/user.repository';
+import { AwsService } from '../../common/aws/aws.service';
+import { ReviewRepository } from '../review/repositories/review.repository';
+import { ShopSubmitRepository } from '../shop/repositories/shop-submit.repository';
+import { UserFavoriteRepository } from './repositories/user-favorite.repository';
 
 import { ValidateNickNameDTO, WithdrawalReasonDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
@@ -16,11 +16,11 @@ import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/
 import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
 
 import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
-import { UserTransactionsRepository } from '../transactions/user.repository';
-import { RecentSearchRepository } from '../recent-search/recent-search.repository';
+import { UserTransactionsRepository } from './repositories/user-transactions.repository';
+import { ShopRecentSearchRepository } from '../shop/repositories/shop-recent-search.repository';
 import { SubmitType } from '../../common/enum/role.enum';
-import { SubmitTransactionsRepository } from '../transactions/submit.repository';
-import { ShopRepository } from '../shop/shop.repository';
+import { ShopSubmitTransactionsRepository } from '../shop/repositories/shop-submit-transactions.repository';
+import { ShopRepository } from '../shop/repositories/shop.repository';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
@@ -33,10 +33,10 @@ export class UserService {
     private awsService: AwsService,
     private reviewRepository: ReviewRepository,
     private userFavoriteRepository: UserFavoriteRepository,
-    private submitRepository: SubmitRepository,
-    private recentSearchRepository: RecentSearchRepository,
+    private submitRepository: ShopSubmitRepository,
+    private recentSearchRepository: ShopRecentSearchRepository,
     private userTransactionsRepository: UserTransactionsRepository,
-    private submitTransactionsRepository: SubmitTransactionsRepository,
+    private shopSubmitTransactionsRepository: ShopSubmitTransactionsRepository,
     private shopRepository: ShopRepository,
   ) {}
 
@@ -186,13 +186,13 @@ export class UserService {
 
     switch (submitRecord.type) {
       case SubmitType.NewShop:
-        await this.submitTransactionsRepository.deleteShopSubmission(submitRecord.shop.id);
+        await this.shopSubmitTransactionsRepository.deleteShopSubmission(submitRecord.shop.id);
         break;
       case SubmitType.NewOperating:
-        await this.submitTransactionsRepository.deleteOperatingHoursSubmission(submitId, submitRecord.shopOperatingHour.id);
+        await this.shopSubmitTransactionsRepository.deleteOperatingHoursSubmission(submitId, submitRecord.shopOperatingHour.id);
         break;
       case SubmitType.NewProduct:
-        await this.submitTransactionsRepository.deleteProductSubmission(submitRecord.shop.id, uuid);
+        await this.shopSubmitTransactionsRepository.deleteProductSubmission(submitRecord.shop.id, uuid);
         break;
       default:
         throw new NotFoundException('Invalid submit type');

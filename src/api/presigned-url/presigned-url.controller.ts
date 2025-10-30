@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, getSchemaPath } from '@nestjs/swagger';
 import { SuccessResponseDTO } from '../../common/response/response.dto';
 import { PresignedUrlService } from './presigned-url.service';

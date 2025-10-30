@@ -3,8 +3,8 @@ import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectComm
 import { ConfigService } from '@nestjs/config';
 import { LoggerService } from '../logger/logger.service';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { UploadType } from '../../common/enum/image.enum';
-import { PreSignedURLResponsesDTO } from '../presigned-url/dto/responses/create_presigned_url_response.dto';
+import { UploadType } from '../enum/image.enum';
+import { PreSignedURLResponsesDTO } from '../../api/presigned-url/dto/responses/create_presigned_url_response.dto';
 
 @Injectable()
 export class AwsService {

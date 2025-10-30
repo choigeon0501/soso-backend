@@ -1,24 +1,25 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { ShopRepository } from './shop.repository';
+import { ShopRepository } from './repositories/shop.repository';
 import { RegionRepository } from '../region/region.repository';
-import { RecentSearchRepository } from '../recent-search/recent-search.repository';
+import { ShopRecentSearchRepository } from './repositories/shop-recent-search.repository';
 import { convertTimeToAmPm } from '../../common/function/time-to-am-pm.function';
 import { getLastSegment } from 'src/common/function/get-insta-id';
-import { SubmitTransactionsRepository } from '../transactions/submit.repository';
-import { SubmitRepository } from '../submit/submit.repository';
-import { ReviewRepository } from '../review/review.repository';
-import { ReviewTransactionsRepository } from '../transactions/review.repository';
+import { ShopSubmitTransactionsRepository } from './repositories/shop-submit-transactions.repository';
+import { ShopSubmitRepository } from './repositories/shop-submit.repository';
+import { ReviewRepository } from '../review/repositories/review.repository';
+import { ReviewTransactionsRepository } from '../review/repositories/review-transactions.repository';
 import { ReviewService } from '../review/review.service';
-import { ReportRepository } from '../report/report.repository';
+import { ShopReportRepository } from './repositories/shop-report.repository';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';
 import { PostReviewDto, UpdateReviewDto } from './dto/requests/review_request.dto';
 import { Paging } from './dto/responses/pagination_response.dto';
 import { ShopSearchPageNationResultDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
-import { UserFavoriteRepository } from '../user-favorite/user-favorite.repository';
+import { UserFavoriteRepository } from '../user/repositories/user-favorite.repository';
 import { SubmitType } from '../../common/enum/role.enum';
-import { ReviewBanRepository } from '../review-ban/review-ban.repository';
+import { ReviewBanRepository } from '../review/repositories/review-ban.repository';
+import { ReviewReportRepository } from '../review/repositories/review-report.repository';
 
 @Injectable()
 export class ShopService {
@@ -27,12 +28,13 @@ export class ShopService {
     private reviewService: ReviewService,
     private userFavoriteRepository: UserFavoriteRepository,
     private regionRepository: RegionRepository,
-    private recentSearchRepository: RecentSearchRepository,
-    private submitTransactionsRepository: SubmitTransactionsRepository,
-    private submitRepository: SubmitRepository,
+    private recentSearchRepository: ShopRecentSearchRepository,
+    private shopSubmitTransactionsRepository: ShopSubmitTransactionsRepository,
+    private submitRepository: ShopSubmitRepository,
     private reviewRepository: ReviewRepository,
     private reviewTransactionsRepository: ReviewTransactionsRepository,
-    private reportRepository: ReportRepository,
+    private shopReportRepository: ShopReportRepository,
+    private reviewReportRepository: ReviewReportRepository,
     private reviewBanRepository: ReviewBanRepository,
   ) {}
 
@@ -100,7 +102,7 @@ export class ShopService {
     const region = await this.regionRepository.findRegionByLocation(newShopData.shop.location);
     if (!region) throw new NotFoundException('check region location');
 
-    await this.submitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
+    await this.shopSubmitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
   }
 
   async findShopByShopId(shopId: number, uuid: string) {
@@ -176,7 +178,7 @@ export class ShopService {
     const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, SubmitType.NewOperating);
     if (existData) throw new ConflictException('Exist Data');
 
-    await this.submitTransactionsRepository.createOperatingHours(shopId, operatingData, uuid);
+    await this.shopSubmitTransactionsRepository.createOperatingHours(shopId, operatingData, uuid);
   }
 
   async validateAndUpdateProducts(shopId: number, productsData: SubmitNewProductsDto, uuid: string): Promise<void> {
@@ -186,7 +188,7 @@ export class ShopService {
     const existData = await this.submitRepository.findUserSubmitRecordByType(uuid, shopId, SubmitType.NewProduct);
     if (existData) throw new ConflictException('Exist Data');
 
-    await this.submitTransactionsRepository.createProducts(shopId, productsData, uuid);
+    await this.shopSubmitTransactionsRepository.createProducts(shopId, productsData, uuid);
   }
 
   async createReview(uuid: string, postReviewDto: PostReviewDto, shopId: number): Promise<void> {
@@ -234,19 +236,19 @@ export class ShopService {
     const review = await this.reviewRepository.findOneReviewById(reviewId);
     if (!review) throw new NotFoundException('Not exist review');
 
-    const existData = await this.reportRepository.findReviewReport(uuid, reviewId);
+    const existData = await this.reviewReportRepository.findReviewReport(uuid, reviewId);
     if (existData) throw new ConflictException('Exist Report Review');
 
-    await this.reportRepository.saveReviewReport(uuid, reviewId, reviewReportDto);
+    await this.reviewReportRepository.saveReviewReport(uuid, reviewId, reviewReportDto);
   }
 
   async reportShop(uuid: string, shopReportDto: ShopReportDto, shopId: number): Promise<void> {
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new NotFoundException('Not exist shop');
 
-    const existData = await this.reportRepository.findShopReport(uuid, shopId);
+    const existData = await this.shopReportRepository.findShopReport(uuid, shopId);
     if (existData) throw new ConflictException('Exist Report Shop');
 
-    await this.reportRepository.saveShopReport(uuid, shop.id, shopReportDto);
+    await this.shopReportRepository.saveShopReport(uuid, shop.id, shopReportDto);
   }
 }

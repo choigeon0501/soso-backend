@@ -2,14 +2,14 @@ import { Injectable, InternalServerErrorException, UnauthorizedException } from 
 import * as qs from 'querystring';
 import { v4 as uuidv4 } from 'uuid';
 import * as appleSignin from 'apple-signin-auth';
-import { UserRepository } from '../user/user.repository';
+import { UserRepository } from '../user/repositories/user.repository';
 import axios from 'axios';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../common/logger/logger.service';
 import { AppleAuthLoginDto, AuthTokenResponseDTO, GoogleAuthLoginDTO, RefreshTokenDTO } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../../common/enum/role.enum';
 import { AuthProvider } from '../../common/enum/auth.enum';
-import { AuthIdentityRepository } from '../auth-identity/auth-identity.repository';
+import { AuthIdentityRepository } from './repositories/auth-identity.repository';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

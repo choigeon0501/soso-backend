@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Patch, UseGuards, Delete, Query, Pa
 import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
 import { UpdateProfileDTO } from './dto/requests/user_requests.dto';

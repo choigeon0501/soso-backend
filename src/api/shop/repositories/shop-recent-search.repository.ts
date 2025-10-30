@@ -1,10 +1,10 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { RecentSearch } from '../../database/entity/recent-search.entity';
+import { RecentSearch } from '../../../database/entity/recent-search.entity';
 import { Repository } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../../common/logger/logger.service';
 import { InternalServerErrorException } from '@nestjs/common';
 
-export class RecentSearchRepository {
+export class ShopRecentSearchRepository {
   constructor(
     @InjectRepository(RecentSearch)
     private recentSearchRepository: Repository<RecentSearch>,

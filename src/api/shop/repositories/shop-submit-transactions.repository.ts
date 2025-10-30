@@ -1,15 +1,15 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
-import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
-import { Shop } from '../../database/entity/shop.entity';
-import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
-import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../shop/dto/requests/submit_shop_requests.dto';
-import { ShopOperatingHour } from '../../database/entity/shop-operating-hour.entity';
-import { ShopProductMapping } from '../../database/entity/shop-product-mapping.entity';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { SubmitUserRecord } from '../../../database/entity/submit-user-record.entity';
+import { Shop } from '../../../database/entity/shop.entity';
+import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
+import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../dto/requests/submit_shop_requests.dto';
+import { ShopOperatingHour } from '../../../database/entity/shop-operating-hour.entity';
+import { ShopProductMapping } from '../../../database/entity/shop-product-mapping.entity';
 
 @Injectable()
-export class SubmitTransactionsRepository {
+export class ShopSubmitTransactionsRepository {
   constructor(
     private dataSource: DataSource,
     private loggerService: LoggerService,

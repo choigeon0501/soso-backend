@@ -2,10 +2,10 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SubmitUserRecord } from 'src/database/entity/submit-user-record.entity';
-import { LoggerService } from '../logger/logger.service';
-import { SubmitType } from '../../common/enum/role.enum';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { SubmitType } from '../../../common/enum/role.enum';
 
-export class SubmitRepository {
+export class ShopSubmitRepository {
   constructor(
     @InjectRepository(SubmitUserRecord)
     private submitUserRecordRepository: Repository<SubmitUserRecord>,

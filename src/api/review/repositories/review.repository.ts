@@ -2,8 +2,8 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from 'src/database/entity/review.entity';
 import { Repository } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
-import { SortOrder } from '../../common/enum/sorting.enum';
+import { LoggerService } from '../../../common/logger/logger.service';
+import { SortOrder } from '../../../common/enum/sorting.enum';
 
 export class ReviewRepository {
   constructor(

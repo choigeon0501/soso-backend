@@ -1,9 +1,9 @@
 import { ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../../common/logger/logger.service';
 import { Injectable } from '@nestjs/common';
-import { UserFavorite } from '../../database/entity/user-favorite.entity';
+import { UserFavorite } from '../../../database/entity/user-favorite.entity';
 
 @Injectable()
 export class UserFavoriteRepository {

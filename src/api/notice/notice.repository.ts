@@ -2,7 +2,7 @@ import { Notice } from '../../database/entity/notice.entity';
 import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../common/logger/logger.service';
 
 export class NoticeRepository {
   constructor(

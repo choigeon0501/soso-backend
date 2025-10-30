@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ReviewRepository } from './review.repository';
+import { ReviewRepository } from './repositories/review.repository';
 import { Image } from '../../database/entity/image.entity';
-import { AwsService } from '../aws/aws.service';
+import { AwsService } from '../../common/aws/aws.service';
 
 @Injectable()
 export class ReviewService {

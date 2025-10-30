@@ -4,7 +4,7 @@ import { ShopService } from './shop.service';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
 import { GetUUID } from '../../common/deco/get-user.deco';
 import { OptionalAuthGuard } from 'src/common/gurad/optional-auth-guard.guard';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';
 import { PostReviewDto, UpdateReviewDto } from './dto/requests/review_request.dto';
