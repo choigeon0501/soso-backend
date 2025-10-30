@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Shop } from './shop.entity';
-import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
+import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
 import { ShopOperatingHour } from './shop-operating-hour.entity';
 
-@Entity('submit_user_records')
-export class SubmitUserRecord {
+@Entity('shop_submit_records')
+export class ShopSubmitRecord {
   @PrimaryGeneratedColumn()
   id: number;
 

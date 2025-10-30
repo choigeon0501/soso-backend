@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { Region } from './region.entity';
+import { Region } from '../../region/entities/region.entity';
 import { ShopOperatingHour } from './shop-operating-hour.entity';
 import { ShopProductMapping } from './shop-product-mapping.entity';
 

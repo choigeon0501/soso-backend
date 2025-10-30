@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ReviewRepository } from './repositories/review.repository';
-import { Image } from '../../database/entity/image.entity';
+import { ReviewImage } from './entities/review-image.entity';
 import { AwsService } from '../../common/aws/aws.service';
 
 @Injectable()
@@ -18,9 +18,9 @@ export class ReviewService {
       return await this.awsService.getPresignedGetUrlByKey(key);
     };
 
-    const transformImages = async (images: Image[] = []) => {
+    const transformImages = async (reviewImages: ReviewImage[] = []) => {
       return Promise.all(
-        images
+        reviewImages
           .filter((img) => !!img)
           .map(async (image) => {
             const url = await getPresignedOrNull(image.fileKey);

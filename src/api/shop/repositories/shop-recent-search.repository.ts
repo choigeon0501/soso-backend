@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { RecentSearch } from '../../../database/entity/recent-search.entity';
+import { RecentSearch } from '../entities/shop-recent-search.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { InternalServerErrorException } from '@nestjs/common';

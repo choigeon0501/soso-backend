@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Review } from './review.entity';
-import { ReviewReportType } from '../../common/enum/report.enum';
+import { ReviewReportType } from '../../../common/enum/report.enum';
 
 @Entity('review_reports')
 export class ReviewReport {

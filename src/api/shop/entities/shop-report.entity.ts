@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../../user/entities/user.entity';
 import { Shop } from './shop.entity';
-import { ShopReportType } from '../../common/enum/report.enum';
+import { ShopReportType } from '../../../common/enum/report.enum';
 
 @Entity('shop_reports')
 export class ShopReport {

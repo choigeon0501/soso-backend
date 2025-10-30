@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Region } from 'src/database/entity/region.entity';
+import { Region } from 'src/api/region/entities/region.entity';
 
 import { Repository } from 'typeorm';
 import { LoggerService } from '../../common/logger/logger.service';

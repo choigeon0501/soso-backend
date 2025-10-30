@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { RecentSearch } from '../../../../database/entity/recent-search.entity';
+import { RecentSearch } from '../../../shop/entities/shop-recent-search.entity';
 
 export class RecentSearchResponsesDto {
   @ApiProperty({ example: 1 }) id: number;

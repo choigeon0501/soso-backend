@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
-import { ReviewBan } from '../../../database/entity/review-ban.entity';
+import { ReviewBan } from '../entities/review-ban.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { LoggerService } from '../../../common/logger/logger.service';
 

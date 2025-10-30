@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
-import { SubmitUserRecord } from '../../../database/entity/submit-user-record.entity';
-import { Shop } from '../../../database/entity/shop.entity';
+import { ShopSubmitRecord } from '../entities/shop-submit-user-record.entity';
+import { Shop } from '../entities/shop.entity';
 import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../dto/requests/submit_shop_requests.dto';
-import { ShopOperatingHour } from '../../../database/entity/shop-operating-hour.entity';
-import { ShopProductMapping } from '../../../database/entity/shop-product-mapping.entity';
+import { ShopOperatingHour } from '../entities/shop-operating-hour.entity';
+import { ShopProductMapping } from '../entities/shop-product-mapping.entity';
 
 @Injectable()
 export class ShopSubmitTransactionsRepository {
@@ -23,7 +23,7 @@ export class ShopSubmitTransactionsRepository {
 
     try {
       const shopRepo = queryRunner.manager.getRepository(Shop);
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
@@ -78,7 +78,7 @@ export class ShopSubmitTransactionsRepository {
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
       const shopRepo = queryRunner.manager.getRepository(Shop);
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
 
       // Step 1: Delete product mappings
       await productRepo.delete({ shop: { id: shopId } });
@@ -110,7 +110,7 @@ export class ShopSubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       const newOperatingHours = await operatingRepo.save({
@@ -142,7 +142,7 @@ export class ShopSubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       await operatingRepo.delete({
@@ -169,7 +169,7 @@ export class ShopSubmitTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const createSubmitRecord = await submitRepo.save({
@@ -208,7 +208,7 @@ export class ShopSubmitTransactionsRepository {
 
     try {
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
 
       // Step 1: Delete product mappings of type Verifying by this user
       await productRepo.delete({

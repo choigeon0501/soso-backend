@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Review } from './review.entity';
 
-@Entity('images')
-export class Image {
+@Entity('review_images')
+export class ReviewImage {
   @PrimaryGeneratedColumn()
   id: number;
 

@@ -1,4 +1,4 @@
-import { Notice } from '../../database/entity/notice.entity';
+import { Notice } from './entities/notice.entity';
 import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';

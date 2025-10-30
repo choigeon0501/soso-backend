@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
-import { Review } from '../../../database/entity/review.entity';
-import { Image } from '../../../database/entity/image.entity';
+import { Review } from '../entities/review.entity';
+import { ReviewImage } from '../entities/review-image.entity';
 import { AwsService } from '../../../common/aws/aws.service';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class ReviewTransactionsRepository {
 
     try {
       const reviewRepo = queryRunner.manager.getRepository(Review);
-      const imageRepo = queryRunner.manager.getRepository(Image);
+      const reviewImgRepo = queryRunner.manager.getRepository(ReviewImage);
 
       // Review 생성
       const review = await reviewRepo.save({
@@ -34,7 +34,7 @@ export class ReviewTransactionsRepository {
         // Review와 Image 연결
         review.images = await Promise.all(
           reviewImgKeys.map(async (key) => {
-            const [image] = await Promise.all([imageRepo.save({ fileKey: key })]);
+            const [image] = await Promise.all([reviewImgRepo.save({ fileKey: key })]);
             return image;
           }),
         );
@@ -58,7 +58,7 @@ export class ReviewTransactionsRepository {
 
     try {
       const reviewRepo = queryRunner.manager.getRepository(Review);
-      const imageRepo = queryRunner.manager.getRepository(Image);
+      const reviewImgRepo = queryRunner.manager.getRepository(ReviewImage);
 
       // Review 찾기
       const review = await reviewRepo.findOne({
@@ -78,7 +78,7 @@ export class ReviewTransactionsRepository {
           await this.awsService.deleteImageFromS3(image.fileKey);
         }
         // DB에서 이미지 삭제
-        await imageRepo.delete(deleteImages);
+        await reviewImgRepo.delete(deleteImages);
         review.images = review.images.filter((image) => !deleteImages.includes(image.id));
       }
 
@@ -86,7 +86,7 @@ export class ReviewTransactionsRepository {
       if (newImageKeys.length > 0) {
         const newImages = await Promise.all(
           newImageKeys.map(async (fileKey) => {
-            return await imageRepo.save({ fileKey });
+            return await reviewImgRepo.save({ fileKey });
           }),
         );
         review.images = [...review.images, ...newImages];
@@ -118,7 +118,7 @@ export class ReviewTransactionsRepository {
 
     try {
       const reviewRepo = queryRunner.manager.getRepository(Review);
-      const imageRepo = queryRunner.manager.getRepository(Image);
+      const reviewImgRepo = queryRunner.manager.getRepository(Image);
 
       // Review 찾기
       const review = await reviewRepo.findOne({
@@ -137,7 +137,7 @@ export class ReviewTransactionsRepository {
           await this.awsService.deleteImageFromS3(image.fileKey);
         }
         // DB에서 이미지 삭제
-        await imageRepo.delete(review.images.map((image) => image.id));
+        await reviewImgRepo.delete(review.images.map((image) => image.id));
       }
 
       // 리뷰 삭제

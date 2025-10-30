@@ -1,20 +1,20 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubmitUserRecord } from 'src/database/entity/submit-user-record.entity';
+import { ShopSubmitRecord } from 'src/api/shop/entities/shop-submit-user-record.entity';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { SubmitType } from '../../../common/enum/role.enum';
 
 export class ShopSubmitRepository {
   constructor(
-    @InjectRepository(SubmitUserRecord)
-    private submitUserRecordRepository: Repository<SubmitUserRecord>,
+    @InjectRepository(ShopSubmitRecord)
+    private ShopSubmitRecordRepository: Repository<ShopSubmitRecord>,
     private readonly loggerService: LoggerService,
   ) {}
 
   async findSubmitRecordById(submitId: number, uuid: string) {
     try {
-      return await this.submitUserRecordRepository.findOne({
+      return await this.ShopSubmitRecordRepository.findOne({
         where: {
           id: submitId,
           user: {
@@ -29,9 +29,9 @@ export class ShopSubmitRepository {
     }
   }
 
-  async findUserSubmitRecordByType(uuid: string, shopId: number, type: SubmitType): Promise<SubmitUserRecord> {
+  async findUserSubmitRecordByType(uuid: string, shopId: number, type: SubmitType): Promise<ShopSubmitRecord> {
     try {
-      return await this.submitUserRecordRepository.findOne({
+      return await this.ShopSubmitRecordRepository.findOne({
         where: {
           user: { uuid },
           shop: {
@@ -46,22 +46,20 @@ export class ShopSubmitRepository {
     }
   }
 
-  async findUserSubmitUserRecord(uuid: string) {
+  async findUserShopSubmitRecord(uuid: string) {
     try {
-      return await this.submitUserRecordRepository
-        .createQueryBuilder('submit') // ✅ 엔티티 별칭 수정
+      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit') // ✅ 엔티티 별칭 수정
         .where('submit.user.uuid = :uuid', { uuid }) // ✅ where 절 수정
         .getCount();
     } catch (err) {
-      this.loggerService.warn(`Submit/ findUserSubmitUserRecord Error: ${err}`);
+      this.loggerService.warn(`Submit/ findUserShopSubmitRecord Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }
 
-  async findUserSubmitUserRecordByPageNation(uuid: string, page: number, limit: number) {
+  async findUserShopSubmitRecordByPageNation(uuid: string, page: number, limit: number) {
     try {
-      return await this.submitUserRecordRepository
-        .createQueryBuilder('submit') // ✅ 엔티티 별칭 수정
+      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit') // ✅ 엔티티 별칭 수정
         .where('submit.user.uuid = :uuid', { uuid }) // ✅ where 절 수정
         .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
         .orderBy('submit.createdAt', 'DESC') // ✅ 최신순 정렬
@@ -69,15 +67,14 @@ export class ShopSubmitRepository {
         .take(limit) // ✅ limit 설정
         .getMany();
     } catch (err) {
-      this.loggerService.warn(`Submit/ findUserSubmitUserRecordByPageNation Error: ${err}`);
+      this.loggerService.warn(`Submit/ findUserShopSubmitRecordByPageNation Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }
 
   async findAllSubmitProducts() {
     try {
-      return await this.submitUserRecordRepository
-        .createQueryBuilder('submit')
+      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
         .where('submit.type=2')
         .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
         .leftJoinAndSelect('shop.productMappings', 'productMappings')
@@ -91,8 +88,7 @@ export class ShopSubmitRepository {
 
   async findAllSubmitOperatings() {
     try {
-      return await this.submitUserRecordRepository
-        .createQueryBuilder('submit')
+      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
         .where('submit.type=1')
         .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
         .leftJoinAndSelect('shop.operatingHours', 'operatingHours')
@@ -106,8 +102,7 @@ export class ShopSubmitRepository {
 
   async findAllSubmitNewShops() {
     try {
-      return await this.submitUserRecordRepository
-        .createQueryBuilder('submit')
+      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
         .where('submit.type=0')
         .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
         .leftJoinAndSelect('shop.operatingHours', 'operatingHours')

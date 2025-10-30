@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Review } from 'src/database/entity/review.entity';
+import { Review } from 'src/api/review/entities/review.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { SortOrder } from '../../../common/enum/sorting.enum';

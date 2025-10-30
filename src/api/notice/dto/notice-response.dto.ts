@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Notice } from '../../../database/entity/notice.entity';
+import { Notice } from '../entities/notice.entity';
 
 export class NoticeDTO {
   @ApiProperty({ description: '공지 ID', example: 1 })

@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
-import { SubmitUserRecord } from '../../../database/entity/submit-user-record.entity';
+import { ShopSubmitRecord } from '../../shop/entities/shop-submit-user-record.entity';
 import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
-import { Shop } from '../../../database/entity/shop.entity';
-import { ShopProductMapping } from '../../../database/entity/shop-product-mapping.entity';
-import { ShopOperatingHour } from '../../../database/entity/shop-operating-hour.entity';
+import { Shop } from '../../shop/entities/shop.entity';
+import { ShopProductMapping } from '../../shop/entities/shop-product-mapping.entity';
+import { ShopOperatingHour } from '../../shop/entities/shop-operating-hour.entity';
 
 @Injectable()
 export class AdminTransactionsRepository {
@@ -20,7 +20,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       // 해당 유저가 제출한 submit status를 완료로 바꾸기
@@ -90,7 +90,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const userSubmitData = await submitRepo.findOne({
@@ -133,7 +133,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
       const shopRepo = queryRunner.manager.getRepository(Shop);
 
@@ -200,7 +200,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const operatingRepo = queryRunner.manager.getRepository(ShopOperatingHour);
 
       const userSubmitData = await submitRepo.findOne({
@@ -242,7 +242,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const shopRepo = queryRunner.manager.getRepository(Shop);
 
       const userSubmitData = await submitRepo.findOne({
@@ -292,7 +292,7 @@ export class AdminTransactionsRepository {
     await queryRunner.startTransaction();
 
     try {
-      const submitRepo = queryRunner.manager.getRepository(SubmitUserRecord);
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
       const shopRepo = queryRunner.manager.getRepository(Shop);
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 

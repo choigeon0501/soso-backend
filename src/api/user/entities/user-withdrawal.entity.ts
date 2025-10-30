@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-import { WithdrawalReasonCode } from '../../common/enum/users.enum';
+import { WithdrawalReasonCode } from '../../../common/enum/users.enum';
 
 @Entity('user_withdrawals')
 export class UserWithdrawal {

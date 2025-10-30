@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Feedback } from '../../database/entity/feedback.entity';
+import { Feedback } from './entities/feedback.entity';
 import { Repository } from 'typeorm';
 import { InternalServerErrorException } from '@nestjs/common';
 import { LoggerService } from '../../common/logger/logger.service';

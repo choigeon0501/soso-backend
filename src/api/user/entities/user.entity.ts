@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Unique, OneToMany } from 'typeorm';
-import { ReviewBan } from './review-ban.entity';
+import { ReviewBan } from '../../review/entities/review-ban.entity';
 
 @Entity('users')
 @Unique(['email'])

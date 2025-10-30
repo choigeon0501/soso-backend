@@ -1,9 +1,9 @@
 import { ConflictException, HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { User } from '../../../database/entity/user.entity';
+import { User } from '../entities/user.entity';
 import { LoggerService } from '../../../common/logger/logger.service';
-import { Image } from '../../../database/entity/image.entity';
-import { UserWithdrawal } from '../../../database/entity/user-withdrawal.entity';
+import { ReviewImage } from '../../review/entities/review-image.entity';
+import { UserWithdrawal } from '../entities/user-withdrawal.entity';
 import { WithdrawalReasonDTO } from '../dto/query/user.dto';
 import { AwsService } from '../../../common/aws/aws.service';
 
@@ -65,9 +65,9 @@ export class UserTransactionsRepository {
     try {
       const userRepo = queryRunner.manager.getRepository(User);
       const userWithdrawalRepo = queryRunner.manager.getRepository(UserWithdrawal);
-      const imgRepo = queryRunner.manager.getRepository(Image);
+      const reviewImgRepo = queryRunner.manager.getRepository(ReviewImage);
 
-      await imgRepo.delete({ fileKey: profileImg });
+      await reviewImgRepo.delete({ fileKey: profileImg });
       await this.awsService.deleteImageFromS3(profileImg);
 
       await userWithdrawalRepo.save({

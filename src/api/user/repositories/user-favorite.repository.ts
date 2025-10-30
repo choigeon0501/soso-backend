@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { Injectable } from '@nestjs/common';
-import { UserFavorite } from '../../../database/entity/user-favorite.entity';
+import { UserFavorite } from '../entities/user-favorite.entity';
 
 @Injectable()
 export class UserFavoriteRepository {

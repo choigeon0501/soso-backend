@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Region } from 'src/database/entity/region.entity';
+import { Region } from 'src/api/region/entities/region.entity';
 import { RegionRepository } from './region.repository';
 import { RegionController } from './region.controller';
 import { RegionService } from './region.service';

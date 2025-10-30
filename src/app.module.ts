@@ -33,7 +33,7 @@ import { AdminModule } from './api/admin/admin.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/database/entity/*.entity.{ts,js}'],
+        entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
         synchronize: false,
       }),
     }),

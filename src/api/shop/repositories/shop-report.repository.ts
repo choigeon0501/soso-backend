@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ShopReport } from '../../../database/entity/shop-report.entity';
+import { ShopReport } from '../entities/shop-report.entity';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { ShopReportDto } from '../dto/requests/report_request';
 

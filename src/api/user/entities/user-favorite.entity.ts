@@ -1,9 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
-import { Shop } from './shop.entity';
+import { Shop } from '../../shop/entities/shop.entity';
 
-@Entity('recent_searches')
-export class RecentSearch {
+@Entity('user_favorites')
+export class UserFavorite {
   @PrimaryGeneratedColumn()
   id: number;
 

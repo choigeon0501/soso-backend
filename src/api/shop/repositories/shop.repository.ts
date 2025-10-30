@@ -1,6 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Shop } from 'src/database/entity/shop.entity';
+import { Shop } from 'src/api/shop/entities/shop.entity';
 import { Repository } from 'typeorm';
 import { LoggerService } from '../../../common/logger/logger.service';
 import { Injectable } from '@nestjs/common';

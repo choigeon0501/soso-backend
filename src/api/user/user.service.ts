@@ -15,7 +15,7 @@ import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/su
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
 import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
 
-import { SubmitUserRecord } from '../../database/entity/submit-user-record.entity';
+import { ShopSubmitRecord } from '../shop/entities/shop-submit-user-record.entity';
 import { UserTransactionsRepository } from './repositories/user-transactions.repository';
 import { ShopRecentSearchRepository } from '../shop/repositories/shop-recent-search.repository';
 import { SubmitType } from '../../common/enum/role.enum';
@@ -100,8 +100,8 @@ export class UserService {
 
   async findUserShopSubmissions(pageNation: PaginationQueryDTO, uuid: string) {
     const { page, limit } = pageNation;
-    const totalCount = await this.submitRepository.findUserSubmitUserRecord(uuid);
-    const rows: SubmitUserRecord[] = await this.submitRepository.findUserSubmitUserRecordByPageNation(uuid, page, limit);
+    const totalCount = await this.submitRepository.findUserShopSubmitRecord(uuid);
+    const rows: ShopSubmitRecord[] = await this.submitRepository.findUserShopSubmitRecordByPageNation(uuid, page, limit);
 
     const mapped: UserSubmitRecordItemDTO[] = rows.map((record) => new UserSubmitRecordItemDTO(record));
     const pageInfo = new PageInfoDTO(page, limit, totalCount);

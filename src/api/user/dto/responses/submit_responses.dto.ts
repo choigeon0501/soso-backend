@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SubmitUserRecord } from '../../../../database/entity/submit-user-record.entity';
+import { ShopSubmitRecord } from '../../../shop/entities/shop-submit-user-record.entity';
 import { PageInfoDTO, PaginationResponsesDto } from './pagination_responses.dto';
 import { SubmitStatus, SubmitType } from '../../../../common/enum/role.enum';
 
@@ -20,7 +20,7 @@ export class UserSubmitRecordItemDTO {
   @ApiProperty() createdAt: Date;
   @ApiProperty({ type: ShopResponseDTO }) shop: ShopResponseDTO;
 
-  constructor(record: SubmitUserRecord) {
+  constructor(record: ShopSubmitRecord) {
     this.id = record.id;
     this.type = record.type;
     this.status = record.status;

@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
-import { User } from './user.entity';
-import { Shop } from './shop.entity';
-import { Image } from './image.entity';
+import { User } from '../../user/entities/user.entity';
+import { Shop } from '../../shop/entities/shop.entity';
+import { ReviewImage } from './review-image.entity';
 
 @Entity('reviews')
 export class Review {
@@ -19,13 +19,13 @@ export class Review {
   @JoinColumn({ name: 'shop_id' })
   shop: Shop;
 
-  @ManyToMany(() => Image, (image) => image.reviews, { cascade: false })
+  @ManyToMany(() => ReviewImage, (image) => image.reviews, { cascade: false })
   @JoinTable({
     name: 'review_image_mappings', // 이미 존재하는 조인 테이블 사용
     joinColumn: { name: 'review_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'image_id', referencedColumnName: 'id' },
   })
-  images: Image[];
+  images: ReviewImage[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
