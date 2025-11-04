@@ -1,5 +1,4 @@
 import { BadRequestException, ValidationError, ValidationPipe, ValidationPipeOptions } from '@nestjs/common';
-import { BadRequestResponseDTO } from '../response/response.dto'; // DTO 경로
 
 export class CustomValidationPipe extends ValidationPipe {
   constructor(options: ValidationPipeOptions = {}) {
@@ -17,9 +16,7 @@ export class CustomValidationPipe extends ValidationPipe {
 
   createExceptionFactory() {
     return (validationErrors: ValidationError[] = []) => {
-      const errors = this.flattenValidationErrors(validationErrors);
-      const message = errors.join('; ');
-      return new BadRequestException(new BadRequestResponseDTO(message));
+      return new BadRequestException(this.flattenValidationErrors(validationErrors));
     };
   }
 }

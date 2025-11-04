@@ -24,8 +24,8 @@ export class PresignedUrlController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(PreSignedURLResponsesDTO) } } }],
     },
   })
-  async createPresignedURL(@Body() createPresignedDTO: CreatePresignedDTO) {
-    return new SuccessResponseDTO(await this.presignedUrlService.createPresignedURL(createPresignedDTO));
+  createPresignedURL(@Body() createPresignedDTO: CreatePresignedDTO) {
+    return this.presignedUrlService.createPresignedURL(createPresignedDTO);
   }
 
   @Post('/list')
@@ -52,7 +52,7 @@ export class PresignedUrlController {
       ],
     },
   })
-  async createPresignedURLList(@Body() createPresignedListDTO: CreatePresignedListDTO) {
-    return new SuccessResponseDTO(await this.presignedUrlService.createPresignedURLList(createPresignedListDTO));
+  createPresignedURLList(@Body() createPresignedListDTO: CreatePresignedListDTO) {
+    return this.presignedUrlService.createPresignedURLList(createPresignedListDTO);
   }
 }

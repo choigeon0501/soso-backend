@@ -13,10 +13,11 @@ import { LoggerModule } from './common/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from './common/jwt/jwt.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
 import { AdminModule } from './api/admin/admin.module';
+import { SuccessResponseFilter } from './common/filter/success-response.filter';
 
 @Module({
   imports: [
@@ -69,6 +70,10 @@ import { AdminModule } from './api/admin/admin.module';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SuccessResponseFilter,
     },
   ],
 })

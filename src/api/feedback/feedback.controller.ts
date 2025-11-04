@@ -21,8 +21,7 @@ export class FeedbackController {
     description: '건의사항 등록 성공',
     type: SuccessNoResultResponseDTO,
   })
-  async saveFeedback(@GetUUID() uuid: string, @Body() saveFeedbackDTO: SaveFeedbackDTO) {
-    await this.feedbackService.saveFeedback(uuid, saveFeedbackDTO);
-    return new SuccessNoResultResponseDTO();
+  saveFeedback(@GetUUID() uuid: string, @Body() saveFeedbackDTO: SaveFeedbackDTO) {
+    return this.feedbackService.saveFeedback(uuid, saveFeedbackDTO);
   }
 }

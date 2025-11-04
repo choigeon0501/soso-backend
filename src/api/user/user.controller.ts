@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, Post, Patch, UseGuards, Delete, Query, ParseIntPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
@@ -17,6 +16,7 @@ import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
+import { SuccessResponseDTO, SuccessNoResultResponseDTO } from 'src/common/response/response.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -37,8 +37,8 @@ export class UserController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserProfileResponsesDTO) } } }],
     },
   })
-  async getUserProfile(@GetUUID() uuid: string) {
-    return new SuccessResponseDTO(await this.userService.getUserProfile(uuid));
+  getUserProfile(@GetUUID() uuid: string) {
+    return this.userService.getUserProfile(uuid);
   }
 
   @Patch('/me')
@@ -46,9 +46,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '프로필 정보 수정하기', description: '프로필 사진(옵션), 닉네임(옵션)' })
   @ApiOkResponse({ description: '프로필 정보 수정 성공', type: SuccessNoResultResponseDTO })
-  async updateProfile(@GetUUID() uuid: string, @Body() updateProfileDTO?: UpdateProfileDTO) {
-    await this.userService.updateUserProfile(updateProfileDTO, uuid);
-    return new SuccessNoResultResponseDTO();
+  updateProfile(@GetUUID() uuid: string, @Body() updateProfileDTO?: UpdateProfileDTO) {
+    return this.userService.updateUserProfile(updateProfileDTO, uuid);
   }
 
   @Delete('/me')
@@ -56,9 +55,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '회원탈퇴' })
   @ApiOkResponse({ description: '회원탈퇴 성공', type: SuccessNoResultResponseDTO })
-  async deleteUser(@Query() withdrawalReasonDTO: WithdrawalReasonDTO, @GetUUID() uuid: string) {
-    await this.userService.deleteUser(uuid, withdrawalReasonDTO);
-    return new SuccessNoResultResponseDTO();
+  deleteUser(@Query() withdrawalReasonDTO: WithdrawalReasonDTO, @GetUUID() uuid: string) {
+    return this.userService.deleteUser(uuid, withdrawalReasonDTO);
   }
 
   @Get('/duplicate-check')
@@ -69,8 +67,8 @@ export class UserController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { type: 'boolean', enum: [true, false] } } }],
     },
   })
-  async validateNickName(@Query() validationNickNameDTO: ValidateNickNameDTO) {
-    return new SuccessResponseDTO(await this.userService.findUserNickName(validationNickNameDTO));
+  validateNickName(@Query() validationNickNameDTO: ValidateNickNameDTO) {
+    return this.userService.findUserNickName(validationNickNameDTO);
   }
 
   @Get('/me/shop-submissions')
@@ -84,8 +82,8 @@ export class UserController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserSubmitRecordDTO) } } }],
     },
   })
-  async getUserShopSubmissions(@GetUUID() uuid: string, @Query() pageNation: PaginationQueryDTO) {
-    return new SuccessResponseDTO(await this.userService.findUserShopSubmissions(pageNation as any, uuid));
+  getUserShopSubmissions(@GetUUID() uuid: string, @Query() pageNation: PaginationQueryDTO) {
+    return this.userService.findUserShopSubmissions(pageNation as any, uuid);
   }
 
   @Delete('/me/shop-submissions/:submitId')
@@ -93,9 +91,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '제보한 데이터 제거' })
   @ApiOkResponse({ description: '제보한 데이터 제거 성공', type: SuccessNoResultResponseDTO })
-  async deleteUserShopSubmission(@Param('submitId', ParseIntPipe) submitId: number, @GetUUID() uuid: string) {
-    await this.userService.deleteUserShopSubmission(submitId, uuid);
-    return new SuccessNoResultResponseDTO();
+  deleteUserShopSubmission(@Param('submitId', ParseIntPipe) submitId: number, @GetUUID() uuid: string) {
+    return this.userService.deleteUserShopSubmission(submitId, uuid);
   }
 
   @Get('/me/reviews')
@@ -109,8 +106,8 @@ export class UserController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserReviewsRecordDTO) } } }],
     },
   })
-  async getUserReviews(@GetUUID() uuid: string, @Query() reviewPageNation: ReviewPaginationDTO) {
-    return new SuccessResponseDTO(await this.userService.findUserReviews(reviewPageNation, uuid));
+  getUserReviews(@GetUUID() uuid: string, @Query() reviewPageNation: ReviewPaginationDTO) {
+    return this.userService.findUserReviews(reviewPageNation, uuid);
   }
 
   @Get('/me/favorite')
@@ -124,8 +121,8 @@ export class UserController {
       allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserFavoriteRecordDTO) } } }],
     },
   })
-  async getUserFavorites(@GetUUID() uuid: string, @Query() pageNation: UserFavoritePageNationDTO) {
-    return new SuccessResponseDTO(await this.userService.getUserFavorites(pageNation as any, uuid));
+  getUserFavorites(@GetUUID() uuid: string, @Query() pageNation: UserFavoritePageNationDTO) {
+    return this.userService.getUserFavorites(pageNation as any, uuid);
   }
 
   @Post('/me/favorite')
@@ -133,9 +130,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '소품샵 찜하기', description: '찜하기 리스트에 해당 소품샵을 넣습니다.' })
   @ApiOkResponse({ description: '찜하기 성공', type: SuccessNoResultResponseDTO })
-  async addUserFavorite(@GetUUID() uuid: string, @Body() userFavoriteRequestsDto: UserFavoriteRequestsDto) {
-    await this.userService.addUserFavorite(userFavoriteRequestsDto, uuid);
-    return new SuccessNoResultResponseDTO();
+  addUserFavorite(@GetUUID() uuid: string, @Body() userFavoriteRequestsDto: UserFavoriteRequestsDto) {
+    return this.userService.addUserFavorite(userFavoriteRequestsDto, uuid);
   }
 
   @Get('/me/recent-searches')
@@ -152,8 +148,8 @@ export class UserController {
       ],
     },
   })
-  async getUserRecentSearches(@GetUUID() uuid: string) {
-    return new SuccessResponseDTO(await this.userService.getUserRecentSearches(uuid));
+  getUserRecentSearches(@GetUUID() uuid: string) {
+    return this.userService.getUserRecentSearches(uuid);
   }
 
   @Delete('/me/recent-searches')
@@ -161,9 +157,8 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '최근 검색 기록 전체 삭제' })
   @ApiOkResponse({ description: '최근 검색 기록 전체 삭제 완료', type: SuccessNoResultResponseDTO })
-  async deleteAllRecentSearch(@GetUUID() uuid: string) {
-    await this.userService.deleteAllRecentSearch(uuid);
-    return new SuccessNoResultResponseDTO();
+  deleteAllRecentSearch(@GetUUID() uuid: string) {
+    return this.userService.deleteAllRecentSearch(uuid);
   }
 
   @Delete('/me/recent-searches/:recentSearchId')
@@ -171,8 +166,7 @@ export class UserController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '최근 검색 기록 삭제', description: '최근 검색 기록 id로 삭제' })
   @ApiOkResponse({ description: '최근 검색 기록 삭제 성공', type: SuccessNoResultResponseDTO })
-  async deleteRecentSearchById(@GetUUID() uuid: string, @Param('recentSearchId', ParseIntPipe) recentSearchId: number) {
-    await this.userService.deleteRecentSearchById(uuid, recentSearchId);
-    return new SuccessNoResultResponseDTO();
+  deleteRecentSearchById(@GetUUID() uuid: string, @Param('recentSearchId', ParseIntPipe) recentSearchId: number) {
+    return this.userService.deleteRecentSearchById(uuid, recentSearchId);
   }
 }

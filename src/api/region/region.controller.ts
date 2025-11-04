@@ -31,7 +31,7 @@ export class RegionController {
       ],
     },
   })
-  async getAllShopRegions() {
-    return new SuccessResponseDTO(await this.regionService.findAllRegions());
+  getAllShopRegions() {
+    return this.regionService.findAllRegions();
   }
 }

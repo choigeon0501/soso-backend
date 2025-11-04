@@ -30,7 +30,7 @@ export class NoticeController {
       ],
     },
   })
-  async getNotice() {
-    return new SuccessResponseDTO(await this.noticeService.findAll());
+  getNotice() {
+    return this.noticeService.findAll();
   }
 }

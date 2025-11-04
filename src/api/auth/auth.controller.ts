@@ -27,8 +27,8 @@ export class AuthController {
       ],
     },
   })
-  async googleLogin(@Body() googleAuthLoginDTO: GoogleAuthLoginDTO) {
-    return new SuccessResponseDTO(await this.authService.googleAuthLogin(googleAuthLoginDTO));
+  googleLogin(@Body() googleAuthLoginDTO: GoogleAuthLoginDTO) {
+    return this.authService.googleAuthLogin(googleAuthLoginDTO);
   }
 
   @Post('/apple')
@@ -49,8 +49,8 @@ export class AuthController {
       ],
     },
   })
-  async appleLogin(@Body() appleAuthLoginDTO: AppleAuthLoginDto) {
-    return new SuccessResponseDTO(await this.authService.appleAuthLogin(appleAuthLoginDTO));
+  appleLogin(@Body() appleAuthLoginDTO: AppleAuthLoginDto) {
+    return this.authService.appleAuthLogin(appleAuthLoginDTO);
   }
 
   @Post('/refresh')
@@ -71,12 +71,12 @@ export class AuthController {
       ],
     },
   })
-  async refreshToken(@Body() refreshTokenDTO: RefreshTokenDTO) {
-    return new SuccessResponseDTO(await this.authService.refreshToken(refreshTokenDTO));
+  refreshToken(@Body() refreshTokenDTO: RefreshTokenDTO) {
+    return this.authService.refreshToken(refreshTokenDTO);
   }
 
   @Get('/test')
-  async test() {
-    return new SuccessResponseDTO(await this.authService.test());
+  test() {
+    return this.authService.test();
   }
 }
