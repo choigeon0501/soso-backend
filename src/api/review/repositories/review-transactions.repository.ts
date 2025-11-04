@@ -118,7 +118,7 @@ export class ReviewTransactionsRepository {
 
     try {
       const reviewRepo = queryRunner.manager.getRepository(Review);
-      const reviewImgRepo = queryRunner.manager.getRepository(Image);
+      const reviewImgRepo = queryRunner.manager.getRepository(ReviewImage);
 
       // Review 찾기
       const review = await reviewRepo.findOne({

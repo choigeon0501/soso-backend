@@ -60,7 +60,7 @@ export class UserFavoriteRepository {
         .createQueryBuilder('uf')
         .leftJoin('uf.shop', 's')
         .leftJoin('s.region', 'r')
-        .where('uf.user_id = :uuid', { uuid });
+        .where('uf.user.uuid = :uuid', { uuid });
       if (areaId) {
         qb.andWhere('r.id = :areaId', { areaId });
       }

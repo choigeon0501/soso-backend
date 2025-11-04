@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, Column } from 'typeorm';
 import { User } from './user.entity';
 import { Shop } from '../../shop/entities/shop.entity';
 
@@ -7,12 +7,12 @@ export class UserFavorite {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'uuid' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_uuid', referencedColumnName: 'uuid' })
   user: User;
 
-  @ManyToOne(() => Shop, (shop) => shop.id, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'shop_id' })
+  @ManyToOne(() => Shop, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'shop_id', referencedColumnName: 'id' })
   shop: Shop;
 
   @CreateDateColumn({ name: 'created_at' })
