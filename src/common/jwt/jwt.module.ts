@@ -19,7 +19,9 @@ import { User } from '../../api/user/entities/user.entity';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+          expiresIn: configService.get<string>('JWT_ACCESS_TOKEN_EXPIRES_IN'),
+          issuer: configService.get<string>('JWT_ISSUER'),
+          audience: configService.get<string>('JWT_AUDIENCE'),
         },
       }),
     }),

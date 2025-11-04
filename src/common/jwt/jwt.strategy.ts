@@ -23,16 +23,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    const { uuid, exp, role } = payload;
+    const { sub, exp, role } = payload;
     if (exp && Date.now() >= exp * 1000) {
       throw new UnauthorizedException('The token has expired.');
     }
 
-    const user: User = await this.userRepository.findOne({ where: { uuid } });
+    const user: User = await this.userRepository.findOne({ where: { uuid: sub } });
     if (!user) {
-      this.loggerService.warn(`JWT/ Not Exist User : ${uuid}`);
+      this.loggerService.warn(`JWT/ Not Exist User : ${sub}`);
       throw new NotFoundException('Not Exist User');
     }
-    return { uuid, role };
+    return { sub, role };
   }
 }

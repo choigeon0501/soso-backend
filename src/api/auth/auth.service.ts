@@ -66,12 +66,14 @@ export class AuthService {
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
-      const jwtPayload = { uuid: userUuid, role };
+      const jwtPayload = { sub: userUuid, role };
 
       const accessToken = this.jwtService.sign(jwtPayload);
       const refreshToken = this.jwtService.sign(jwtPayload, {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+        issuer: this.configService.get<string>('JWT_ISSUER'),
+        audience: this.configService.get<string>('JWT_AUDIENCE'),
       });
 
       return new AuthTokenResponseDTO(accessToken, refreshToken);
@@ -112,12 +114,14 @@ export class AuthService {
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
       const role = userUuid === adminUuid ? Role.Admin : Role.User;
-      const jwtPayload = { uuid: userUuid, role };
+      const jwtPayload = { sub: userUuid, role };
 
       const accessToken = this.jwtService.sign(jwtPayload);
       const refreshToken = this.jwtService.sign(jwtPayload, {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+        issuer: this.configService.get<string>('JWT_ISSUER'),
+        audience: this.configService.get<string>('JWT_AUDIENCE'),
       });
 
       return new AuthTokenResponseDTO(accessToken, refreshToken);
@@ -135,14 +139,16 @@ export class AuthService {
         ignoreExpiration: false,
       });
 
-      const { uuid, role } = payload;
+      const { sub, role } = payload;
 
-      const newAccessToken = this.jwtService.sign({ uuid, role });
+      const newAccessToken = this.jwtService.sign({ sub, role });
       const newRefreshToken = this.jwtService.sign(
-        { uuid, role },
+        { sub, role },
         {
           secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
           expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+          issuer: this.configService.get<string>('JWT_ISSUER'),
+          audience: this.configService.get<string>('JWT_AUDIENCE'),
         },
       );
 
@@ -154,12 +160,14 @@ export class AuthService {
   }
 
   async test() {
-    const payload = { uuid: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin };
+    const payload = { sub: this.configService.get<string>('ADMIN_UUID'), role: Role.Admin };
 
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN'),
+      issuer: this.configService.get<string>('JWT_ISSUER'),
+      audience: this.configService.get<string>('JWT_AUDIENCE'),
     });
 
     return new AuthTokenResponseDTO(accessToken, refreshToken);
