@@ -20,7 +20,8 @@ export class UserTransactionsRepository {
   ) {}
 
   async updateUser(nickName: string, profileImgKey: string, uuid: string): Promise<void> {
-    await this.awsService.assertObjectExists(profileImgKey);
+    const isExistProfileImg = await this.awsService.assertObjectExists(profileImgKey);
+    if (!isExistProfileImg) throw new NotFoundException('Profile image not found');
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();

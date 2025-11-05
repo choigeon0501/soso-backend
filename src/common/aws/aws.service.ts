@@ -57,8 +57,8 @@ export class AwsService {
   }
 
   async getPresignedGetUrlByKey(key: string, expiresInSec = 180, contentDisposition: string = 'inline'): Promise<string> {
-    const isExist = await this.assertObjectExists(key);
-    if (!isExist) return null;
+    const isExistKey = await this.assertObjectExists(key);
+    if (!isExistKey) return null;
 
     const cmd = new GetObjectCommand({
       Bucket: this.bucketName,

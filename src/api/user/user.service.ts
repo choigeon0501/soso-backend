@@ -67,23 +67,12 @@ export class UserService {
 
     if (profileImgKey) {
       // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
-      await this.awsService.assertObjectExists(profileImgKey);
+      const isExistProfileImgKey = await this.awsService.assertObjectExists(profileImgKey);
+      if (!isExistProfileImgKey) throw new NotFoundException('Fail update profileImg');
 
       const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImgKey);
       if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
     }
-  }
-
-  async getPresignedURLUserProfileImg(uuid: string) {
-    const expiresIn = 300;
-    const user = await this.userRepository.findUserByUUID(uuid);
-    if (!user) throw new NotFoundException('Not Found User');
-
-    // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
-    await this.awsService.assertObjectExists(user.profileImg);
-
-    const userProfilePresignedURL = await this.awsService.getPresignedGetUrlByKey(user.profileImg, expiresIn);
-    return new PresignedUserProfileImgResponsesDTO(userProfilePresignedURL, expiresIn);
   }
 
   async deleteUser(uuid: string, withdrawalReasonDTO: WithdrawalReasonDTO) {
