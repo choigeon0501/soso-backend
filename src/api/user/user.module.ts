@@ -10,9 +10,10 @@ import { ShopModule } from '../shop/shop.module';
 import { UserFavoriteRepository } from './repositories/user-favorite.repository';
 import { UserFavorite } from './entities/user-favorite.entity';
 import { UserTransactionsRepository } from './repositories/user-transactions.repository';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [forwardRef(() => ShopModule), TypeOrmModule.forFeature([User, UserFavorite]), AwsModule, ReviewModule],
+  imports: [forwardRef(() => ShopModule), forwardRef(() => AuthModule), TypeOrmModule.forFeature([User, UserFavorite]), AwsModule, ReviewModule],
   controllers: [UserController],
   providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],
   exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],

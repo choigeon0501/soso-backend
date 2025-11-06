@@ -8,11 +8,6 @@ export class WithdrawalReasonDTO {
   @IsNotEmpty()
   @IsEnum(WithdrawalReasonCode)
   withdrawalReasonCode: WithdrawalReasonCode;
-
-  @ApiPropertyOptional({ description: '회원 탈퇴 이유 (기타) 메시지' })
-  @IsOptional()
-  @IsString()
-  withdrawalReasonText: string;
 }
 
 export class ValidateNickNameDTO {

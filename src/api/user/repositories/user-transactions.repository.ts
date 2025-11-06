@@ -60,7 +60,7 @@ export class UserTransactionsRepository {
 
   async deleteUser(user: User, withdrawalReason: WithdrawalReasonDTO): Promise<void> {
     const { uuid, profileImg } = user;
-    const { withdrawalReasonCode, withdrawalReasonText } = withdrawalReason;
+    const { withdrawalReasonCode } = withdrawalReason;
 
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -101,7 +101,6 @@ export class UserTransactionsRepository {
 
       await userWithdrawalRepo.save({
         reasonCode: withdrawalReasonCode,
-        reasonText: withdrawalReasonText,
       });
       await userRepo.delete({ uuid });
 

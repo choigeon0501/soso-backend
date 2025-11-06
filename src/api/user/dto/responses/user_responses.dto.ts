@@ -10,10 +10,13 @@ export class UserProfileResponsesDTO {
   @ApiProperty({ description: '닉네임', example: '소소한유저' })
   nickName: string;
 
-  constructor({ email, profileImg, nickName }: { email: string; profileImg: string; nickName: string }) {
+  provider: string;
+
+  constructor({ email, profileImg, nickName }: { email: string; profileImg: string; nickName: string }, provider: string) {
     this.email = email;
     this.profileImg = profileImg;
     this.nickName = nickName;
+    this.provider = provider;
   }
 }
 

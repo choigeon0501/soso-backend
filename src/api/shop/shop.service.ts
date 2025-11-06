@@ -195,7 +195,7 @@ export class ShopService {
     const { content, reviewImgKeys } = postReviewDto;
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
-    if (!shop) throw new ConflictException('Not Exist Shop');
+    if (!shop) throw new NotFoundException('Not Exist Shop');
 
     // 리뷰 밴 테이블에 사용자가 존재하는지 검사
     const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);
@@ -209,7 +209,7 @@ export class ShopService {
     const { content, deleteImages, newImageKeys } = updateReviewDto;
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
-    if (!shop) throw new ConflictException('Not Exist Shop');
+    if (!shop) throw new NotFoundException('Not Exist Shop');
 
     // 리뷰 밴 테이블에 사용자가 존재하는지 검사
     const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);

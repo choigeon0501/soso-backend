@@ -25,11 +25,13 @@ import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
+import { AuthIdentityRepository } from '../auth/repositories/auth-identity.repository';
 
 @Injectable()
 export class UserService {
   constructor(
     private userRepository: UserRepository,
+    private authIdentityRepository: AuthIdentityRepository,
     private awsService: AwsService,
     private reviewRepository: ReviewRepository,
     private userFavoriteRepository: UserFavoriteRepository,
@@ -44,10 +46,13 @@ export class UserService {
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
 
+    const userAuthIdentity = await this.authIdentityRepository.findAuthIdentityByUuid(uuid);
+    if (!userAuthIdentity) throw new NotFoundException('Not Found User');
+
     // PresignedURL 발급
     user.profileImg = user.profileImg ? await this.awsService.getPresignedGetUrlByKey(user.profileImg) : null;
 
-    return new UserProfileResponsesDTO(user);
+    return new UserProfileResponsesDTO(user, userAuthIdentity.provider);
   }
 
   async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string) {

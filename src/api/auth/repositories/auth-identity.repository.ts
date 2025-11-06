@@ -11,6 +11,16 @@ export class AuthIdentityRepository {
     private authIdentityRepository: Repository<AuthIdentity>,
   ) {}
 
+  async findAuthIdentityByUuid(uuid: string) {
+    return await this.authIdentityRepository.findOne({
+      where: {
+        user: {
+          uuid,
+        },
+      },
+    });
+  }
+
   async findAuthIdentityByAuthProviderId(authProviderId: string, authProvider: AuthProvider) {
     return await this.authIdentityRepository.findOne({
       where: {

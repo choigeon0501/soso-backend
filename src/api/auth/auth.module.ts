@@ -11,5 +11,6 @@ import { AuthIdentityRepository } from './repositories/auth-identity.repository'
   imports: [forwardRef(() => UserModule), TypeOrmModule.forFeature([User, AuthIdentity])],
   controllers: [AuthController],
   providers: [AuthService, AuthIdentityRepository],
+  exports: [AuthIdentityRepository],
 })
 export class AuthModule {}
