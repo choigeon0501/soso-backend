@@ -37,11 +37,16 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             cd /home/bitnami/soso-backend
+
             echo "🚀 Git Pull 시작"
-            sudo git pull origin dev
+            git remote set-url origin https://${{ github.actor }}:${{ env.ACCESS_TOKEN_GITHUB }}@github.com/${{ github.repository }}.git
+            git pull origin dev
+
             echo "📦 패키지 설치"
             sudo npm i
+
             echo "🔨 빌드 중..."
             sudo npm run build
+
             echo "♻️ PM2 재시작"
             sudo pm2 restart main
