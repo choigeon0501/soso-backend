@@ -11,6 +11,7 @@ env:
   LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST }}
   LIGHTSAIL_USERNAME: bitnami
   AWS_REGION: ap-northeast-2
+  ACCESS_TOKEN_GITHUB: ${{ secrets.ACCESS_TOKEN_GITHUB }}
 
 jobs:
   deploy:
@@ -39,7 +40,7 @@ jobs:
             cd /home/bitnami/soso-backend
 
             echo "🚀 Git Pull 시작"
-            git remote set-url origin https://${{ github.actor }}:${{ env.ACCESS_TOKEN_GITHUB }}@github.com/${{ github.repository }}.git
+            git remote set-url origin https://cchoigeon:${{ env.ACCESS_TOKEN_GITHUB }}@github.com/SoSo-Small-Shops-Matter/soso-backend.git
             git pull origin dev
 
             echo "📦 패키지 설치"
