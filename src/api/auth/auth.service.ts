@@ -26,28 +26,33 @@ export class AuthService {
   ) {}
 
   private async getGoogleUserByCode(code: string, redirectUri: string) {
-    const tokenResponse = await axios.post(
-      this.googleTokenUrl,
-      qs.stringify({
-        code,
-        client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-        client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
-    );
+    try {
+      const tokenResponse = await axios.post(
+        this.googleTokenUrl,
+        qs.stringify({
+          code,
+          client_id: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+          client_secret: this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
+          redirect_uri: redirectUri,
+          grant_type: 'authorization_code',
+        }),
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+      );
 
-    const accessToken = tokenResponse.data.access_token;
-    if (!accessToken) {
-      throw new Error('Google OAuth: access_token not found');
+      const accessToken = tokenResponse.data.access_token;
+      if (!accessToken) {
+        throw new Error('Google OAuth: access_token not found');
+      }
+
+      const userResponse = await axios.get(this.googleUserInfoUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      return userResponse.data;
+    } catch (err) {
+      this.loggerService.warn(`Auth/ getGoogleUserByCode Error: ${err}`);
+      throw new InternalServerErrorException();
     }
-
-    const userResponse = await axios.get(this.googleUserInfoUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    return userResponse.data;
   }
 
   async googleAuthLogin(googleAuthLoginDTO: GoogleAuthLoginDTO) {
