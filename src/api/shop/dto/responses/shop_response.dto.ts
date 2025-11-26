@@ -46,6 +46,12 @@ export class ShopSearchResultItemDTO {
   @ApiProperty({ example: '서울시 강남구' })
   location: string;
 
+  @ApiProperty({ example: 37.5665 })
+  lat: number;
+
+  @ApiProperty({ example: 126.978 })
+  lng: number;
+
   @ApiProperty({ example: 0.42, description: '거리 (단위: km)' })
   distance: number;
 }

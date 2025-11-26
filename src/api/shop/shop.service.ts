@@ -86,6 +86,8 @@ export class ShopService {
           name: shop.shop_name,
           mainImage: shop.shop_main_image,
           location: shop.shop_location ?? null,
+          lat: Number(shop.shop_lat),
+          lng: Number(shop.shop_lng),
           distance: Number(shop.distance),
         };
       }),
