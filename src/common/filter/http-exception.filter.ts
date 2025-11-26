@@ -42,11 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const meta = {
       method: req.method,
       url: req.originalUrl || req.url,
-      ip: req.ip,
       status,
-      ua: req.headers['user-agent'],
-      // 필요시 요청ID/유저ID 등 추가
-      // requestId: req.headers['x-request-id'],
     };
 
     // 레벨 라우팅

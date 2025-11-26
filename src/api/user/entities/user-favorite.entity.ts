@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Shop } from '../../shop/entities/shop.entity';
 
@@ -8,7 +8,7 @@ export class UserFavorite {
   id: number;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_uuid', referencedColumnName: 'uuid' })
+  @JoinColumn({ name: 'uuid', referencedColumnName: 'uuid' })
   user: User;
 
   @ManyToOne(() => Shop, { onDelete: 'CASCADE' })
