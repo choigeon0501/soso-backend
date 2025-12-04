@@ -60,7 +60,7 @@ export class AuthService {
       const userData = await this.getGoogleUserByCode(googleAuthLoginDTO.code, googleAuthLoginDTO.redirectUri);
 
       const authIdentity = await this.authIdentityRepository.findAuthIdentityByAuthProviderId(userData.id, AuthProvider.GOOGLE);
-      const userUuid = authIdentity?.user.uuid ?? uuidv4();
+      const userUuid = authIdentity?.user?.uuid ?? uuidv4();
 
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
@@ -108,7 +108,7 @@ export class AuthService {
       const email = payload.email;
 
       const authIdentity = await this.authIdentityRepository.findAuthIdentityByAuthProviderId(appleId, AuthProvider.APPLE);
-      const userUuid = authIdentity?.user.uuid ?? uuidv4();
+      const userUuid = authIdentity?.user?.uuid ?? uuidv4();
 
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
