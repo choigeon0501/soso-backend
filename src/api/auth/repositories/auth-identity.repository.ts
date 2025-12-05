@@ -27,6 +27,7 @@ export class AuthIdentityRepository {
         provider: authProvider,
         providerUid: authProviderId,
       },
+      relations: ['user'],
     });
   }
 
