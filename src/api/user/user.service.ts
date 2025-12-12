@@ -9,7 +9,7 @@ import { ValidateNickNameDTO, WithdrawalReasonDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
 import { UpdateProfileDTO } from './dto/requests/user_requests.dto';
 
-import { PresignedUserProfileImgResponsesDTO, UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
+import { UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
 import { PageInfoDTO } from './dto/responses/pagination_responses.dto';
 import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
 import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
@@ -49,13 +49,10 @@ export class UserService {
     const userAuthIdentity = await this.authIdentityRepository.findAuthIdentityByUuid(uuid);
     if (!userAuthIdentity) throw new NotFoundException('Not Found User');
 
-    // PresignedURL 발급
-    user.profileImg = user.profileImg ? await this.awsService.getPresignedGetUrlByKey(user.profileImg) : null;
-
     return new UserProfileResponsesDTO(user, userAuthIdentity.provider);
   }
 
-  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string) {
+  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string, file?: Express.Multer.File) {
     const { nickName, profileImgKey } = updateProfileDTO;
 
     if (nickName && profileImgKey) {
@@ -70,12 +67,9 @@ export class UserService {
       if (newNickName.affected == 0) throw new NotFoundException('Fail update nickname');
     }
 
-    if (profileImgKey) {
-      // ✅ S3 존재 검증: 삭제되었거나 만료된 키 방지
-      const isExistProfileImgKey = await this.awsService.assertObjectExists(profileImgKey);
-      if (!isExistProfileImgKey) throw new NotFoundException('Fail update profileImg');
-
-      const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImgKey);
+    if (file) {
+      const [profileImg] = await this.awsService.uploadImagesToS3(file, 'jpg');
+      const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImg);
       if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
     }
   }
@@ -108,14 +102,12 @@ export class UserService {
     const totalCount = await this.reviewRepository.findUserReviewByUUID(uuid);
     const reviews = await this.reviewRepository.findUserReviewByPageNation(uuid, page, limit, sort);
 
-    // ✅ Promise.all로 비동기 map 처리
     const rows: UserReviewsRecordItemDTO[] = await Promise.all(
       reviews.map(async (review) => {
         const images = await Promise.all(
           (review.images ?? []).map(async (img) => ({
             id: img.id,
-            fileKey: img.fileKey,
-            url: await this.awsService.getPresignedGetUrlByKey(img.fileKey),
+            url: img.fileKey,
           })),
         );
 

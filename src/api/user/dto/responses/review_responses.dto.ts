@@ -16,12 +16,6 @@ export class ImageItemDTO {
   id: number;
 
   @ApiProperty({
-    description: '이미지 파일 접근 키(내부 식별자)',
-    example: 'shops/15/reviews/101.jpg',
-  })
-  fileKey: string;
-
-  @ApiProperty({
     description: '이미지 Presigned URL',
     example: 'https://cdn.example.com/shops/15/reviews/101.jpg',
   })
