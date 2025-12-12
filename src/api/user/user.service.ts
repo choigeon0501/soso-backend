@@ -55,7 +55,7 @@ export class UserService {
     return new UserProfileResponsesDTO(user, userAuthIdentity.provider);
   }
 
-  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string) {
+  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, uuid: string, file: Express.Multer.File | null = null) {
     const { nickName, profileImgKey } = updateProfileDTO;
 
     if (nickName && profileImgKey) {

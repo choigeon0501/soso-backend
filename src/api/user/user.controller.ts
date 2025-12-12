@@ -1,5 +1,21 @@
-import { Body, Controller, Get, Param, Post, Patch, UseGuards, Delete, Query, ParseIntPipe } from '@nestjs/common';
-import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Patch,
+  UseGuards,
+  Delete,
+  Query,
+  ParseIntPipe,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  UseInterceptors,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
@@ -17,6 +33,7 @@ import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
 import { SuccessResponseDTO, SuccessNoResultResponseDTO } from 'src/common/response/response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')
 @Controller('users')
@@ -43,11 +60,35 @@ export class UserController {
 
   @Patch('/me')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('profileImage'))
   @ApiBearerAuth('JWT-auth')
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '프로필 정보 수정하기', description: '프로필 사진(옵션), 닉네임(옵션)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        nickName: { type: 'string', example: '소소한유저' },
+        profileImage: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @ApiOkResponse({ description: '프로필 정보 수정 성공', type: SuccessNoResultResponseDTO })
-  updateProfile(@GetUUID() uuid: string, @Body() updateProfileDTO?: UpdateProfileDTO) {
-    return this.userService.updateUserProfile(updateProfileDTO, uuid);
+  updateProfile(
+    @GetUUID() uuid: string,
+    @Body() updateProfileDTO: UpdateProfileDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), new FileTypeValidator({ fileType: /image\/(jpg|jpeg|png)/ })],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
+  ) {
+    return this.userService.updateUserProfile(updateProfileDTO, uuid, file);
   }
 
   @Delete('/me')
