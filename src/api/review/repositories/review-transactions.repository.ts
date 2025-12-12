@@ -83,7 +83,7 @@ export class ReviewTransactionsRepository {
       }
 
       // 새 이미지가 존재하면 추가
-      if (newImageKeys.length > 0) {
+      if (newImageKeys?.length > 0) {
         const newImages = await Promise.all(
           newImageKeys.map(async (fileKey) => {
             return await reviewImgRepo.save({ fileKey });
