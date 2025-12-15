@@ -67,10 +67,16 @@ export class UserController {
   @ApiBody({
     schema: {
       type: 'object',
+      required: [],
       properties: {
-        nickName: { type: 'string', example: '소소한유저' },
+        nickName: {
+          type: 'string',
+          nullable: true,
+          example: '소소한유저',
+        },
         profileImage: {
           type: 'string',
+          nullable: true,
           format: 'binary',
         },
       },

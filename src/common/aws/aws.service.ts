@@ -57,7 +57,9 @@ export class AwsService {
     }
   }
 
-  async deleteImageFromS3(imageUrl: string) {
+  async deleteImageFromS3(imageUrl: string | null) {
+    if (!imageUrl) return;
+
     try {
       // 올바른 Key 추출 방법
       const fileName = imageUrl.split(`.amazonaws.com/`)[1];
