@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiBody } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ShopService } from './shop.service';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
 import { GetUUID } from '../../common/deco/get-user.deco';
@@ -10,6 +10,7 @@ import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } f
 import { PostReviewDto, UpdateReviewDto } from './dto/requests/review_request.dto';
 import { ShopDetailResponseDTO, ShopSearchPageNationResultDTO, ShopWithin1KmResponseItemDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Shops')
 @Controller('shops')
@@ -122,27 +123,100 @@ export class ShopController {
 
   @Post('/:shopId/reviews')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FilesInterceptor('reviewImages', 10, {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 최대 5MB
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) cb(null, true);
+        else cb(new Error('Only images allowed!'), false);
+      },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '리뷰 작성', description: '리뷰를 작성합니다.' })
-  @ApiBody({ description: '리뷰 데이터 및 이미지 파일', type: PostReviewDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['content'],
+      properties: {
+        content: {
+          type: 'string',
+          example: '리뷰 작성 내용',
+        },
+        reviewImages: {
+          type: 'array',
+          nullable: true,
+          items: {
+            type: 'string',
+            format: 'binary',
+            example: '업데이트할 리뷰 이미지',
+          },
+        },
+      },
+    },
+  })
   @ApiOkResponse({ description: '리뷰 작성 성공', type: SuccessNoResultResponseDTO })
-  postReview(@Param('shopId', ParseIntPipe) shopId: number, @Body() postReviewDto: PostReviewDto, @GetUUID() uuid: string) {
-    return this.shopService.createReview(uuid, postReviewDto, shopId);
+  createReview(
+    @Param('shopId', ParseIntPipe) shopId: number,
+    @Body() postReviewDto: PostReviewDto,
+    @GetUUID() uuid: string,
+    @UploadedFiles() reviewImages?: Express.Multer.File[],
+  ) {
+    return this.shopService.createReview(uuid, postReviewDto, shopId, reviewImages);
   }
 
   @Patch('/:shopId/reviews/:reviewId')
-  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FilesInterceptor('newReviewImages', 10, {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 최대 5MB
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) cb(null, true);
+        else cb(new Error('Only images allowed!'), false);
+      },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '리뷰 수정', description: '리뷰를 수정합니다.' })
-  @ApiBody({ description: '리뷰 데이터 및 이미지 파일', type: UpdateReviewDto })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: [],
+      properties: {
+        content: {
+          type: 'string',
+          nullable: true,
+          example: '리뷰 작성 내용',
+        },
+        newReviewImages: {
+          type: 'array',
+          nullable: true,
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+        deleteReviewImages: {
+          type: 'array',
+          nullable: true,
+          items: {
+            type: 'number',
+            example: 1,
+          },
+        },
+      },
+    },
+  })
   @ApiOkResponse({ description: '리뷰 수정 성공', type: SuccessNoResultResponseDTO })
   updateReview(
     @Param('shopId', ParseIntPipe) shopId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() updateReviewDto: UpdateReviewDto,
     @GetUUID() uuid: string,
+    @UploadedFiles() newReviewImages?: Express.Multer.File[],
   ) {
-    return this.shopService.updateReview(uuid, updateReviewDto, shopId, reviewId);
+    return this.shopService.updateReview(uuid, updateReviewDto, shopId, reviewId, newReviewImages);
   }
 
   @Delete('/:shopId/reviews/:reviewId')

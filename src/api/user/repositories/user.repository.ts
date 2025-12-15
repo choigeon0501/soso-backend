@@ -12,6 +12,15 @@ export class UserRepository {
     private loggerService: LoggerService,
   ) {}
 
+  async saveUser(user: User) {
+    try {
+      return await this.userRepository.save(user);
+    } catch (err) {
+      this.loggerService.warn(`User/ saveUser Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findUserByUUID(uuid: string) {
     try {
       return await this.userRepository.findOne({
@@ -53,15 +62,6 @@ export class UserRepository {
       return await this.userRepository.update({ uuid }, { nickName });
     } catch (err) {
       this.loggerService.warn(`User/ updateNickName Error: ${err}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async updateUserProfileImg(uuid: string, profileImgKey: string) {
-    try {
-      return await this.userRepository.update({ uuid }, { profileImg: profileImgKey });
-    } catch (err) {
-      this.loggerService.warn(`User/  updateUserProfileImg Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }

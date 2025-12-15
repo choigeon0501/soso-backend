@@ -68,9 +68,11 @@ export class UserService {
     }
 
     if (file) {
-      const [profileImg] = await this.awsService.uploadImagesToS3(file, 'jpg');
-      const updateUrl = await this.userRepository.updateUserProfileImg(uuid, profileImg);
-      if (updateUrl.affected == 0) throw new NotFoundException('Fail update profileImg');
+      const [profileImg] = await this.awsService.uploadImagesToS3(file, 'user-profile');
+      const user = await this.userRepository.findUserByUUID(uuid);
+      await this.awsService.deleteImageFromS3(user.profileImg);
+      user.profileImg = profileImg;
+      await this.userRepository.saveUser(user);
     }
   }
 

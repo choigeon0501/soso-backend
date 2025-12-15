@@ -13,17 +13,12 @@ export class ReviewService {
   async findShopReviewsByShopId(shopId: number, uuid: string) {
     const reviews = await this.reviewRepository.findShopReviewsByShopId(shopId);
 
-    const getPresignedOrNull = async (key?: string | null) => {
-      if (!key) return null;
-      return await this.awsService.getPresignedGetUrlByKey(key);
-    };
-
     const transformImages = async (reviewImages: ReviewImage[] = []) => {
       return Promise.all(
         reviewImages
           .filter((img) => !!img)
           .map(async (image) => {
-            const url = await getPresignedOrNull(image.fileKey);
+            const url = image.fileKey;
             return { ...image, url };
           }),
       );
@@ -32,7 +27,6 @@ export class ReviewService {
     // uuid는 필터링용으로만 유지
     const transformReview = async (review: any) => {
       const images = await transformImages(review.images ?? []);
-      const profileImg = await getPresignedOrNull(review.user?.profileImg);
 
       return {
         ...review,
@@ -40,7 +34,7 @@ export class ReviewService {
         user: review.user
           ? {
               uuid: review.user.uuid, // 👉 필터링 전까진 유지
-              profileImg,
+              profileImg: review.user.profileImg ?? null,
               nickName: review.user.nickName ?? null,
             }
           : null,

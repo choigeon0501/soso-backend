@@ -29,20 +29,20 @@ export class AwsService {
     }
   }
 
-  async uploadImagesToS3(files: Express.Multer.File[] | Express.Multer.File | undefined, ext: string): Promise<string[]> {
+  async uploadImagesToS3(files: Express.Multer.File[] | Express.Multer.File | undefined, imageType: string): Promise<string[]> {
     try {
       if (!files) return [];
 
       const fileArray = Array.isArray(files) ? files : [files];
 
       const uploadPromises = fileArray.map(async (file) => {
-        const fileName = `review/${Date.now()}-${file.originalname}`;
+        const fileName = `${imageType}/${Date.now()}-${file.originalname}`;
 
         const command = new PutObjectCommand({
           Bucket: this.bucketName,
           Key: fileName,
           Body: file.buffer,
-          ContentType: `image/${ext}`,
+          ContentType: 'image/jpg',
         });
 
         await this.s3Client.send(command);
@@ -58,14 +58,19 @@ export class AwsService {
   }
 
   async deleteImageFromS3(imageUrl: string) {
-    // 올바른 Key 추출 방법
-    const fileName = imageUrl.split(`.amazonaws.com/`)[1];
+    try {
+      // 올바른 Key 추출 방법
+      const fileName = imageUrl.split(`.amazonaws.com/`)[1];
 
-    const command = new DeleteObjectCommand({
-      Bucket: this.bucketName,
-      Key: fileName,
-    });
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: fileName,
+      });
 
-    await this.s3Client.send(command);
+      await this.s3Client.send(command);
+    } catch (err) {
+      this.loggerService.warn(`S3/ Delete 에러: ${err} \n imageUrl: ${imageUrl}`);
+      throw new InternalServerErrorException();
+    }
   }
 }

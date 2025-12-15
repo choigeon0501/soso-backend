@@ -15,7 +15,6 @@ import { JwtModule } from './common/jwt/jwt.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
-import { PresignedUrlModule } from './api/presigned-url/presigned-url.module';
 import { AdminModule } from './api/admin/admin.module';
 import { SuccessResponseFilter } from './common/filter/success-response.filter';
 
@@ -58,7 +57,6 @@ import { SuccessResponseFilter } from './common/filter/success-response.filter';
     FeedbackModule,
     LoggerModule,
     JwtModule,
-    PresignedUrlModule,
     AdminModule,
   ],
   controllers: [AppController],

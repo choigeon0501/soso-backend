@@ -20,6 +20,7 @@ import { UserFavoriteRepository } from '../user/repositories/user-favorite.repos
 import { SubmitType } from '../../common/enum/role.enum';
 import { ReviewBanRepository } from '../review/repositories/review-ban.repository';
 import { ReviewReportRepository } from '../review/repositories/review-report.repository';
+import { AwsService } from '../../common/aws/aws.service';
 
 @Injectable()
 export class ShopService {
@@ -36,6 +37,7 @@ export class ShopService {
     private shopReportRepository: ShopReportRepository,
     private reviewReportRepository: ReviewReportRepository,
     private reviewBanRepository: ReviewBanRepository,
+    private awsService: AwsService,
   ) {}
 
   async findShopsWithin1Km(getShopWithin1KmDTO: GetShopWithin1KmDTO, uuid: string) {
@@ -193,8 +195,8 @@ export class ShopService {
     await this.shopSubmitTransactionsRepository.createProducts(shopId, productsData, uuid);
   }
 
-  async createReview(uuid: string, postReviewDto: PostReviewDto, shopId: number): Promise<void> {
-    const { content, reviewImgKeys } = postReviewDto;
+  async createReview(uuid: string, postReviewDto: PostReviewDto, shopId: number, reviewImages?: Express.Multer.File[]): Promise<void> {
+    const { content } = postReviewDto;
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new NotFoundException('Not Exist Shop');
@@ -202,13 +204,21 @@ export class ShopService {
     // 리뷰 밴 테이블에 사용자가 존재하는지 검사
     const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);
     if (isExistUser) throw new ConflictException('Can not post review.');
+
+    const reviewImagesUrl = reviewImages ? await this.awsService.uploadImagesToS3(reviewImages, 'review') : [];
 
     // 트랜잭션을 사용하여 Review 생성
-    await this.reviewTransactionsRepository.createReview(uuid, shopId, content, reviewImgKeys);
+    await this.reviewTransactionsRepository.createReview(uuid, shopId, content, reviewImagesUrl);
   }
 
-  async updateReview(uuid: string, updateReviewDto: UpdateReviewDto, shopId: number, reviewId: number): Promise<void> {
-    const { content, deleteImages, newImageKeys } = updateReviewDto;
+  async updateReview(
+    uuid: string,
+    updateReviewDto: UpdateReviewDto,
+    shopId: number,
+    reviewId: number,
+    newReviewImage?: Express.Multer.File[],
+  ): Promise<void> {
+    const { content, deleteReviewImages } = updateReviewDto;
 
     const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
     if (!shop) throw new NotFoundException('Not Exist Shop');
@@ -217,8 +227,11 @@ export class ShopService {
     const isExistUser = await this.reviewBanRepository.findUserReviewBanByUuid(uuid);
     if (isExistUser) throw new ConflictException('Can not post review.');
 
+    // 새 리뷰 이미지가 존재하면 업로드
+    const newReviewImageUrls = newReviewImage?.length > 0 ? await this.awsService.uploadImagesToS3(newReviewImage, 'review') : [];
+
     // 트랜잭션을 사용하여 Review 업데이트
-    await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteImages || [], newImageKeys);
+    await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteReviewImages, newReviewImageUrls);
   }
 
   async deleteReviewByUUID(uuid: string, shopId: number, reviewId: number): Promise<void> {

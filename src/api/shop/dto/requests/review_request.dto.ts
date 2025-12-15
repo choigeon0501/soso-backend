@@ -1,23 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsIn, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class PostReviewDto {
   @ApiProperty({ description: '리뷰 내용', example: '정말 예쁜 소품들이 많아요!' })
   @IsString()
   @IsNotEmpty()
   content: string;
-
-  @ApiPropertyOptional({
-    description: 'PreSigned로 업로드한 이미지 Key들 (최대 10개)',
-    type: String,
-    isArray: true,
-    example: ['rev/img/1.png', 'rev/img/2.png'],
-  })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  reviewImgKeys?: string[];
 }
 
 export class UpdateReviewDto {
@@ -32,14 +21,20 @@ export class UpdateReviewDto {
     type: [Number],
   })
   @IsOptional()
-  deleteImages?: number[];
+  @Transform(({ value }) => {
+    if (!value) return [];
 
-  @ApiPropertyOptional({
-    description: '새로 업로드할 이미지 키 배열 (최대 10개)',
-    type: String,
-    isArray: true,
+    // case 1: deleteReviewImages=5&deleteReviewImages=6
+    if (Array.isArray(value)) {
+      return value.map((v) => Number(v));
+    }
+
+    // case 2: deleteReviewImages=5,6
+    return value.split(',').map((v) => Number(v));
   })
-  newImageKeys?: string[];
+  @IsArray()
+  @IsNumber({}, { each: true })
+  deleteReviewImages?: number[];
 }
 
 export class PresignPutRequestDto {

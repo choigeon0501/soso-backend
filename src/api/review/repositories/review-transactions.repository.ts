@@ -13,7 +13,7 @@ export class ReviewTransactionsRepository {
     private awsService: AwsService,
   ) {}
 
-  async createReview(uuid: string, shopId: number, content: string, reviewImgKeys: string[]): Promise<void> {
+  async createReview(uuid: string, shopId: number, content: string, reviewImagesUrl: string[]): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -30,10 +30,10 @@ export class ReviewTransactionsRepository {
       });
 
       // 이미지가 존재할 경우에만 처리
-      if (reviewImgKeys?.length > 0) {
+      if (reviewImagesUrl?.length > 0) {
         // Review와 Image 연결
         review.images = await Promise.all(
-          reviewImgKeys.map(async (key) => {
+          reviewImagesUrl.map(async (key) => {
             const [image] = await Promise.all([reviewImgRepo.save({ fileKey: key })]);
             return image;
           }),
@@ -51,7 +51,7 @@ export class ReviewTransactionsRepository {
     }
   }
 
-  async updateReview(uuid: string, reviewId: number, content: string, deleteImages: number[], newImageKeys: string[]): Promise<void> {
+  async updateReview(uuid: string, reviewId: number, content?: string, deleteImages?: number[], newImageKeys?: string[]): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
