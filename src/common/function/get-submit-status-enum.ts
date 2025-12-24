@@ -1,21 +1,35 @@
+import { SubmitType, SubmitStatus } from "../enum/role.enum";
 /**
- * type과 status 값을 조합하여 submitStatus enum 번호(0~8)를 반환하는 함수
+ * SubmitType 과 SubmitStatus 를 조합하여
+ * 단일 SubmitCombinedStatus 문자열을 반환한다.
  *
- * enum 값 의미:
- * 0 → 최초 제보 - 확인 중
- * 1 → 최초 제보 - 승인됨
- * 2 → 최초 제보 - 거절됨
- * 3 → 운영 정보 수정 - 확인 중
- * 4 → 운영 정보 수정 - 승인됨
- * 5 → 운영 정보 수정 - 거절됨
- * 6 → 판매 정보 수정 - 확인 중
- * 7 → 판매 정보 수정 - 승인됨
- * 8 → 판매 정보 수정 - 거절됨
+ * 반환 규칙:
+ * `${type}_${status}`
  *
- * @param type - 제보 유형 (0: 최초 제보, 1: 운영 정보 수정, 2: 판매 정보 수정)
- * @param status - 처리 상태 (0: 확인 중, 1: 승인됨, 2: 거절됨)
- * @returns 0~8 사이의 정수 값
+ * 가능한 조합 케이스:
+ *
+ * [최초 제보]
+ * - new_shop + pending → new_shop_pending
+ * - new_shop + approved → new_shop_approved
+ * - new_shop + rejected → new_shop_rejected
+ *
+ * [운영 정보 수정]
+ * - new_operating + pending → new_operating_pending
+ * - new_operating + approved → new_operating_approved
+ * - new_operating + rejected → new_operating_rejected
+ *
+ * [판매 정보 수정]
+ * - new_product + pending → new_product_pending
+ * - new_product + approved → new_product_approved
+ * - new_product + rejected → new_product_rejected
+ *
+ * @param type   제보 유형 (SubmitType)
+ * @param status 처리 상태 (SubmitStatus)
+ * @returns `${SubmitType}_${SubmitStatus}` 형식의 문자열
  */
-export function getSubmitStatusEnum(type: number, status: number): number {
-  return type * 3 + status;
+export function getSubmitCombinedStatus(
+  type: SubmitType,
+  status: SubmitStatus,
+) { 
+  return `${type}_${status}` as const;
 }

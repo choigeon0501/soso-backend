@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ShopSubmitRecord } from '../../../shop/entities/shop-submit-user-record.entity';
 import { PageInfoDTO, PaginationResponsesDto } from './pagination_responses.dto';
 import { SubmitStatus, SubmitType } from '../../../../common/enum/role.enum';
+import { getSubmitCombinedStatus } from '../../../../common/function/get-submit-status-enum';
 
 export class ShopResponseDTO {
   @ApiProperty() id: number;
@@ -16,6 +17,7 @@ export class UserSubmitRecordItemDTO {
   @ApiProperty() id: number;
   @ApiProperty() type: SubmitType;
   @ApiProperty() status: SubmitStatus;
+  @ApiProperty() submitStatus: string;
   @ApiProperty({ nullable: true }) rejectMessage: string | null;
   @ApiProperty() createdAt: Date;
   @ApiProperty({ type: ShopResponseDTO }) shop: ShopResponseDTO;
@@ -24,6 +26,7 @@ export class UserSubmitRecordItemDTO {
     this.id = record.id;
     this.type = record.type;
     this.status = record.status;
+    this.submitStatus = getSubmitCombinedStatus(record.type, record.status);
     this.rejectMessage = record.rejectMessage;
     this.createdAt = record.createdAt;
     this.shop = {
