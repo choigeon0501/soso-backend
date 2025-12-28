@@ -6,6 +6,12 @@ export class UserWithdrawal {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column('varchar', { length: 255, nullable: true })
+  email: string;
+
+  @Column('varchar', { length: 50, name: 'nickname', nullable: true })
+  nickName: string;
+
   @Column('varchar', { name: 'reason_code', length: 32 })
   reasonCode: WithdrawalReasonCode;
 

@@ -75,7 +75,7 @@ export class UserTransactionsRepository {
       // 1. 유저가 제보한 소품샵 데이터들 조회.
       const userSubmitRecords = await userSubmitRepo.find({ where: { user: { uuid } }, relations: ['shop', 'shopOperatingHour'] });
 
-      // 2. 만약 제보한 내용이 소품샵이라면, 해당 제보의 status 체크 후 실제 사용 중인 데이터이면 냅두기 (approved)
+      // 2. 승인되지 않은 제보 데이터들은 전부 삭제
       for (const userSubmitRecord of userSubmitRecords) {
         if (userSubmitRecord.status !== SubmitStatus.Approved) {
           switch (userSubmitRecord.type) {
@@ -94,11 +94,20 @@ export class UserTransactionsRepository {
         }
       }
 
-      if (profileImg) await this.awsService.deleteImageFromS3(profileImg); // 유저 프로필은 삭제하기!
+      // 3. 유저 프로필은 존재시 삭제
+      if (profileImg) await this.awsService.deleteImageFromS3(profileImg);
 
+      // 4. 유저 정보 불러오기
+      const user = await userRepo.findOne({ where: { uuid } });
+
+      // 5. 탈퇴 데이터 저장
       await userWithdrawalRepo.save({
+        email: user.email,
+        nickName: user.nickName,
         reasonCode: withdrawalReasonCode,
       });
+
+      // 6. 유저 하드 딜리트
       await userRepo.delete({ uuid });
 
       await queryRunner.commitTransaction();

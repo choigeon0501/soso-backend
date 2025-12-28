@@ -33,7 +33,4 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @DeleteDateColumn({ nullable: true, name: 'deleted_at' })
-  deletedAt: Date;
 }
