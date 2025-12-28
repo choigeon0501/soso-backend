@@ -14,8 +14,16 @@ export class User {
   @Column('varchar', { length: 512, nullable: true, name: 'profile_img' })
   profileImg: string;
 
-  @Column('varchar', { length: 50, name: 'nick_name', nullable: true })
+  @Column('varchar', { length: 50, name: 'nickname', nullable: true })
   nickName: string;
+
+  @Column({
+    type: 'timestamp',
+    name: 'last_activity_at',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  lastActivityAt: Date;
 
   @OneToMany(() => ReviewBan, (reviewBan) => reviewBan.user)
   reviewBans: ReviewBan[];

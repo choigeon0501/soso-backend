@@ -33,6 +33,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       this.loggerService.warn(`JWT/ Not Exist User : ${sub}`);
       throw new NotFoundException('Not Exist User');
     }
+
+    // 최근 활동 시각 모니터링
+    const now = Date.now();
+    const lastActivityTime = user.lastActivityAt?.getTime() ?? 0;
+    if (now - lastActivityTime > 10 * 60 * 1000) {
+      user.lastActivityAt = new Date();
+      await this.userRepository.save(user);
+    }
+
     return { sub, role };
   }
 }
