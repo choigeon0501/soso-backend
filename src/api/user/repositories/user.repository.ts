@@ -65,4 +65,15 @@ export class UserRepository {
       throw new InternalServerErrorException();
     }
   }
+
+  async findActivityUsers() {
+    try {
+      return await this.userRepository.find({
+        relations: ['authIdentities'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`User/ findActivityUsers Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
 }

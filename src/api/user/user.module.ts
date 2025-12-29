@@ -11,11 +11,19 @@ import { UserFavoriteRepository } from './repositories/user-favorite.repository'
 import { UserFavorite } from './entities/user-favorite.entity';
 import { UserTransactionsRepository } from './repositories/user-transactions.repository';
 import { AuthModule } from '../auth/auth.module';
+import { UserWithdrawalRepository } from './repositories/user-withdrawal.repository';
+import { UserWithdrawal } from './entities/user-withdrawal.entity';
 
 @Module({
-  imports: [forwardRef(() => ShopModule), forwardRef(() => AuthModule), TypeOrmModule.forFeature([User, UserFavorite]), AwsModule, ReviewModule],
+  imports: [
+    forwardRef(() => ShopModule),
+    forwardRef(() => AuthModule),
+    TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]),
+    AwsModule,
+    ReviewModule,
+  ],
   controllers: [UserController],
-  providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],
-  exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],
+  providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
+  exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
 })
 export class UserModule {}
