@@ -14,6 +14,15 @@ export class ReviewReportRepository {
     private readonly loggerService: LoggerService,
   ) {}
 
+  async findAll() {
+    try {
+      return await this.reviewReportRepository.find({ relations: ['review', 'user'] });
+    } catch (err) {
+      this.loggerService.warn(`Report/ findAll Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findReviewReport(uuid: string, reviewId: number) {
     try {
       return await this.reviewReportRepository.findOne({

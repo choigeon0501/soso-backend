@@ -14,6 +14,15 @@ export class ShopReportRepository {
     private readonly loggerService: LoggerService,
   ) {}
 
+  async findAll() {
+    try {
+      return await this.shopReportRepository.find({ relations: ['shop', 'user'] });
+    } catch (err) {
+      this.loggerService.warn(`Report/ findAll Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findShopReport(uuid: string, shopId: number) {
     try {
       return await this.shopReportRepository.findOne({

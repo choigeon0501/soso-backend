@@ -266,4 +266,71 @@ export class ShopService {
 
     await this.shopReportRepository.saveShopReport(uuid, shop.id, shopReportDto);
   }
+
+  async getAllShopReportsForAdmin() {
+    // 전체 신고 데이터 조회 (shop, user relation 포함)
+    const shopReports = await this.shopReportRepository.findAll();
+
+    // 소품샵 ID 기준 신고 누적 횟수 계산
+    const shopReportCountMap: Record<number, number> = {};
+
+    shopReports.forEach((report) => {
+      const shopId = report.shop.id;
+
+      // 해당 소품샵 ID가 이미 있으면 +1, 없으면 1로 초기화
+      shopReportCountMap[shopId] = (shopReportCountMap[shopId] || 0) + 1;
+    });
+
+    // Admin 반환용 데이터 가공
+    const adminReportList = shopReports.map((report) => ({
+      userEmail: report.user.email,
+      shopId: report.shop.id,
+      shopName: report.shop.name,
+      shopLocation: report.shop.location,
+      reportType: report.reportType,
+      reportCount: shopReportCountMap[report.shop.id],
+      reportDate: report.createdAt,
+    }));
+
+    // 누적 횟수 기준 내림차순 정렬
+    adminReportList.sort((a, b) => b.reportCount - a.reportCount);
+
+    return adminReportList.map((item, index) => ({
+      num: index + 1, // 정렬 이후 index 기준
+      ...item,
+    }));
+  }
+
+  async getAllReviewReportsForAdmin() {
+    // 전체 리뷰 신고 데이터 조회
+    const allReviewReports = await this.reviewReportRepository.findAll();
+
+    // 리뷰 ID 기준 신고 누적 횟수 계산
+    const reviewReportCountMap: Record<number, number> = {};
+
+    allReviewReports.forEach((report) => {
+      const reviewId = report.review.id;
+
+      // 리뷰 ID가 이미 있으면 +1, 없으면 1로 초기화
+      reviewReportCountMap[reviewId] = (reviewReportCountMap[reviewId] || 0) + 1;
+    });
+
+    // Admin 반환용 데이터 가공
+    const adminReviewReportList = allReviewReports.map((report) => ({
+      userEmail: report.user.email,
+      reportType: report.reportType,
+      reportMessage: report.reportMessage,
+      reviewContent: report.review.content,
+      reportDate: report.createdAt,
+      reportCount: reviewReportCountMap[report.review.id],
+    }));
+
+    //  누적 횟수 기준 내림차순 정렬
+    adminReviewReportList.sort((a, b) => b.reportCount - a.reportCount);
+
+    return adminReviewReportList.map((item, index) => ({
+      num: index + 1,
+      ...item,
+    }));
+  }
 }

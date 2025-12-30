@@ -189,10 +189,10 @@ export class UserService {
     }
   }
 
-  async getActiveUsersForAdmin() {
-    const activityUsers = await this.userRepository.findActivityUsers();
+  async getAllUsersForAdmin() {
+    const allActivityUsers = await this.userRepository.findActivityUsers();
 
-    return activityUsers.map((user, index) => ({
+    const activityUsers = allActivityUsers.map((user, index) => ({
       num: index + 1, // 1부터 시작
       email: user.email,
       nickName: user.nickName,
@@ -200,17 +200,17 @@ export class UserService {
       lastActivityAt: user.lastActivityAt,
       provider: user.authIdentities[0].provider,
     }));
-  }
 
-  async getWithdrawalUsersForAdmin() {
-    const withdrawalUsers = await this.userWithdrawalRepository.findWithdrawalUsers();
+    const allWithdrawalUsers = await this.userWithdrawalRepository.findWithdrawalUsers();
 
-    return withdrawalUsers.map((user, index) => ({
+    const withdrawalUsers = allWithdrawalUsers.map((user, index) => ({
       num: index + 1, // 1부터 시작
       email: user.email,
       nickName: user.nickName,
       createdAt: user.createdAt,
       withdrawalReason: user.reasonCode,
     }));
+
+    return { activityUsers, withdrawalUsers };
   }
 }
