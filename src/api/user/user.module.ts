@@ -15,13 +15,7 @@ import { UserWithdrawalRepository } from './repositories/user-withdrawal.reposit
 import { UserWithdrawal } from './entities/user-withdrawal.entity';
 
 @Module({
-  imports: [
-    forwardRef(() => ShopModule),
-    forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]),
-    AwsModule,
-    ReviewModule,
-  ],
+  imports: [forwardRef(() => ShopModule), TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]), AuthModule, AwsModule, ReviewModule],
   controllers: [UserController],
   providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
   exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
