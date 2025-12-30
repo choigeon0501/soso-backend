@@ -13,7 +13,7 @@ import { UserTransactionsRepository } from './repositories/user-transactions.rep
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [forwardRef(() => ShopModule), forwardRef(() => AuthModule), TypeOrmModule.forFeature([User, UserFavorite]), AwsModule, ReviewModule],
+  imports: [forwardRef(() => ShopModule), TypeOrmModule.forFeature([User, UserFavorite]), AuthModule, AwsModule, ReviewModule],
   controllers: [UserController],
   providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],
   exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository],

@@ -11,6 +11,7 @@ import { Role } from '../../common/enum/role.enum';
 import { AuthProvider } from '../../common/enum/auth.enum';
 import { AuthIdentityRepository } from './repositories/auth-identity.repository';
 import { JwtService } from '@nestjs/jwt';
+import { AuthTransactionService } from './services/auth-transcation.service';
 
 @Injectable()
 export class AuthService {
@@ -18,8 +19,8 @@ export class AuthService {
   private googleUserInfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
   constructor(
-    private userRepository: UserRepository,
     private authIdentityRepository: AuthIdentityRepository,
+    private authTransactionService: AuthTransactionService,
     private readonly loggerService: LoggerService,
     private readonly configService: ConfigService,
     private jwtService: JwtService,
@@ -64,9 +65,7 @@ export class AuthService {
 
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
-        // 트랜잭션으로 묶기
-        await this.userRepository.createUser(userUuid, userData.email, AuthProvider.GOOGLE, null);
-        await this.authIdentityRepository.createAuthIdentity(userData.id, AuthProvider.GOOGLE, userUuid);
+        await this.authTransactionService.createUserWithAuthIdentity(userUuid, userData.email, userData.id, AuthProvider.GOOGLE);
       }
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
@@ -112,9 +111,7 @@ export class AuthService {
 
       if (!authIdentity) {
         // 2) 신규 가입 경로 → uuid 생성 후 두 테이블에 삽입
-        // 트랜잭션으로 묶기
-        await this.userRepository.createUser(userUuid, email, AuthProvider.APPLE, null);
-        await this.authIdentityRepository.createAuthIdentity(appleId, AuthProvider.APPLE, userUuid);
+        await this.authTransactionService.createUserWithAuthIdentity(userUuid, email, appleId, AuthProvider.APPLE);
       }
 
       const adminUuid = this.configService.get<string>('ADMIN_UUID');
