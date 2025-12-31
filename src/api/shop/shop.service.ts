@@ -333,4 +333,11 @@ export class ShopService {
       ...item,
     }));
   }
+
+  async getAllSubmissions() {
+    const newShopSubmissions = await this.submitRepository.findAllNewShopSubmissions();
+    const newProductSubmissions = await this.submitRepository.findAllNewProductSubmissions();
+    const newOperatingSubmissions = await this.submitRepository.findAllNewOperatingSubmissions();
+    return { newShopSubmissions, newProductSubmissions, newOperatingSubmissions };
+  }
 }

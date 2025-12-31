@@ -20,4 +20,8 @@ export class AdminService {
   async getAllReviewReports() {
     return await this.shopService.getAllReviewReportsForAdmin();
   }
+
+  async getAllSubmissions() {
+    return await this.shopService.getAllSubmissions();
+  }
 }

@@ -12,6 +12,47 @@ export class ShopSubmitRepository {
     private readonly loggerService: LoggerService,
   ) {}
 
+  async findAllNewShopSubmissions() {
+    try {
+      return await this.ShopSubmitRecordRepository.find({
+        where: {
+          type: SubmitType.NewShop,
+        },
+        relations: ['shop', 'shop.operatingHours', 'shop.productMappings', 'shop.productMappings.product', 'user'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findAllNewShopSubmissions Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findAllNewOperatingSubmissions() {
+    try {
+      return await this.ShopSubmitRecordRepository.find({
+        where: {
+          type: SubmitType.NewOperating,
+        },
+        relations: ['shop', 'shop.operatingHours', 'shopOperatingHour', 'user'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findAllNewOperatingSubmissions Error: ${err}`);
+    }
+  }
+
+  async findAllNewProductSubmissions() {
+    try {
+      return await this.ShopSubmitRecordRepository.find({
+        where: {
+          type: SubmitType.NewProduct,
+        },
+        relations: ['shop', 'shop.productMappings', 'shop.productMappings.product', 'shopProducts', 'shopProducts.product', 'user'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findAllNewProductSubmissions Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findSubmitRecordById(submitId: number, uuid: string) {
     try {
       return await this.ShopSubmitRecordRepository.findOne({
@@ -68,49 +109,6 @@ export class ShopSubmitRepository {
         .getMany();
     } catch (err) {
       this.loggerService.warn(`Submit/ findUserShopSubmitRecordByPageNation Error: ${err}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async findAllSubmitProducts() {
-    try {
-      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
-        .where('submit.type=2')
-        .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
-        .leftJoinAndSelect('shop.productMappings', 'productMappings')
-        .leftJoinAndSelect('submit.user', 'user') // ✅ shop 관계 조인
-        .getMany();
-    } catch (err) {
-      this.loggerService.warn(`Submit/ findAllSubmitProducts Error: ${err}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async findAllSubmitOperatings() {
-    try {
-      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
-        .where('submit.type=1')
-        .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
-        .leftJoinAndSelect('shop.operatingHours', 'operatingHours')
-        .leftJoinAndSelect('submit.user', 'user') // ✅ shop 관계 조인
-        .getMany();
-    } catch (err) {
-      this.loggerService.warn(`Submit/ findAllSubmitProducts Error: ${err}`);
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async findAllSubmitNewShops() {
-    try {
-      return await this.ShopSubmitRecordRepository.createQueryBuilder('submit')
-        .where('submit.type=0')
-        .leftJoinAndSelect('submit.shop', 'shop') // ✅ shop 관계 조인
-        .leftJoinAndSelect('shop.operatingHours', 'operatingHours')
-        .leftJoinAndSelect('shop.productMappings', 'productMappings')
-        .leftJoinAndSelect('submit.user', 'user') // ✅ shop 관계 조인
-        .getMany();
-    } catch (err) {
-      this.loggerService.warn(`Submit/ findAllSubmitProducts Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }

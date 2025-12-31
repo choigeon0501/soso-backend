@@ -19,4 +19,9 @@ export class AdminController {
   async getAllReviewReports() {
     return await this.adminService.getAllReviewReports();
   }
+
+  @Get('submission')
+  async getAllSubmissions() {
+    return await this.adminService.getAllSubmissions();
+  }
 }
