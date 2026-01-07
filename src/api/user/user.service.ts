@@ -26,11 +26,13 @@ import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
 import { AuthIdentityRepository } from '../auth/repositories/auth-identity.repository';
+import { UserWithdrawalRepository } from './repositories/user-withdrawal.repository';
 
 @Injectable()
 export class UserService {
   constructor(
     private userRepository: UserRepository,
+    private userWithdrawalRepository: UserWithdrawalRepository,
     private authIdentityRepository: AuthIdentityRepository,
     private awsService: AwsService,
     private reviewRepository: ReviewRepository,
@@ -185,5 +187,30 @@ export class UserService {
       default:
         throw new NotFoundException('Invalid submit type');
     }
+  }
+
+  async getAllUsersForAdmin() {
+    const allActivityUsers = await this.userRepository.findActivityUsers();
+
+    const activityUsers = allActivityUsers.map((user, index) => ({
+      num: index + 1, // 1부터 시작
+      email: user.email,
+      nickName: user.nickName,
+      createdAt: user.createdAt,
+      lastActivityAt: user.lastActivityAt,
+      provider: user.authIdentities[0].provider,
+    }));
+
+    const allWithdrawalUsers = await this.userWithdrawalRepository.findWithdrawalUsers();
+
+    const withdrawalUsers = allWithdrawalUsers.map((user, index) => ({
+      num: index + 1, // 1부터 시작
+      email: user.email,
+      nickName: user.nickName,
+      createdAt: user.createdAt,
+      withdrawalReason: user.reasonCode,
+    }));
+
+    return { activityUsers, withdrawalUsers };
   }
 }

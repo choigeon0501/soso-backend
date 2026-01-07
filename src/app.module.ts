@@ -18,6 +18,7 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { AdminModule } from './api/admin/admin.module';
 import { SuccessResponseFilter } from './common/filter/success-response.filter';
 import { AppleModule } from './api/apple/apple.module';
+import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { AppleModule } from './api/apple/apple.module';
     JwtModule,
     AdminModule,
     AppleModule,
+    AdminJwtModule,
   ],
   controllers: [AppController],
   providers: [
