@@ -51,9 +51,4 @@ export class AuthTokenResponseDTO {
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   refreshToken: string;
-
-  constructor(accessToken: string, refreshTokenDTO: string) {
-    this.accessToken = accessToken;
-    this.refreshToken = refreshTokenDTO;
-  }
 }
