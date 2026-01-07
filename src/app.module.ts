@@ -17,6 +17,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filter/http-exception.filter';
 import { AdminModule } from './api/admin/admin.module';
 import { SuccessResponseFilter } from './common/filter/success-response.filter';
+import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { SuccessResponseFilter } from './common/filter/success-response.filter';
     LoggerModule,
     JwtModule,
     AdminModule,
+    AdminJwtModule,
   ],
   controllers: [AppController],
   providers: [

@@ -11,6 +11,15 @@ export class AuthTokenService {
     private readonly configService: ConfigService,
   ) {}
 
+  issueAdminToken(email: number) {
+    const payload = { sub: email };
+
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_ADMIN_TOKEN_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_ADMIN_TOKEN_EXPIRES_IN'),
+    });
+  }
+
   /**
    * Access + Refresh Token 발급
    */
