@@ -5,6 +5,10 @@ import * as bcrypt from 'bcrypt';
 import { AdminUserRepository } from './repositories/admin-user.repository';
 import { AdminLoginDto } from './dto/request/admin-login.dto';
 import { AuthTokenService } from '../auth/services/auth-token.service';
+import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dto';
+import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
+import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
+import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
 
 @Injectable()
 export class AdminService {
@@ -33,19 +37,19 @@ export class AdminService {
     return this.authTokenService.issueAdminToken(admin.id);
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<GetAllUsersResponseDto> {
     return await this.userService.getAllUsersForAdmin();
   }
 
-  async getAllShopReports() {
+  async getAllShopReports(): Promise<GetAllShopReportResponseDto[]> {
     return await this.shopService.getAllShopReportsForAdmin();
   }
 
-  async getAllReviewReports() {
+  async getAllReviewReports(): Promise<GetAllReviewReportResponseDto[]> {
     return await this.shopService.getAllReviewReportsForAdmin();
   }
 
-  async getAllSubmissions() {
+  async getAllSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
     return await this.shopService.getAllSubmissions();
   }
 }
