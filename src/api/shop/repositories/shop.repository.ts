@@ -31,6 +31,7 @@ export class ShopRepository extends Repository<Shop> {
         )
         .where('(shop.name LIKE :keyword OR shop.location LIKE :keyword)', { keyword: `%${keyword}%` })
         .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+        .andWhere('shop.isHidden = :isHidden', { isHidden: false })
         .setParameters({ lat, lng, isVerified: true })
         .skip(limit * (page - 1))
         .take(limit)
@@ -48,6 +49,7 @@ export class ShopRepository extends Repository<Shop> {
         .where('shop.name LIKE :keyword', { keyword: `%${keyword}%` }) // 부분 검색
         .orWhere('shop.location LIKE :keyword', { keyword: `%${keyword}%` }) // 도로명 검색
         .andWhere('shop.isVerified = :isVerified', { isVerified: true }) // 특정 타입 필터링
+        .andWhere('shop.isHidden = :isHidden', { isHidden: false })
         .getCount();
     } catch (err) {
       this.loggerService.warn(`Shop/ findAllShopsCountByKeyword Error: ${err}`);
@@ -61,6 +63,7 @@ export class ShopRepository extends Repository<Shop> {
         where: {
           id: shopId,
           isVerified: true,
+          isHidden: false,
         },
       });
     } catch (err) {
@@ -78,6 +81,7 @@ export class ShopRepository extends Repository<Shop> {
         .leftJoinAndSelect('productMapping.product', 'product') // product_mapping을 통해 product 조인
         .where('shop.id = :shopId', { shopId })
         .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+        .andWhere('shop.isHidden = :isHidden', { isHidden: false })
         .getOne();
     } catch (err) {
       this.loggerService.warn(`Shop/ findShopByShopId Error: ${err}`);
@@ -105,6 +109,7 @@ export class ShopRepository extends Repository<Shop> {
           'distance',
         )
         .where('shop.isVerified = :isVerified', { isVerified: true })
+        .andWhere('shop.isHidden = :isHidden', { isHidden: false })
         .having('distance < :distanceLimit', { distanceLimit })
         .setParameters({ lat, lng });
 
@@ -123,6 +128,8 @@ export class ShopRepository extends Repository<Shop> {
     return this.createQueryBuilder('shop')
       .innerJoin('shop.productMappings', 'productMapping')
       .where('productMapping.product.id IN (:...productIds)', { productIds })
+      .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+      .andWhere('shop.isHidden = :isHidden', { isHidden: false })
       .getMany();
   }
 }
