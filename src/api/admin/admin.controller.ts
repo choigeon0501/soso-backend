@@ -8,6 +8,7 @@ import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
+import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -94,5 +95,16 @@ export class AdminController {
   @Patch('shops/:shopId/hidden')
   async toggleShopHidden(@Param('shopId') shopId: number, @Body() toggleShopHiddenDto: ToggleShopHiddenDto) {
     return await this.adminService.toggleShopHidden(shopId, toggleShopHiddenDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '리뷰 숨김/해제 (Admin)',
+    description: '관리자가 리뷰를 숨기거나 다시 노출합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('reviews/:reviewId/hidden')
+  async toggleReviewHidden(@Param('reviewId') reviewId: number, @Body() toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
+    return await this.adminService.toggleReviewHidden(reviewId, toggleReviewHiddenDto);
   }
 }

@@ -72,6 +72,20 @@ export class ShopRepository extends Repository<Shop> {
     }
   }
 
+  async findByShopIdForHiddenShop(shopId: number) {
+    try {
+      return await this.shopRepository.findOne({
+        where: {
+          id: shopId,
+          isVerified: true,
+        },
+      });
+    } catch (err) {
+      this.loggerService.warn(`Shop/ findByShopIdForHiddenShop Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findShopByShopId(shopId: number) {
     try {
       return await this.shopRepository

@@ -10,12 +10,15 @@ import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
+import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
+import { ReviewService } from '../review/review.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly userService: UserService,
     private readonly shopService: ShopService,
+    private readonly reviewService: ReviewService,
     private readonly authTokenService: AuthTokenService,
     private readonly adminUserRepository: AdminUserRepository,
   ) {}
@@ -58,5 +61,11 @@ export class AdminService {
     const { isHidden } = toggleShopHiddenDto;
 
     return await this.shopService.toggleShopHidden(shopId, isHidden);
+  }
+
+  async toggleReviewHidden(reviewId: number, toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
+    const { isHidden } = toggleReviewHiddenDto;
+
+    await this.reviewService.toggleReviewHidden(reviewId, isHidden);
   }
 }

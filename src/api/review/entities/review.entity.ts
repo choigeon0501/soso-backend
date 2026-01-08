@@ -11,6 +11,9 @@ export class Review {
   @Column('text')
   content: string;
 
+  @Column('boolean', { name: 'is_hidden', default: false })
+  isHidden: boolean;
+
   @ManyToOne(() => User, (user) => user.uuid, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'uuid' })
   user: User;

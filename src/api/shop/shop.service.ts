@@ -343,7 +343,7 @@ export class ShopService {
   }
 
   async toggleShopHidden(shopId: number, isHidden: boolean): Promise<void> {
-    const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
+    const shop = await this.shopRepository.findByShopIdForHiddenShop(shopId);
     if (!shop) throw new ConflictException('Not Exist Shop');
 
     shop.isHidden = isHidden;

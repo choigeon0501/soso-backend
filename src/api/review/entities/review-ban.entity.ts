@@ -10,6 +10,9 @@ export class ReviewBan {
   @JoinColumn({ name: 'uuid' })
   user: User;
 
+  @Column({ type: 'text', name: 'review_content' })
+  reviewContent: string;
+
   @Column({ type: 'varchar', length: 50, name: 'ban_reason' })
   banReason: string;
 

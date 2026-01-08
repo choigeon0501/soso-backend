@@ -27,12 +27,12 @@ export class ReviewBanRepository {
     }
   }
 
-  // async createReviewBan(uuid: string, banReason: string, banStartDate: Date, banEndDate: Date) {
-  //   return await this.reviewBanRepository.save({
-  //     user: { uuid: uuid },
-  //     banReason: banReason,
-  //     banStartDate: banStartDate,
-  //     banEndDate: banEndDate,
-  //   });
-  // }
+  async createReviewBan(uuid: string, banReason: string, banStartDate: Date, banEndDate: Date) {
+    return await this.reviewBanRepository.save({
+      user: { uuid: uuid },
+      banReason: banReason,
+      banStartDate: banStartDate,
+      banEndDate: banEndDate,
+    });
+  }
 }
