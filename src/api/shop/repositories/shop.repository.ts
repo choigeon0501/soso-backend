@@ -132,4 +132,8 @@ export class ShopRepository extends Repository<Shop> {
       .andWhere('shop.isHidden = :isHidden', { isHidden: false })
       .getMany();
   }
+
+  async saveShop(shop: Shop) {
+    return this.shopRepository.save(shop);
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/request/admin-login.dto';
 import { AdminJwtAuthGuard } from '../../common/admin-jwt/admin-jwt-auth.guard';
@@ -7,6 +7,7 @@ import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dt
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -82,5 +83,16 @@ export class AdminController {
   @Get('submission')
   async getAllSubmissions() {
     return await this.adminService.getAllSubmissions();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '소품샵 숨김/해제 (Admin)',
+    description: '관리자가 소품샵을 유저에게 숨기거나 다시 노출합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('shops/:shopId/hidden')
+  async toggleShopHidden(@Param('shopId') shopId: number, @Body() toggleShopHiddenDto: ToggleShopHiddenDto) {
+    return await this.adminService.toggleShopHidden(shopId, toggleShopHiddenDto);
   }
 }

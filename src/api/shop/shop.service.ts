@@ -290,6 +290,7 @@ export class ShopService {
       reportType: report.reportType,
       reportCount: shopReportCountMap[report.shop.id],
       reportDate: report.createdAt,
+      isHidden: report.shop.isHidden,
     }));
 
     // 누적 횟수 기준 내림차순 정렬
@@ -339,5 +340,14 @@ export class ShopService {
     const newProductSubmissions = await this.submitRepository.findAllNewProductSubmissions();
     const newOperatingSubmissions = await this.submitRepository.findAllNewOperatingSubmissions();
     return { newShopSubmissions, newProductSubmissions, newOperatingSubmissions };
+  }
+
+  async toggleShopHidden(shopId: number, isHidden: boolean): Promise<void> {
+    const shop = await this.shopRepository.findOnlyShopByShopId(shopId);
+    if (!shop) throw new ConflictException('Not Exist Shop');
+
+    shop.isHidden = isHidden;
+
+    await this.shopRepository.saveShop(shop);
   }
 }

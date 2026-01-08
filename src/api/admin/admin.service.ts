@@ -9,6 +9,7 @@ import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dt
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 
 @Injectable()
 export class AdminService {
@@ -51,5 +52,11 @@ export class AdminService {
 
   async getAllSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
     return await this.shopService.getAllSubmissions();
+  }
+
+  async toggleShopHidden(shopId: number, toggleShopHiddenDto: ToggleShopHiddenDto): Promise<void> {
+    const { isHidden } = toggleShopHiddenDto;
+
+    return await this.shopService.toggleShopHidden(shopId, isHidden);
   }
 }
