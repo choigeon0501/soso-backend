@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ShopSubmitRecord } from 'src/api/shop/entities/shop-submit-user-record.entity';
 import { LoggerService } from '../../../common/logger/logger.service';
-import { SubmitType } from '../../../common/enum/role.enum';
+import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
 
 export class ShopSubmitRepository {
   constructor(
@@ -12,11 +12,27 @@ export class ShopSubmitRepository {
     private readonly loggerService: LoggerService,
   ) {}
 
+  async findById(submitId: number) {
+    try {
+      return await this.ShopSubmitRecordRepository.findOne({
+        where: {
+          id: submitId,
+          status: SubmitStatus.Pending,
+        },
+        relations: ['shop'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findDetailProductSubmitRecord Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findAllNewShopSubmissions() {
     try {
       return await this.ShopSubmitRecordRepository.find({
         where: {
           type: SubmitType.NewShop,
+          status: SubmitStatus.Pending,
         },
         relations: ['shop', 'shop.operatingHours', 'shop.productMappings', 'shop.productMappings.product', 'user'],
       });
@@ -31,6 +47,7 @@ export class ShopSubmitRepository {
       return await this.ShopSubmitRecordRepository.find({
         where: {
           type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
         },
         relations: ['shop', 'shop.operatingHours', 'shopOperatingHour', 'user'],
       });
@@ -44,6 +61,7 @@ export class ShopSubmitRepository {
       return await this.ShopSubmitRecordRepository.find({
         where: {
           type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
         },
         relations: ['shop', 'shop.productMappings', 'shop.productMappings.product', 'shopProducts', 'shopProducts.product', 'user'],
       });

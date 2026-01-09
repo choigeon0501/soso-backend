@@ -12,6 +12,7 @@ import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-sub
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { ReviewService } from '../review/review.service';
+import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
 
 @Injectable()
 export class AdminService {
@@ -53,8 +54,16 @@ export class AdminService {
     return await this.shopService.getAllReviewReportsForAdmin();
   }
 
-  async getAllSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
-    return await this.shopService.getAllSubmissions();
+  async getAllPendingSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
+    return await this.shopService.getAllPendingSubmissions();
+  }
+
+  async acceptProductSubmission(submissionId: number) {
+    return await this.shopService.acceptProductSubmission(submissionId);
+  }
+
+  async rejectProductSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectProductSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
   }
 
   async toggleShopHidden(shopId: number, toggleShopHiddenDto: ToggleShopHiddenDto): Promise<void> {

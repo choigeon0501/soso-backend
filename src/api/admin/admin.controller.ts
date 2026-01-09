@@ -9,6 +9,7 @@ import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-rep
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
+import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -82,8 +83,30 @@ export class AdminController {
   })
   @UseGuards(AdminJwtAuthGuard)
   @Get('submission')
-  async getAllSubmissions() {
-    return await this.adminService.getAllSubmissions();
+  async getAllPendingSubmissions() {
+    return await this.adminService.getAllPendingSubmissions();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '상품 제보 승인',
+    description: '관리자가 상품 제보를 승인하여 실제 운영 데이터로 반영합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/product/accept')
+  async acceptProductSubmission(@Param('submissionId') submissionId: number) {
+    return await this.adminService.acceptProductSubmission(submissionId);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '상품 제보 반려',
+    description: '관리자가 상품 제보를 반려하고 반려 사유를 저장합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/product/reject')
+  async rejectProductSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.adminService.rejectProductSubmission(submissionId, rejectProductSubmissionDto);
   }
 
   @ApiBearerAuth('JWT-auth')
