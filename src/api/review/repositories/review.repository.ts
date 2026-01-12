@@ -13,16 +13,37 @@ export class ReviewRepository {
   ) {}
   async findOneReviewById(reviewId: number) {
     try {
-      return await this.reviewRepository.findOne({ where: { id: reviewId } });
+      return await this.reviewRepository.findOne({
+        where: {
+          id: reviewId,
+          isHidden: false,
+        },
+      });
     } catch (err) {
       this.loggerService.warn(`Review/ createReview Error: ${err}`);
       throw new InternalServerErrorException();
     }
   }
 
+  async findByIdForHiddenReview(reviewId: number) {
+    try {
+      return await this.reviewRepository.findOne({
+        where: {
+          id: reviewId,
+        },
+      });
+    } catch (err) {
+      this.loggerService.warn(`Review/ findByIdForHiddenReview Error: ${err}`);
+    }
+  }
+
   async findUserReviewByUUID(uuid: string) {
     try {
-      return await this.reviewRepository.createQueryBuilder('review').where('review.user.uuid = :uuid', { uuid }).getCount();
+      return await this.reviewRepository
+        .createQueryBuilder('review')
+        .where('review.user.uuid = :uuid', { uuid })
+        .andWhere('review.isHidden = false')
+        .getCount();
     } catch (err) {
       this.loggerService.warn(`Review/ findUserReviewByUUID Error: ${err}`);
       throw new InternalServerErrorException();
@@ -37,6 +58,7 @@ export class ReviewRepository {
         .leftJoinAndSelect('review.shop', 'shop') // 가게 정보
         .leftJoinAndSelect('review.images', 'image') // ✅ 이미지 ManyToMany 조인
         .where('u.uuid = :uuid', { uuid }) // 사용자 조건
+        .andWhere('review.isHidden = false')
         .orderBy('review.createdAt', sort) // 정렬
         .skip(limit * (page - 1))
         .take(limit)
@@ -54,6 +76,7 @@ export class ReviewRepository {
           shop: {
             id: shopId,
           },
+          isHidden: false,
         },
         relations: ['images', 'user'],
         order: {
@@ -63,6 +86,14 @@ export class ReviewRepository {
     } catch (err) {
       this.loggerService.warn(`Review/ findShopReviewsByShopId Error: ${err}`);
       throw new InternalServerErrorException();
+    }
+  }
+
+  async saveReview(review: Review) {
+    try {
+      return await this.reviewRepository.save(review);
+    } catch (err) {
+      this.loggerService.warn(`Review/ saveReview Error: ${err}`);
     }
   }
 }

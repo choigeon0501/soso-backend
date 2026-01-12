@@ -17,7 +17,7 @@ export class ShopSubmitRecord {
   status: SubmitStatus;
 
   @Column('text', { name: 'reject_message', nullable: true })
-  rejectMessage: string;
+  rejectMessage: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

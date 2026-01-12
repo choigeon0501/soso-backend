@@ -50,4 +50,10 @@ export class GetAllShopReportResponseDto {
     format: 'date-time',
   })
   reportDate: Date;
+
+  @ApiProperty({
+    example: true,
+    description: '소품샵 숨김 여부 (true: 유저에게 숨김, false: 다시 노출)',
+  })
+  isHidden: boolean;
 }

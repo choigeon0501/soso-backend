@@ -9,12 +9,17 @@ import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dt
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
+import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
+import { ReviewService } from '../review/review.service';
+import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
 
 @Injectable()
 export class AdminService {
   constructor(
     private readonly userService: UserService,
     private readonly shopService: ShopService,
+    private readonly reviewService: ReviewService,
     private readonly authTokenService: AuthTokenService,
     private readonly adminUserRepository: AdminUserRepository,
   ) {}
@@ -49,7 +54,43 @@ export class AdminService {
     return await this.shopService.getAllReviewReportsForAdmin();
   }
 
-  async getAllSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
-    return await this.shopService.getAllSubmissions();
+  async getAllPendingSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
+    return await this.shopService.getAllPendingSubmissions();
+  }
+
+  async acceptProductSubmission(submissionId: number) {
+    return await this.shopService.acceptProductSubmission(submissionId);
+  }
+
+  async rejectProductSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectProductSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
+  async acceptOperatingInfoSubmission(submissionId: number) {
+    return await this.shopService.acceptOperatingInfoSubmission(submissionId);
+  }
+
+  async rejectOperatingInfoSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectOperatingInfoSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
+  async acceptNewShopSubmission(submissionId: number) {
+    return await this.shopService.acceptNewShopSubmission(submissionId);
+  }
+
+  async rejectNewShopSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectNewShopSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
+  async toggleShopHidden(shopId: number, toggleShopHiddenDto: ToggleShopHiddenDto): Promise<void> {
+    const { isHidden } = toggleShopHiddenDto;
+
+    return await this.shopService.toggleShopHidden(shopId, isHidden);
+  }
+
+  async toggleReviewHidden(reviewId: number, toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
+    const { isHidden } = toggleReviewHiddenDto;
+
+    await this.reviewService.toggleReviewHidden(reviewId, isHidden);
   }
 }

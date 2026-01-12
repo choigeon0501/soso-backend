@@ -35,7 +35,7 @@ import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
         entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     ThrottlerModule.forRoot({

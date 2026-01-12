@@ -1,14 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ReviewRepository } from './repositories/review.repository';
 import { ReviewImage } from './entities/review-image.entity';
-import { AwsService } from '../../common/aws/aws.service';
 
 @Injectable()
 export class ReviewService {
-  constructor(
-    private reviewRepository: ReviewRepository,
-    private awsService: AwsService,
-  ) {}
+  constructor(private reviewRepository: ReviewRepository) {}
+
+  async toggleReviewHidden(reviewId: number, isHidden: boolean): Promise<void> {
+    const review = await this.reviewRepository.findByIdForHiddenReview(reviewId);
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
+
+    review.isHidden = isHidden;
+
+    await this.reviewRepository.saveReview(review);
+  }
 
   async findShopReviewsByShopId(shopId: number, uuid: string) {
     const reviews = await this.reviewRepository.findShopReviewsByShopId(shopId);

@@ -29,6 +29,9 @@ export class Shop {
   @Column('varchar', { length: 255, nullable: true })
   location: string;
 
+  @Column('boolean', { name: 'is_hidden', default: false })
+  isHidden: boolean;
+
   @ManyToOne(() => Region, (region) => region.shops, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'region_id' })
   region: Region;

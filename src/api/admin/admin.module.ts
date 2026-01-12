@@ -8,9 +8,10 @@ import { AuthModule } from '../auth/auth.module';
 import { AdminJwtModule } from '../../common/admin-jwt/admin-jwt.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminUser } from './entities/admin-user.entity';
+import { ReviewModule } from '../review/review.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AdminUser]), UserModule, ShopModule, AuthModule, AdminJwtModule],
+  imports: [TypeOrmModule.forFeature([AdminUser]), UserModule, ShopModule, AuthModule, AdminJwtModule, ReviewModule],
   controllers: [AdminController],
   providers: [AdminService, AdminUserRepository],
 })

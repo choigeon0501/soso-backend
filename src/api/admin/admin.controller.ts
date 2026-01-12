@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/request/admin-login.dto';
 import { AdminJwtAuthGuard } from '../../common/admin-jwt/admin-jwt-auth.guard';
@@ -7,6 +7,9 @@ import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dt
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
+import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
+import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -80,7 +83,95 @@ export class AdminController {
   })
   @UseGuards(AdminJwtAuthGuard)
   @Get('submission')
-  async getAllSubmissions() {
-    return await this.adminService.getAllSubmissions();
+  async getAllPendingSubmissions() {
+    return await this.adminService.getAllPendingSubmissions();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '상품 제보 승인',
+    description: '관리자가 상품 제보를 승인하여 실제 운영 데이터로 반영합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/product/accept')
+  async acceptProductSubmission(@Param('submissionId') submissionId: number) {
+    return await this.adminService.acceptProductSubmission(submissionId);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '상품 제보 반려',
+    description: '관리자가 상품 제보를 반려하고 반려 사유를 저장합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/product/reject')
+  async rejectProductSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.adminService.rejectProductSubmission(submissionId, rejectProductSubmissionDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '운영정보 제보 승인',
+    description: '관리자가 운영정보 제보를 승인하여 실제 운영 데이터로 반영합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/operating-info/accept')
+  async acceptOperatingInfoSubmission(@Param('submissionId') submissionId: number) {
+    return await this.adminService.acceptOperatingInfoSubmission(submissionId);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '운영정보 제보 반려',
+    description: '관리자가 운영정보 제보를 반려하고 반려 사유를 저장합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/operating-info/reject')
+  async rejectOperatingInfoSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.adminService.rejectOperatingInfoSubmission(submissionId, rejectProductSubmissionDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '새로운 소품샵 제보 승인',
+    description: '관리자가 새로운 소품샵 제보를 승인하여 실제 운영 데이터로 반영합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/new-shop/accept')
+  async acceptNewShopSubmission(@Param('submissionId') submissionId: number) {
+    return await this.adminService.acceptNewShopSubmission(submissionId);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '새로운 소품샵 제보 반려',
+    description: '관리자가 새로운 소품샵 제보를 반려하고 반려 사유를 저장합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/new-shop/reject')
+  async rejectNewShopSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.adminService.rejectNewShopSubmission(submissionId, rejectProductSubmissionDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '소품샵 숨김/해제 (Admin)',
+    description: '관리자가 소품샵을 유저에게 숨기거나 다시 노출합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('shops/:shopId/hidden')
+  async toggleShopHidden(@Param('shopId') shopId: number, @Body() toggleShopHiddenDto: ToggleShopHiddenDto) {
+    return await this.adminService.toggleShopHidden(shopId, toggleShopHiddenDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '리뷰 숨김/해제 (Admin)',
+    description: '관리자가 리뷰를 숨기거나 다시 노출합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('reviews/:reviewId/hidden')
+  async toggleReviewHidden(@Param('reviewId') reviewId: number, @Body() toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
+    return await this.adminService.toggleReviewHidden(reviewId, toggleReviewHiddenDto);
   }
 }

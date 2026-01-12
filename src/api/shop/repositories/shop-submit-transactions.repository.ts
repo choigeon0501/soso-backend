@@ -15,6 +15,272 @@ export class ShopSubmitTransactionsRepository {
     private loggerService: LoggerService,
   ) {}
 
+  async rejectNewShopSubmission(submitId: number, shopId: number, rejectMessage: string | null = null): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopRepo = queryRunner.manager.getRepository(Shop);
+
+      // 제보한 운영정보 데이터 제거
+      await shopRepo.delete({
+        id: shopId,
+        isVerified: false,
+      });
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewShop,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Rejected,
+          rejectMessage: rejectMessage,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async acceptNewShopSubmission(submitId: number, shopId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopRepo = queryRunner.manager.getRepository(Shop);
+
+      // 실제 운영 중인 운영정보 데이터 제거
+      await shopRepo.update(
+        {
+          id: shopId,
+          isVerified: false,
+        },
+        {
+          isVerified: true,
+        },
+      );
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewShop,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Approved,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async rejectOperatingInfoSubmission(submitId: number, rejectMessage: string | null = null): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopOperatingHourRepo = queryRunner.manager.getRepository(ShopOperatingHour);
+
+      const submitOperatingHour = await submitRepo.findOne({
+        where: {
+          id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
+        },
+        relations: ['shopOperatingHour'],
+      });
+
+      // 제보한 운영정보 데이터 제거
+      await shopOperatingHourRepo.delete({
+        id: submitOperatingHour.shopOperatingHour.id,
+        isVerified: false,
+      });
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Rejected,
+          rejectMessage: rejectMessage,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async acceptOperatingInfoSubmission(submitId: number, shopId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopOperatingHourRepo = queryRunner.manager.getRepository(ShopOperatingHour);
+
+      const submitOperatingHour = await submitRepo.findOne({
+        where: {
+          id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
+        },
+        relations: ['shopOperatingHour'],
+      });
+
+      // 실제 운영 중인 운영정보 데이터 제거
+      await shopOperatingHourRepo.delete({
+        shop: { id: shopId },
+        isVerified: true,
+      });
+
+      // 제보한 운영정보 실제 운영 데이터로 업데이트
+      await shopOperatingHourRepo.update(
+        {
+          id: submitOperatingHour.shopOperatingHour.id,
+          isVerified: false,
+        },
+        {
+          isVerified: true,
+        },
+      );
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Approved,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async rejectProductSubmission(submitId: number, rejectMessage: string | null = null): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopProductRepo = queryRunner.manager.getRepository(ShopProductMapping);
+
+      // 제보한 판매목록 데이터 제거
+      await shopProductRepo.delete({
+        submitRecord: {
+          id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
+        },
+        isVerified: false,
+      });
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Rejected,
+          rejectMessage: rejectMessage,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async acceptProductSubmission(submitId: number, shopId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopProductRepo = queryRunner.manager.getRepository(ShopProductMapping);
+
+      // 실제 운영 중인 판매목록 데이터 제거
+      await shopProductRepo.delete({
+        shop: { id: shopId },
+        isVerified: true,
+      });
+
+      // 제보한 판매목록 실제 운영 데이터로 업데이트
+      await shopProductRepo.update(
+        {
+          submitRecord: {
+            id: submitId,
+            type: SubmitType.NewProduct,
+            status: SubmitStatus.Pending,
+          },
+          isVerified: false,
+        },
+        {
+          isVerified: true,
+        },
+      );
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Approved,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async createNewShop(newShopData: SubmitNewShopDto, regionId: number, uuid: string): Promise<void> {
     const { shop, operatingHours, products } = newShopData;
     const queryRunner = this.dataSource.createQueryRunner();
@@ -38,7 +304,7 @@ export class ShopSubmitTransactionsRepository {
       if (operatingHours) {
         await operatingRepo.save({
           shop: { id: createShop.id },
-          isVerified: false,
+          isVerified: true, // true로 두는 이유는, 어차피 shop의 verified만 true로 바꾸면 전부 사용할 수 있도록 해야 되기 때문 -> shop에 종속되어있음
           ...operatingHours,
         });
       }
@@ -47,7 +313,7 @@ export class ShopSubmitTransactionsRepository {
         const productMappings = products.map((product) => ({
           product: { id: product.id },
           shop: { id: createShop.id },
-          isVerified: false,
+          isVerified: true, // true로 두는 이유는, 어차피 shop의 verified만 true로 바꾸면 전부 사용할 수 있도록 해야 되기 때문 -> shop에 종속되어있음
         }));
         await productRepo.save(productMappings);
       }
