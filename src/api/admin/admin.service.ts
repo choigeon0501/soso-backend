@@ -66,6 +66,14 @@ export class AdminService {
     return await this.shopService.rejectProductSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
   }
 
+  async acceptOperatingInfoSubmission(submissionId: number) {
+    return await this.shopService.acceptOperatingInfoSubmission(submissionId);
+  }
+
+  async rejectOperatingInfoSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectOperatingInfoSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
   async toggleShopHidden(shopId: number, toggleShopHiddenDto: ToggleShopHiddenDto): Promise<void> {
     const { isHidden } = toggleShopHiddenDto;
 

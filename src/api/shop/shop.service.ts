@@ -366,6 +366,24 @@ export class ShopService {
     if (!submission) throw new NotFoundException('Not Exist Submission');
 
     // 트랜잭션: 제보 Product 데이터 제거 + 제보 데이터 status 업데이트
-    await this.shopSubmitTransactionsRepository.rejectShopSubmission(submissionId, submission.shop.id, rejectMessage);
+    await this.shopSubmitTransactionsRepository.rejectProductSubmission(submissionId, rejectMessage);
+  }
+
+  async acceptOperatingInfoSubmission(submissionId: number) {
+    // 우선 데이터 가져오고 존재하는지 체크 (Pending 상태!)
+    const submission = await this.submitRepository.findById(submissionId);
+    if (!submission) throw new NotFoundException('Not Exist Submission');
+
+    // 트랜잭션: 현재 운영중인 OperatingInfo 데이터 제거하기 (하드 딜리트) + 제보 OperatingInfo 데이터 실제 운영 데이트로 업데이트 + 제보 데이터 status 업데이트
+    await this.shopSubmitTransactionsRepository.acceptOperatingInfoSubmission(submissionId, submission.shop.id);
+  }
+
+  async rejectOperatingInfoSubmission(submissionId: number, rejectMessage?: string) {
+    // 우선 데이터 가져오고 존재하는지 체크 (Pending 상태!)
+    const submission = await this.submitRepository.findById(submissionId);
+    if (!submission) throw new NotFoundException('Not Exist Submission');
+
+    // 트랜잭션: 제보 OperatingInfo 데이터 제거 + 제보 데이터 status 업데이트
+    await this.shopSubmitTransactionsRepository.rejectOperatingInfoSubmission(submissionId, rejectMessage);
   }
 }
