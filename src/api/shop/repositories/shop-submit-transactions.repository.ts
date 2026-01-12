@@ -15,6 +15,82 @@ export class ShopSubmitTransactionsRepository {
     private loggerService: LoggerService,
   ) {}
 
+  async rejectNewShopSubmission(submitId: number, shopId: number, rejectMessage: string | null = null): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopRepo = queryRunner.manager.getRepository(Shop);
+
+      // 제보한 운영정보 데이터 제거
+      await shopRepo.delete({
+        id: shopId,
+        isVerified: false,
+      });
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewShop,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Rejected,
+          rejectMessage: rejectMessage,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async acceptNewShopSubmission(submitId: number, shopId: number): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const submitRepo = queryRunner.manager.getRepository(ShopSubmitRecord);
+      const shopRepo = queryRunner.manager.getRepository(Shop);
+
+      // 실제 운영 중인 운영정보 데이터 제거
+      await shopRepo.update(
+        {
+          id: shopId,
+          isVerified: false,
+        },
+        {
+          isVerified: true,
+        },
+      );
+
+      // 제보한 데이터 상태 변경
+      await submitRepo.update(
+        {
+          id: submitId,
+          type: SubmitType.NewShop,
+          status: SubmitStatus.Pending,
+        },
+        {
+          status: SubmitStatus.Approved,
+        },
+      );
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException();
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async rejectOperatingInfoSubmission(submitId: number, rejectMessage: string | null = null): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -26,6 +102,8 @@ export class ShopSubmitTransactionsRepository {
       const submitOperatingHour = await submitRepo.findOne({
         where: {
           id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
         },
         relations: ['shopOperatingHour'],
       });
@@ -40,6 +118,8 @@ export class ShopSubmitTransactionsRepository {
       await submitRepo.update(
         {
           id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
         },
         {
           status: SubmitStatus.Rejected,
@@ -67,6 +147,8 @@ export class ShopSubmitTransactionsRepository {
       const submitOperatingHour = await submitRepo.findOne({
         where: {
           id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
         },
         relations: ['shopOperatingHour'],
       });
@@ -92,6 +174,8 @@ export class ShopSubmitTransactionsRepository {
       await submitRepo.update(
         {
           id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
         },
         {
           status: SubmitStatus.Approved,
@@ -119,6 +203,8 @@ export class ShopSubmitTransactionsRepository {
       await shopProductRepo.delete({
         submitRecord: {
           id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
         },
         isVerified: false,
       });
@@ -127,6 +213,8 @@ export class ShopSubmitTransactionsRepository {
       await submitRepo.update(
         {
           id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
         },
         {
           status: SubmitStatus.Rejected,
@@ -162,6 +250,8 @@ export class ShopSubmitTransactionsRepository {
         {
           submitRecord: {
             id: submitId,
+            type: SubmitType.NewProduct,
+            status: SubmitStatus.Pending,
           },
           isVerified: false,
         },
@@ -174,6 +264,8 @@ export class ShopSubmitTransactionsRepository {
       await submitRepo.update(
         {
           id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
         },
         {
           status: SubmitStatus.Approved,
@@ -212,7 +304,7 @@ export class ShopSubmitTransactionsRepository {
       if (operatingHours) {
         await operatingRepo.save({
           shop: { id: createShop.id },
-          isVerified: false,
+          isVerified: true, // true로 두는 이유는, 어차피 shop의 verified만 true로 바꾸면 전부 사용할 수 있도록 해야 되기 때문 -> shop에 종속되어있음
           ...operatingHours,
         });
       }
@@ -221,7 +313,7 @@ export class ShopSubmitTransactionsRepository {
         const productMappings = products.map((product) => ({
           product: { id: product.id },
           shop: { id: createShop.id },
-          isVerified: false,
+          isVerified: true, // true로 두는 이유는, 어차피 shop의 verified만 true로 바꾸면 전부 사용할 수 있도록 해야 되기 때문 -> shop에 종속되어있음
         }));
         await productRepo.save(productMappings);
       }

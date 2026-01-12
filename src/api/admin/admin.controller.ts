@@ -133,6 +133,28 @@ export class AdminController {
 
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
+    summary: '새로운 소품샵 제보 승인',
+    description: '관리자가 새로운 소품샵 제보를 승인하여 실제 운영 데이터로 반영합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/new-shop/accept')
+  async acceptNewShopSubmission(@Param('submissionId') submissionId: number) {
+    return await this.adminService.acceptNewShopSubmission(submissionId);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '새로운 소품샵 제보 반려',
+    description: '관리자가 새로운 소품샵 제보를 반려하고 반려 사유를 저장합니다.',
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Patch('submission/:submissionId/new-shop/reject')
+  async rejectNewShopSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.adminService.rejectNewShopSubmission(submissionId, rejectProductSubmissionDto);
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
     summary: '소품샵 숨김/해제 (Admin)',
     description: '관리자가 소품샵을 유저에게 숨기거나 다시 노출합니다.',
   })

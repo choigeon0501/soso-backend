@@ -12,11 +12,44 @@ export class ShopSubmitRepository {
     private readonly loggerService: LoggerService,
   ) {}
 
-  async findById(submitId: number) {
+  async findNewProductById(submitId: number) {
     try {
       return await this.ShopSubmitRecordRepository.findOne({
         where: {
           id: submitId,
+          type: SubmitType.NewProduct,
+          status: SubmitStatus.Pending,
+        },
+        relations: ['shop'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findDetailProductSubmitRecord Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findNewOperatingInfoById(submitId: number) {
+    try {
+      return await this.ShopSubmitRecordRepository.findOne({
+        where: {
+          id: submitId,
+          type: SubmitType.NewOperating,
+          status: SubmitStatus.Pending,
+        },
+        relations: ['shop'],
+      });
+    } catch (err) {
+      this.loggerService.warn(`Submit/ findDetailProductSubmitRecord Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async findNewShopById(submitId: number) {
+    try {
+      return await this.ShopSubmitRecordRepository.findOne({
+        where: {
+          id: submitId,
+          type: SubmitType.NewShop,
           status: SubmitStatus.Pending,
         },
         relations: ['shop'],
