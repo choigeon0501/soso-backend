@@ -13,6 +13,8 @@ import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { ReviewService } from '../review/review.service';
 import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
+import { FeedbackService } from '../feedback/feedback.service';
+import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
 
 @Injectable()
 export class AdminService {
@@ -21,6 +23,7 @@ export class AdminService {
     private readonly shopService: ShopService,
     private readonly reviewService: ReviewService,
     private readonly authTokenService: AuthTokenService,
+    private readonly feedbackService: FeedbackService,
     private readonly adminUserRepository: AdminUserRepository,
   ) {}
 
@@ -56,6 +59,10 @@ export class AdminService {
 
   async getAllPendingSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
     return await this.shopService.getAllPendingSubmissions();
+  }
+
+  async getAllFeedbacks(): Promise<GetAllFeedbacksResponseDto[]> {
+    return await this.feedbackService.getAllFeedbacks();
   }
 
   async acceptProductSubmission(submissionId: number) {

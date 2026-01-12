@@ -11,6 +11,15 @@ export class FeedbackRepository {
     private readonly loggerService: LoggerService, // LoggerService 주입
   ) {}
 
+  async findAll() {
+    try {
+      return await this.feedbackRepository.find({ relations: ['user'], order: { createdAt: 'DESC' } });
+    } catch (err) {
+      this.loggerService.warn(`Feedback/ findAll Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async saveFeedback(uuid: string, feedback: string) {
     try {
       return await this.feedbackRepository.save({ user: { uuid }, content: feedback });

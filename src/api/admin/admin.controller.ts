@@ -10,6 +10,7 @@ import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-sub
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
+import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -85,6 +86,21 @@ export class AdminController {
   @Get('submission')
   async getAllPendingSubmissions() {
     return await this.adminService.getAllPendingSubmissions();
+  }
+
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '전체 Feedback 조회 (Admin)',
+    description: '사용자가 작성한 피드백을 모두 조회합니다.',
+  })
+  @ApiOkResponse({
+    type: GetAllFeedbacksResponseDto,
+    isArray: true,
+  })
+  @UseGuards(AdminJwtAuthGuard)
+  @Get('feedback')
+  async getAllFeedbacks() {
+    return await this.adminService.getAllFeedbacks();
   }
 
   @ApiBearerAuth('JWT-auth')
