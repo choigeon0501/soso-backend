@@ -149,7 +149,7 @@ export class ShopService {
       imageList.push(...review.images);
     });
 
-    const wishlist = !!(await this.userFavoriteRepository.isShopInUserWishlist(shopId, uuid));
+    const wishlist = uuid ? !!(await this.userFavoriteRepository.isShopInUserWishlist(shopId, uuid)) : false;
 
     if (uuid) {
       const userRecentSearchList = (await this.recentSearchRepository.findRecentSearchListByUUID(uuid)) || [];
@@ -158,7 +158,9 @@ export class ShopService {
         const newUserRecentSearch = await this.recentSearchRepository.createRecentSearch(uuid, shopId);
         if (userRecentSearchList.length == 10) {
           const deleteData = userRecentSearchList.pop();
-          await this.recentSearchRepository.deleteRecentSearch(deleteData.user.uuid, deleteData.id);
+          if (deleteData?.user?.uuid) {
+            await this.recentSearchRepository.deleteRecentSearch(deleteData.user.uuid, deleteData.id);
+          }
         }
         userRecentSearchList.unshift(newUserRecentSearch);
         await this.recentSearchRepository.saveRecentSearch(userRecentSearchList);
