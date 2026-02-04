@@ -77,9 +77,11 @@ export class ReviewTransactionsRepository {
         for (const image of imagesToDelete) {
           await this.awsService.deleteImageFromS3(image.fileKey);
         }
-        // DB에서 이미지 삭제
-        await reviewImgRepo.delete(deleteImages);
+        // 먼저 조인 테이블(review_image_mappings)에서 매핑 제거
         review.images = review.images.filter((image) => !deleteImages.includes(image.id));
+        await reviewRepo.save(review);
+        // 그 다음 review_images 테이블에서 이미지 삭제
+        await reviewImgRepo.delete(deleteImages);
       }
 
       // 새 이미지가 존재하면 추가
@@ -132,12 +134,20 @@ export class ReviewTransactionsRepository {
 
       // 이미지가 존재하면 S3와 DB에서 삭제
       if (review.images.length > 0) {
+        // 이미지 ID를 먼저 저장
+        const imageIds = review.images.map((image) => image.id);
+
         // S3에서 이미지 삭제
         for (const image of review.images) {
           await this.awsService.deleteImageFromS3(image.fileKey);
         }
-        // DB에서 이미지 삭제
-        await reviewImgRepo.delete(review.images.map((image) => image.id));
+
+        // 먼저 조인 테이블(review_image_mappings)에서 매핑 삭제
+        review.images = [];
+        await reviewRepo.save(review);
+
+        // 그 다음 review_images 테이블에서 이미지 삭제
+        await reviewImgRepo.delete(imageIds);
       }
 
       // 리뷰 삭제
