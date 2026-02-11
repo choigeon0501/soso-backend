@@ -7,7 +7,7 @@ export class UserWithdrawal {
   id: number;
 
   @Column('varchar', { length: 255, nullable: true })
-  email: string;
+  uuid: string;
 
   @Column('varchar', { length: 50, name: 'nickname', nullable: true })
   nickName: string;

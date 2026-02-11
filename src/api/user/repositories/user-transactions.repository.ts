@@ -102,7 +102,7 @@ export class UserTransactionsRepository {
 
       // 5. 탈퇴 데이터 저장
       await userWithdrawalRepo.save({
-        email: user.email,
+        uuid: user.uuid,
         nickName: user.nickName,
         reasonCode: withdrawalReasonCode,
       });
