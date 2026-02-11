@@ -335,7 +335,7 @@ export class ShopSubmitTransactionsRepository {
     }
   }
 
-  async deleteShopSubmission(shopId: number): Promise<void> {
+  async deleteShopSubmission(submitId: number, shopId: number): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -356,7 +356,7 @@ export class ShopSubmitTransactionsRepository {
       await shopRepo.delete({ id: shopId });
 
       // Step 4: Delete submission record
-      await submitRepo.delete({ shop: { id: shopId } });
+      await submitRepo.delete({ id: submitId });
 
       await queryRunner.commitTransaction();
     } catch (err) {
@@ -467,7 +467,7 @@ export class ShopSubmitTransactionsRepository {
     }
   }
 
-  async deleteProductSubmission(shopId: number, uuid: string): Promise<void> {
+  async deleteProductSubmission(submitId: number, shopId: number, uuid: string): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -482,11 +482,7 @@ export class ShopSubmitTransactionsRepository {
       });
 
       // Step 2: Delete submit record for NewProduct
-      await submitRepo.delete({
-        shop: { id: shopId },
-        user: { uuid },
-        type: SubmitType.NewProduct,
-      });
+      await submitRepo.delete({ id: submitId });
 
       await queryRunner.commitTransaction();
     } catch (err) {

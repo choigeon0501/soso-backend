@@ -176,13 +176,13 @@ export class UserService {
 
     switch (submitRecord.type) {
       case SubmitType.NewShop:
-        await this.shopSubmitTransactionsRepository.deleteShopSubmission(submitRecord.shop.id);
+        await this.shopSubmitTransactionsRepository.deleteShopSubmission(submitId, submitRecord.shop.id);
         break;
       case SubmitType.NewOperating:
         await this.shopSubmitTransactionsRepository.deleteOperatingHoursSubmission(submitId, submitRecord.shopOperatingHour.id);
         break;
       case SubmitType.NewProduct:
-        await this.shopSubmitTransactionsRepository.deleteProductSubmission(submitRecord.shop.id, uuid);
+        await this.shopSubmitTransactionsRepository.deleteProductSubmission(submitId, submitRecord.shop.id, uuid);
         break;
       default:
         throw new NotFoundException('Invalid submit type');
