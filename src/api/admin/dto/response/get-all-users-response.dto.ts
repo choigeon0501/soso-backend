@@ -11,10 +11,10 @@ export class ActivityUserResponseDto {
   num: number;
 
   @ApiProperty({
-    description: '사용자 이메일',
-    example: 'user@example.com',
+    description: '사용자 uuid',
+    example: 'uuid',
   })
-  email: string;
+  uuid: string;
 
   @ApiProperty({
     description: '사용자 닉네임',
@@ -56,10 +56,10 @@ export class WithdrawalUserResponseDto {
   num: number;
 
   @ApiProperty({
-    description: '사용자 이메일',
-    example: 'withdraw@example.com',
+    description: '사용자 uuid',
+    example: 'uuid',
   })
-  email: string;
+  uuid: string;
 
   @ApiProperty({
     description: '사용자 닉네임',

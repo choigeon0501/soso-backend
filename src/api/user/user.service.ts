@@ -194,7 +194,7 @@ export class UserService {
 
     const activityUsers = allActivityUsers.map((user, index) => ({
       num: index + 1, // 1부터 시작
-      email: user.email,
+      uuid: user.uuid,
       nickName: user.nickName,
       createdAt: user.createdAt,
       lastActivityAt: user.lastActivityAt,
@@ -205,7 +205,7 @@ export class UserService {
 
     const withdrawalUsers = allWithdrawalUsers.map((user, index) => ({
       num: index + 1, // 1부터 시작
-      email: user.email,
+      uuid: user.uuid,
       nickName: user.nickName,
       createdAt: user.createdAt,
       withdrawalReason: user.reasonCode,
