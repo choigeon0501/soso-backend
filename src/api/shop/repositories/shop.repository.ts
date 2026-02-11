@@ -147,6 +147,35 @@ export class ShopRepository extends Repository<Shop> {
       .getMany();
   }
 
+  async findShopsByIdsWithDistance(shopIds: number[], lat: number, lng: number, radius: number = 6371, sortByDistance = false) {
+    try {
+      let query = this.shopRepository
+        .createQueryBuilder('shop')
+        .addSelect(
+          `
+        (${radius} * acos(
+          cos(radians(:lat)) * cos(radians(shop.lat)) *
+          cos(radians(shop.lng) - radians(:lng)) +
+          sin(radians(:lat)) * sin(radians(shop.lat))
+        ))`,
+          'distance',
+        )
+        .where('shop.id IN (:...shopIds)', { shopIds })
+        .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+        .andWhere('shop.isHidden = :isHidden', { isHidden: false })
+        .setParameters({ lat, lng });
+
+      if (sortByDistance) {
+        query = query.orderBy('distance', 'ASC');
+      }
+
+      return await query.getRawMany();
+    } catch (err) {
+      this.loggerService.warn(`Shop/ findShopsByIdsWithDistance Error: ${err}`);
+      throw new InternalServerErrorException();
+    }
+  }
+
   async saveShop(shop: Shop) {
     return this.shopRepository.save(shop);
   }

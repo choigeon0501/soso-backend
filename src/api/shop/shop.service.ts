@@ -45,7 +45,23 @@ export class ShopService {
     const radius = 6371; // 지구 반경 (km)
     const distanceLimit = 1; // 거리 제한 (1km)
 
-    let shops = await this.shopRepository.findShopsWithin1Km(lat, lng, distanceLimit, radius, sorting);
+    let shops;
+
+    // isWishlist가 true이고 uuid가 있으면, 1km 제한 없이 위시리스트만 조회
+    if (isWishlist && uuid) {
+      const userFavoriteShops = await this.userFavoriteRepository.findUserFavoriteShopsByUser(uuid);
+      const userFavoriteShopsIds = userFavoriteShops.map((wishlist) => wishlist.shop.id);
+
+      if (userFavoriteShopsIds.length === 0) {
+        return [];
+      }
+
+      // 위시리스트 소품샵들을 거리 정보와 함께 조회 (거리 제한 없음)
+      shops = await this.shopRepository.findShopsByIdsWithDistance(userFavoriteShopsIds, lat, lng, radius, sorting);
+    } else {
+      // 기본: 1km 반경 내 소품샵 조회
+      shops = await this.shopRepository.findShopsWithin1Km(lat, lng, distanceLimit, radius, sorting);
+    }
 
     // shop_ 프리픽스 제거 + 필요한 필드만 추출
     shops = shops.map((shop) => ({
@@ -60,12 +76,7 @@ export class ShopService {
       distance: shop.distance,
     }));
 
-    if (isWishlist && uuid) {
-      const userFavoriteShops = await this.userFavoriteRepository.findUserFavoriteShopsByUser(uuid);
-      const userFavoriteShopsIds = userFavoriteShops.map((wishlist) => wishlist.shop.id);
-      shops = shops.filter((shop) => userFavoriteShopsIds.includes(shop.id));
-    }
-
+    // 상품 ID 필터링 (isWishlist가 true일 때도 적용)
     if (productIds && productIds.length > 0) {
       const shopsWithProducts = await this.shopRepository.findShopsByProductIds(productIds);
       const shopIdsWithProducts = shopsWithProducts.map((shop) => shop.id);
