@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LoggerService } from '../../../common/logger/logger.service';
 import { ShopSubmitRecord } from '../entities/shop-submit-user-record.entity';
 import { Shop } from '../entities/shop.entity';
 import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
@@ -12,7 +11,6 @@ import { ShopProductMapping } from '../entities/shop-product-mapping.entity';
 export class ShopSubmitTransactionsRepository {
   constructor(
     private dataSource: DataSource,
-    private loggerService: LoggerService,
   ) {}
 
   async rejectNewShopSubmission(submitId: number, shopId: number, rejectMessage: string | null = null): Promise<void> {
@@ -43,8 +41,7 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
-      await queryRunner.rollbackTransaction();
+       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
@@ -83,7 +80,6 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -128,7 +124,6 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -183,7 +178,6 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -223,7 +217,6 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ RejectProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -273,7 +266,6 @@ export class ShopSubmitTransactionsRepository {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ AcceptProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -327,7 +319,6 @@ export class ShopSubmitTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ CreateShop Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -360,7 +351,6 @@ export class ShopSubmitTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ DeleteShop Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -394,7 +384,6 @@ export class ShopSubmitTransactionsRepository {
       });
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ CreateOperating Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -419,7 +408,6 @@ export class ShopSubmitTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ DeleteOperating Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -459,7 +447,6 @@ export class ShopSubmitTransactionsRepository {
       await productRepo.save(productMappings);
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ CreateProducts Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -486,7 +473,6 @@ export class ShopSubmitTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Submit/ DeleteProduct Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {

@@ -7,6 +7,7 @@ export class ReviewService {
   constructor(private reviewRepository: ReviewRepository) {}
 
   async toggleReviewHidden(reviewId: number, isHidden: boolean): Promise<void> {
+    // 해당 로직에는 추후 '밴'에 대한 로직이 추가될 예정
     const review = await this.reviewRepository.findByIdForHiddenReview(reviewId);
     if (!review) {
       throw new NotFoundException('리뷰를 찾을 수 없습니다.');

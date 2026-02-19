@@ -5,14 +5,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { User } from '../../api/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { LoggerService } from '../logger/logger.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private readonly loggerService: LoggerService,
     private readonly configService: ConfigService, // ✅ ConfigService 주입
   ) {
     super({
@@ -30,7 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const user: User = await this.userRepository.findOne({ where: { uuid: sub } });
     if (!user) {
-      this.loggerService.warn(`JWT/ Not Exist User : ${sub}`);
       throw new NotFoundException('Not Exist User');
     }
 

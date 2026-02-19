@@ -50,7 +50,11 @@ export class AuthService {
 
       return userResponse.data;
     } catch (err) {
-      this.loggerService.warn(`Auth/ getGoogleUserByCode Error: ${err}`);
+      this.loggerService.logError('Auth/ getGoogleUserByCode Error', {
+        code,
+        redirectUri,
+        err,
+      });
       throw new InternalServerErrorException();
     }
   }
@@ -61,7 +65,10 @@ export class AuthService {
         audience: this.configService.get<string>('APPLE_AUDIENCE_ID'),
       });
     } catch (err) {
-      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
+      this.loggerService.logError('Auth/ validateAppleToken Error', {
+        idToken,
+        err,
+      });
       throw new UnauthorizedException('Apple ID Token 검증 실패');
     }
   }
@@ -80,7 +87,10 @@ export class AuthService {
 
       return this.authTokenService.issueTokens(userUuid, Role.User);
     } catch (err) {
-      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
+      this.loggerService.logError('Auth/ googleAuthLogin Error', {
+        googleAuthLoginDTO,
+        err,
+      });
       throw new InternalServerErrorException();
     }
   }
@@ -103,7 +113,10 @@ export class AuthService {
 
       return this.authTokenService.issueTokens(userUuid, Role.User);
     } catch (err) {
-      this.loggerService.warn(`Auth/ GoogleAuthLogin Error: ${err}`);
+      this.loggerService.logError('Auth/ appleAuthLogin Error', {
+        appleAuthLoginDTO,
+        err,
+      });
       throw new InternalServerErrorException();
     }
   }
@@ -113,6 +126,6 @@ export class AuthService {
   }
 
   async test() {
-    return this.authTokenService.issueTokens(this.configService.get<string>('ADMIN_UUID'), Role.User);
+    return this.authTokenService.issueTokens(this.configService.get<string>('TEST_UUID'), Role.User);
   }
 }

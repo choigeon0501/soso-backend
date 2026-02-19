@@ -25,7 +25,7 @@ export class AwsService {
         },
       });
     } catch (err) {
-      this.loggerService.warn(`S3/ 초기화 에러: ${err}`);
+      this.loggerService.logError('S3/ 초기화 에러', err);
     }
   }
 
@@ -52,7 +52,7 @@ export class AwsService {
 
       return Promise.all(uploadPromises);
     } catch (err) {
-      this.loggerService.warn(`S3/ 업로드 에러: ${err}`);
+      this.loggerService.logError('S3/ 업로드 에러', err);
       throw new InternalServerErrorException();
     }
   }
@@ -71,7 +71,7 @@ export class AwsService {
 
       await this.s3Client.send(command);
     } catch (err) {
-      this.loggerService.warn(`S3/ Delete 에러: ${err} \n imageUrl: ${imageUrl}`);
+      this.loggerService.logError('S3/ Delete 에러', err);
       throw new InternalServerErrorException();
     }
   }

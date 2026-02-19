@@ -1,61 +1,67 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, NotFoundException } from '@nestjs/common';
-import { Response, Request } from 'express';
+import {
+  ExceptionFilter as NestExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
 
-@Catch() // 모든 예외를 잡음
-export class HttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: LoggerService) {}
+@Catch()
+export class ExceptionFilter implements NestExceptionFilter {
+  constructor(private readonly loggerService: LoggerService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const res = ctx.getResponse<Response>();
-    const req = ctx.getRequest<Request>();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    let status = 500;
-    let message = 'Internal Server Error';
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      // HttpException.getResponse()는 string 또는 객체일 수 있음
-      const payload = exception.getResponse();
-      if (typeof payload === 'string') {
-        message = payload;
-      } else if (payload && typeof payload === 'object') {
-        // Nest 기본 형식: { statusCode, message, error }
-        message = (payload as any)?.message || exception.message || 'HttpException';
-      } else {
-        message = exception.message;
-      }
-    } else if (exception instanceof Error) {
-      message = exception.message;
-    }
+    const exceptionResponse =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : { message: 'Internal server error' };
 
-    // 404는 노이즈 → 응답만 내려주고 로그 스킵
-    if (status === 404 || exception instanceof NotFoundException) {
-      return res.status(status).json({
-        status,
-        message,
-      });
-    }
+    const message =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : (exceptionResponse as any).message || 'Unknown error';
 
-    // 로그 메타 (추적용)
-    const meta = {
-      method: req.method,
-      url: req.originalUrl || req.url,
-      status,
+    // 모든 요청에 대해 로깅
+    const errorResponse = {
+      timestamp: new Date().toISOString(),
+      statusCode: status,
+      message: Array.isArray(message) ? message.join(', ') : message,
+      error:
+        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
+          ? (exceptionResponse as any).error
+          : undefined,
+      path: request.url,
+      method: request.method,
+      stack: exception instanceof Error ? exception.stack : undefined,
+      body: request.body,
+      query: request.query,
+      params: request.params,
     };
 
-    // 레벨 라우팅
-    if (status >= 500) {
-      this.logger.error(message, meta);
-    } else {
-      this.logger.warn(message, meta);
-    }
+    // 모든 에러를 하나의 폴더에서 관리
+    this.loggerService.logError(request.url, errorResponse);
 
-    // 클라이언트 응답 (내부 스택은 노출하지 않음)
-    res.status(status).json({
-      status,
-      message,
-    });
+    // 클라이언트 응답 (스택 트레이스 제외)
+    const clientResponse: any = {
+      statusCode: status,
+      message: Array.isArray(message) ? message.join(', ') : message,
+      error:
+        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
+          ? (exceptionResponse as any).error
+          : undefined,
+    };
+
+    response.status(status).json(clientResponse);
   }
 }

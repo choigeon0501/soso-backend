@@ -28,7 +28,7 @@ export class LoggerService {
     if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
 
     this.logger = winston.createLogger({
-      level: 'warn', // info 이하 불필요 → 최소 warn
+      level: 'error',
       format: combine(
         splat(), // %s, %o 포맷 지원
         errors({ stack: true }), // Error 객체 스택 자동 포함
@@ -41,15 +41,6 @@ export class LoggerService {
         }),
       ),
       transports: [
-        // 4xx 등 경고
-        new winston.transports.DailyRotateFile({
-          filename: 'logs/warnings/%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
-          zippedArchive: true,
-          maxSize: '20m',
-          maxFiles: '14d',
-          level: 'warn',
-        }),
         // 5xx 등 에러
         new winston.transports.DailyRotateFile({
           filename: 'logs/errors/%DATE%.log',
@@ -65,11 +56,9 @@ export class LoggerService {
     });
   }
 
-  warn(message: string, meta?: any) {
-    this.logger.warn(message, meta);
-  }
-
-  error(message: string, meta?: any) {
-    this.logger.error(message, meta);
+  logError(path: string, errorResponse: any) {
+    // 모든 에러를 하나의 폴더에서 관리
+    const logMessage = `[${path}] ${errorResponse.message || 'Unknown error'}`;
+    this.logger.error(logMessage, errorResponse);
   }
 }

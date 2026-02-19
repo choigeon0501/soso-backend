@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { LoggerService } from '../../../common/logger/logger.service';
 import { Review } from '../entities/review.entity';
 import { ReviewImage } from '../entities/review-image.entity';
 import { AwsService } from '../../../common/aws/aws.service';
@@ -9,7 +8,6 @@ import { AwsService } from '../../../common/aws/aws.service';
 export class ReviewTransactionsRepository {
   constructor(
     private dataSource: DataSource,
-    private loggerService: LoggerService,
     private awsService: AwsService,
   ) {}
 
@@ -43,7 +41,6 @@ export class ReviewTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Review/ CreateReview Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
@@ -102,7 +99,6 @@ export class ReviewTransactionsRepository {
       await reviewRepo.save(review);
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Review/ UpdateReview Error: ${err}`);
       await queryRunner.rollbackTransaction();
       if (err instanceof NotFoundException) {
         throw err;
@@ -155,7 +151,6 @@ export class ReviewTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.warn(`Review/ DeleteReview Error: ${err}`);
       await queryRunner.rollbackTransaction();
       if (err instanceof NotFoundException) {
         throw err;

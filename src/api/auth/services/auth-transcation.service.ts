@@ -3,14 +3,10 @@ import { DataSource } from 'typeorm';
 import { AuthProvider } from '../../../common/enum/auth.enum';
 import { User } from '../../user/entities/user.entity';
 import { AuthIdentity } from '../entities/auth-identity.entity';
-import { LoggerService } from '../../../common/logger/logger.service';
 
 @Injectable()
 export class AuthTransactionService {
-  constructor(
-    private readonly dataSource: DataSource,
-    private readonly loggerService: LoggerService,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   async createUserWithAuthIdentity(
     userUuid: string,
@@ -35,7 +31,6 @@ export class AuthTransactionService {
         });
       });
     } catch (err) {
-      this.loggerService.warn(`Auth signup transaction failed: ${err}`);
       throw new InternalServerErrorException('Auth signup transaction failed');
     }
   }

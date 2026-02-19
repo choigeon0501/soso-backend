@@ -18,12 +18,6 @@ export class AdminUserRepository {
     });
   }
 
-  async create(email: string, password: string) {
-    return await this.adminUserRepository.save({
-      email: email,
-      password: password,
-    });
-  }
   async updateLastLogin(adminId: number) {
     return await this.adminUserRepository.update(
       {

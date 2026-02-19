@@ -47,8 +47,6 @@ export class UserTransactionsRepository {
         throw new ConflictException('NickName is already in use');
       }
       if (err instanceof HttpException) throw err;
-
-      this.loggerService.warn(`User/updateUser Error: ${err?.message ?? err}`);
       throw new InternalServerErrorException();
     } finally {
       await queryRunner.release();
@@ -89,7 +87,10 @@ export class UserTransactionsRepository {
               await shopProductRepo.delete({ submitRecord: { id: userSubmitRecord.id } });
               break;
             default:
-              this.loggerService.warn(`User/ deleteUser Error: ${userSubmitRecord.type} is not supported type`);
+              this.loggerService.logError('User/ deleteUser Error', {
+                userSubmitRecord,
+                message: 'type is not supported',
+              });
           }
         }
       }
@@ -112,7 +113,6 @@ export class UserTransactionsRepository {
 
       await queryRunner.commitTransaction();
     } catch (err) {
-      this.loggerService.error(`User/ deleteUser Error: ${err}`);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException();
     } finally {
