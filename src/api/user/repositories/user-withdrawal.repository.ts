@@ -10,7 +10,9 @@ export class UserWithdrawalRepository {
     private userWithdrawalRepository: Repository<UserWithdrawal>,
   ) {}
 
-  async findWithdrawalUsers() {
-    return await this.userWithdrawalRepository.find({});
+  async findWithdrawalUsers(order: 'ASC' | 'DESC' = 'DESC') {
+    return await this.userWithdrawalRepository.find({
+      order: { createdAt: order },
+    });
   }
 }

@@ -189,28 +189,35 @@ export class UserService {
     }
   }
 
-  async getAllUsersForAdmin() {
-    const allActivityUsers = await this.userRepository.findActivityUsers();
+  async getAllUsersForAdmin(query: {
+    active?: boolean;
+    sortBy?: 'created' | 'lastActiveAt';
+    order?: 'desc' | 'asc';
+  }) {
+    const active = query.active !== false;
+    const sortBy = query.sortBy ?? 'created';
+    const order = (query.order ?? 'desc').toUpperCase() as 'ASC' | 'DESC';
+    const orderKey = sortBy === 'lastActiveAt' ? 'lastActivityAt' : 'createdAt';
 
-    const activityUsers = allActivityUsers.map((user, index) => ({
-      num: index + 1, // 1부터 시작
-      uuid: user.uuid,
-      nickName: user.nickName,
-      createdAt: user.createdAt,
-      lastActivityAt: user.lastActivityAt,
-      provider: user.authIdentities[0].provider,
-    }));
+    if (active) {
+      const allActivityUsers = await this.userRepository.findActivityUsers(orderKey, order);
+      return allActivityUsers.map((user, index) => ({
+        num: index + 1,
+        uuid: user.uuid,
+        nickName: user.nickName,
+        createdAt: user.createdAt,
+        lastActivityAt: user.lastActivityAt,
+        provider: user.authIdentities[0].provider,
+      }));
+    }
 
-    const allWithdrawalUsers = await this.userWithdrawalRepository.findWithdrawalUsers();
-
-    const withdrawalUsers = allWithdrawalUsers.map((user, index) => ({
-      num: index + 1, // 1부터 시작
+    const allWithdrawalUsers = await this.userWithdrawalRepository.findWithdrawalUsers(order);
+    return allWithdrawalUsers.map((user, index) => ({
+      num: index + 1,
       uuid: user.uuid,
       nickName: user.nickName,
       createdAt: user.createdAt,
       withdrawalReason: user.reasonCode,
     }));
-
-    return { activityUsers, withdrawalUsers };
   }
 }

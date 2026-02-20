@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminLoginDto } from './dto/request/admin-login.dto';
 import { AdminJwtAuthGuard } from '../../common/admin-jwt/admin-jwt-auth.guard';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dto';
+import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/response/get-all-users-response.dto';
+import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
@@ -33,15 +34,30 @@ export class AdminController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '전체 사용자 조회 (Admin)',
-    description: '활동 중인 사용자 및 탈퇴한 사용자 목록을 조회합니다.',
+    description:
+      'active=true: 회원 목록(ActivityUserResponseDto[]), active=false: 탈퇴 목록(WithdrawalUserResponseDto[]). ' +
+      'sortBy=created|lastActiveAt, order=desc|asc 로 정렬 가능.',
   })
+  @ApiExtraModels(ActivityUserResponseDto, WithdrawalUserResponseDto)
   @ApiOkResponse({
-    type: GetAllUsersResponseDto,
+    description: 'active=true 시 ActivityUserResponseDto[], active=false 시 WithdrawalUserResponseDto[]',
+    schema: {
+      oneOf: [
+        {
+          type: 'array',
+          items: { $ref: getSchemaPath(ActivityUserResponseDto) },
+        },
+        {
+          type: 'array',
+          items: { $ref: getSchemaPath(WithdrawalUserResponseDto) },
+        },
+      ],
+    },
   })
   @UseGuards(AdminJwtAuthGuard)
   @Get('users')
-  async getAllUsers() {
-    return await this.adminService.getAllUsers();
+  async getAllUsers(@Query() query: GetUsersQueryDto) {
+    return await this.adminService.getAllUsers(query);
   }
 
   @ApiBearerAuth('JWT-auth')

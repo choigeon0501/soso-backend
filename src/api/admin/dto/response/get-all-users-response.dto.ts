@@ -81,22 +81,3 @@ export class WithdrawalUserResponseDto {
   })
   withdrawalReason: string;
 }
-
-/* =========================
- * Admin - 전체 사용자 조회
- * ========================= */
-export class GetAllUsersResponseDto {
-  @ApiProperty({
-    description: '현재 활동 중인 사용자 목록',
-    type: ActivityUserResponseDto,
-    isArray: true,
-  })
-  activityUsers: ActivityUserResponseDto[];
-
-  @ApiProperty({
-    description: '탈퇴한 사용자 목록',
-    type: WithdrawalUserResponseDto,
-    isArray: true,
-  })
-  withdrawalUsers: WithdrawalUserResponseDto[];
-}

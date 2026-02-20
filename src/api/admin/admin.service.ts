@@ -5,7 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { AdminUserRepository } from './repositories/admin-user.repository';
 import { AdminLoginDto } from './dto/request/admin-login.dto';
 import { AuthTokenService } from '../auth/services/auth-token.service';
-import { GetAllUsersResponseDto } from './dto/response/get-all-users-response.dto';
+import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/response/get-all-users-response.dto';
+import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
@@ -45,8 +46,8 @@ export class AdminService {
     return this.authTokenService.issueAdminToken(admin.id);
   }
 
-  async getAllUsers(): Promise<GetAllUsersResponseDto> {
-    return await this.userService.getAllUsersForAdmin();
+  async getAllUsers(query: GetUsersQueryDto): Promise<ActivityUserResponseDto[] | WithdrawalUserResponseDto[]> {
+    return await this.userService.getAllUsersForAdmin(query);
   }
 
   async getAllShopReports(): Promise<GetAllShopReportResponseDto[]> {

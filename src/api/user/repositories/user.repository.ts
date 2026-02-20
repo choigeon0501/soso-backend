@@ -28,9 +28,10 @@ export class UserRepository {
     return await this.userRepository.update({ uuid }, { nickName });
   }
 
-  async findActivityUsers() {
+  async findActivityUsers(orderKey: 'createdAt' | 'lastActivityAt', order: 'ASC' | 'DESC') {
     return await this.userRepository.find({
       relations: ['authIdentities'],
+      order: { [orderKey]: order },
     });
   }
 }
