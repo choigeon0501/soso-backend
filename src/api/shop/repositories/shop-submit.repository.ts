@@ -42,33 +42,36 @@ export class ShopSubmitRepository {
     });
   }
 
-  async findAllNewShopSubmissions() {
+  async findAllNewShopSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewShop,
         status: SubmitStatus.Pending,
       },
       relations: ['shop', 'shop.operatingHours', 'shop.productMappings', 'shop.productMappings.product', 'user'],
+      order: { createdAt: order },
     });
   }
 
-  async findAllNewOperatingSubmissions() {
+  async findAllNewOperatingSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewOperating,
         status: SubmitStatus.Pending,
       },
       relations: ['shop', 'shop.operatingHours', 'shopOperatingHour', 'user'],
+      order: { createdAt: order },
     });
   }
 
-  async findAllNewProductSubmissions() {
+  async findAllNewProductSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewProduct,
         status: SubmitStatus.Pending,
       },
       relations: ['shop', 'shop.productMappings', 'shop.productMappings.product', 'shopProducts', 'shopProducts.product', 'user'],
+      order: { createdAt: order },
     });
   }
 

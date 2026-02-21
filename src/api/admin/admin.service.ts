@@ -9,7 +9,12 @@ import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/respon
 import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
-import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import {
+  NewShopSubmissionResponseDto,
+  NewOperatingSubmissionResponseDto,
+  NewProductSubmissionResponseDto,
+} from './dto/response/get-all-submission-response.dto';
+import { GetSubmissionsQueryDto } from './dto/query/get-submissions-query.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { ReviewService } from '../review/review.service';
@@ -58,8 +63,10 @@ export class AdminService {
     return await this.shopService.getAllReviewReportsForAdmin();
   }
 
-  async getAllPendingSubmissions(): Promise<GetAllSubmissionsForAdminResponseDto> {
-    return await this.shopService.getAllPendingSubmissions();
+  async getAllPendingSubmissions(
+    query: GetSubmissionsQueryDto,
+  ): Promise<NewShopSubmissionResponseDto[] | NewOperatingSubmissionResponseDto[] | NewProductSubmissionResponseDto[]> {
+    return await this.shopService.getAllPendingSubmissions(query);
   }
 
   async getAllFeedbacks(): Promise<GetAllFeedbacksResponseDto[]> {

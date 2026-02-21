@@ -200,9 +200,9 @@ export class SubmissionShopOperatingHourResponseDto {
 }
 
 /* ======================
- * Shop
+ * Shop (Base - 소품샵 기본 정보만)
  * ====================== */
-export class SubmissionShopResponseDto {
+export class SubmissionShopBaseResponseDto {
   @ApiProperty({ example: 650 })
   id: number;
 
@@ -242,6 +242,12 @@ export class SubmissionShopResponseDto {
   location: string;
 
   @ApiProperty({
+    description: '숨김 여부',
+    example: false,
+  })
+  isHidden: boolean;
+
+  @ApiProperty({
     description: '생성 일자',
     type: String,
     format: 'date-time',
@@ -254,7 +260,12 @@ export class SubmissionShopResponseDto {
     format: 'date-time',
   })
   updatedAt: Date;
+}
 
+/* ======================
+ * Shop (operatingHours, productMappings 포함 - 기타 타입용)
+ * ====================== */
+export class SubmissionShopResponseDto extends SubmissionShopBaseResponseDto {
   @ApiProperty({
     description: '운영 시간 목록 (신규 소품샵 등록 시)',
     type: SubmissionShopOperatingHourResponseDto,
@@ -276,8 +287,25 @@ export class SubmissionShopResponseDto {
  * 신규 소품샵 등록 요청
  * ====================== */
 export class NewShopSubmissionResponseDto extends SubmissionBaseResponseDto {
-  @ApiProperty({ type: SubmissionShopResponseDto })
-  shop: SubmissionShopResponseDto;
+  @ApiProperty({
+    description: '소품샵 기본 정보',
+    type: SubmissionShopBaseResponseDto,
+  })
+  shop: SubmissionShopBaseResponseDto;
+
+  @ApiProperty({
+    description: '이번 제보에 포함된 운영시간 (단일)',
+    type: SubmissionShopOperatingHourResponseDto,
+    nullable: true,
+  })
+  shopOperatingHour: SubmissionShopOperatingHourResponseDto | null;
+
+  @ApiProperty({
+    description: '이번 제보에 포함된 상품 목록',
+    type: SubmissionProductResponseDto,
+    isArray: true,
+  })
+  shopProducts: SubmissionProductResponseDto[];
 
   @ApiProperty({ type: SubmissionUserResponseDto })
   user: SubmissionUserResponseDto;
@@ -287,15 +315,25 @@ export class NewShopSubmissionResponseDto extends SubmissionBaseResponseDto {
  * 신규 상품 추가 요청
  * ====================== */
 export class NewProductSubmissionResponseDto extends SubmissionBaseResponseDto {
-  @ApiProperty({ type: SubmissionShopResponseDto })
-  shop: SubmissionShopResponseDto;
+  @ApiProperty({
+    description: '소품샵 기본 정보',
+    type: SubmissionShopBaseResponseDto,
+  })
+  shop: SubmissionShopBaseResponseDto;
 
   @ApiProperty({
-    description: '이번 요청으로 추가된 상품 목록',
-    type: SubmissionShopProductMappingResponseDto,
+    description: '현재 검증된 상품 목록 (product만)',
+    type: SubmissionProductResponseDto,
     isArray: true,
   })
-  shopProducts: SubmissionShopProductMappingResponseDto[];
+  shopProducts: SubmissionProductResponseDto[];
+
+  @ApiProperty({
+    description: '이번 요청으로 추가된 상품 목록 (product만)',
+    type: SubmissionProductResponseDto,
+    isArray: true,
+  })
+  newShopProducts: SubmissionProductResponseDto[];
 
   @ApiProperty({ type: SubmissionUserResponseDto })
   user: SubmissionUserResponseDto;
@@ -305,14 +343,24 @@ export class NewProductSubmissionResponseDto extends SubmissionBaseResponseDto {
  * 신규 운영시간 추가 요청
  * ====================== */
 export class NewOperatingSubmissionResponseDto extends SubmissionBaseResponseDto {
-  @ApiProperty({ type: SubmissionShopResponseDto })
-  shop: SubmissionShopResponseDto;
+  @ApiProperty({
+    description: '소품샵 기본 정보',
+    type: SubmissionShopBaseResponseDto,
+  })
+  shop: SubmissionShopBaseResponseDto;
+
+  @ApiProperty({
+    description: '현재 검증된 운영시간 (isVerified=1인 단일)',
+    type: SubmissionShopOperatingHourResponseDto,
+    nullable: true,
+  })
+  shopOperatingHour: SubmissionShopOperatingHourResponseDto | null;
 
   @ApiProperty({
     description: '이번 요청으로 추가된 운영시간',
     type: SubmissionShopOperatingHourResponseDto,
   })
-  shopOperatingHour: SubmissionShopOperatingHourResponseDto;
+  newShopOperatingHour: SubmissionShopOperatingHourResponseDto;
 
   @ApiProperty({ type: SubmissionUserResponseDto })
   user: SubmissionUserResponseDto;

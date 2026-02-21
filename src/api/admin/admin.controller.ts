@@ -7,7 +7,12 @@ import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/respon
 import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
 import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
 import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
-import { GetAllSubmissionsForAdminResponseDto } from './dto/response/get-all-submission-response.dto';
+import {
+  NewShopSubmissionResponseDto,
+  NewOperatingSubmissionResponseDto,
+  NewProductSubmissionResponseDto,
+} from './dto/response/get-all-submission-response.dto';
+import { GetSubmissionsQueryDto } from './dto/query/get-submissions-query.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
@@ -93,15 +98,23 @@ export class AdminController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '전체 Submission 조회 (Admin)',
-    description: '신규 소품샵 / 상품 / 운영시간 등록 요청(Submission)을 모두 조회합니다.',
+    description: 'type=shop: 신규 소품샵, type=operate: 운영정보 수정, type=product: 판매정보 수정. ' + 'sortBy=created, order=desc|asc 로 정렬.',
   })
+  @ApiExtraModels(NewShopSubmissionResponseDto, NewOperatingSubmissionResponseDto, NewProductSubmissionResponseDto)
   @ApiOkResponse({
-    type: GetAllSubmissionsForAdminResponseDto,
+    description: 'type에 따라 NewShopSubmissionResponseDto[] | NewOperatingSubmissionResponseDto[] | NewProductSubmissionResponseDto[]',
+    schema: {
+      oneOf: [
+        { type: 'array', items: { $ref: getSchemaPath(NewShopSubmissionResponseDto) } },
+        { type: 'array', items: { $ref: getSchemaPath(NewOperatingSubmissionResponseDto) } },
+        { type: 'array', items: { $ref: getSchemaPath(NewProductSubmissionResponseDto) } },
+      ],
+    },
   })
   @UseGuards(AdminJwtAuthGuard)
   @Get('submission')
-  async getAllPendingSubmissions() {
-    return await this.adminService.getAllPendingSubmissions();
+  async getAllPendingSubmissions(@Query() query: GetSubmissionsQueryDto) {
+    return await this.adminService.getAllPendingSubmissions(query);
   }
 
   @ApiBearerAuth('JWT-auth')

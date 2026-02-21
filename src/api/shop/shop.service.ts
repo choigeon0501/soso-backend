@@ -348,11 +348,70 @@ export class ShopService {
     }));
   }
 
-  async getAllPendingSubmissions() {
-    const newShopSubmissions = await this.submitRepository.findAllNewShopSubmissions();
-    const newOperatingSubmissions = await this.submitRepository.findAllNewOperatingSubmissions();
-    const newProductSubmissions = await this.submitRepository.findAllNewProductSubmissions();
-    return { newShopSubmissions, newOperatingSubmissions, newProductSubmissions };
+  async getAllPendingSubmissions(query: {
+    type?: 'shop' | 'operate' | 'product';
+    sortBy?: 'created';
+    order?: 'desc' | 'asc';
+  }) {
+    const type = query.type ?? 'shop';
+    const order = (query.order ?? 'desc').toUpperCase() as 'ASC' | 'DESC';
+
+    switch (type) {
+      case 'shop': {
+        const list = await this.submitRepository.findAllNewShopSubmissions(order);
+        return list.map((record) => {
+          const { operatingHours, productMappings, ...shopBase } = record.shop;
+          return {
+            ...record,
+            shop: shopBase,
+            shopOperatingHour: operatingHours?.[0] ?? null,
+            shopProducts: productMappings?.map((m) => m.product) ?? [],
+          };
+        });
+      }
+      case 'operate': {
+        const list = await this.submitRepository.findAllNewOperatingSubmissions(order);
+        return list.map((record) => {
+          const { shopOperatingHour, shop, ...rest } = record;
+          const verifiedOperatingHour =
+            shop.operatingHours?.find((o) => Boolean(o.isVerified)) ?? null;
+          const { operatingHours: _dropped, ...shopBase } = shop;
+          return {
+            ...rest,
+            shop: shopBase,
+            shopOperatingHour: verifiedOperatingHour,
+            newShopOperatingHour: shopOperatingHour,
+          };
+        });
+      }
+      case 'product': {
+        const list = await this.submitRepository.findAllNewProductSubmissions(order);
+        return list.map((record) => {
+          const { shopProducts: newMappings, shop, ...rest } = record;
+          const verifiedProducts =
+            shop.productMappings?.filter((m) => Boolean(m.isVerified)).map((m) => m.product) ?? [];
+          const { productMappings: _dropped, ...shopBase } = shop;
+          return {
+            ...rest,
+            shop: shopBase,
+            shopProducts: verifiedProducts,
+            newShopProducts: newMappings?.map((m) => m.product) ?? [],
+          };
+        });
+      }
+      default: {
+        const list = await this.submitRepository.findAllNewShopSubmissions(order);
+        return list.map((record) => {
+          const { operatingHours, productMappings, ...shopBase } = record.shop;
+          return {
+            ...record,
+            shop: shopBase,
+            shopOperatingHour: operatingHours?.[0] ?? null,
+            shopProducts: productMappings?.map((m) => m.product) ?? [],
+          };
+        });
+      }
+    }
   }
 
   async toggleShopHidden(shopId: number, isHidden: boolean): Promise<void> {
