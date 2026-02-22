@@ -5,70 +5,87 @@ import {
   Param,
   Post,
   Patch,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
   Delete,
   Query,
-  ConflictException,
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
 } from '@nestjs/common';
-import { NickNameDTO, PageNationDTO, ReviewPageNationDTO, UpdateProfileDTO, WishlistPageNationDTO } from './dto/user.dto';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { SuccessResponseDTO } from 'src/common/response/response.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from '../jwt/jwt-auth.guard';
+import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
+import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
-import { ApiNoContentResponse, ApiOperation } from '@nestjs/swagger';
-import { ApiDefaultResponses } from '../../common/deco/swagger-default.deco';
+import { UpdateProfileDTO } from './dto/requests/user_requests.dto';
+import { WithdrawalReasonDTO, ValidateNickNameDTO } from './dto/query/user.dto';
+import { PaginationQueryDTO } from './dto/query/pagination.dto';
+import { PageInfoDTO, PaginationResponsesDto } from './dto/responses/pagination_responses.dto';
+import { UserProfileResponsesDTO } from './dto/responses/user_responses.dto';
+import { RecentSearchResponsesDto } from './dto/responses/recent_search_responses.dto';
+import { UserSubmitRecordDTO, UserSubmitRecordItemDTO } from './dto/responses/submit_responses.dto';
+import { UserReviewsRecordDTO, UserReviewsRecordItemDTO } from './dto/responses/review_responses.dto';
+import { ReviewPaginationDTO } from './dto/query/review.dto';
+import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
+import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
+import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
+import { SuccessResponseDTO, SuccessNoResultResponseDTO } from 'src/common/response/response.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('user')
+@ApiTags('Users')
+@Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Delete('/:uuid')
-  @ApiOperation({ summary: '회원탈퇴 API' })
-  @ApiNoContentResponse()
-  @ApiDefaultResponses()
+  @Get('/me')
   @UseGuards(JwtAuthGuard)
-  async deleteUser(@Query('deleteType') deleteType: number, @Param('uuid') uuid: string, @GetUUID() currentUUID: string) {
-    if (uuid !== currentUUID) throw new ConflictException('Not equal User UUID');
-    return new SuccessResponseDTO(await this.userService.deleteUser(uuid, deleteType));
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '프로필 정보 불러오기',
+    description: 'isNew: 닉네임 작성 완료 여부 (false면 닉네임 설정 페이지로 이동 필요)',
+  })
+  @ApiExtraModels(SuccessResponseDTO, UserProfileResponsesDTO)
+  @ApiOkResponse({
+    description: '프로필 정보 불러오기 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserProfileResponsesDTO) } } }],
+    },
+  })
+  getUserProfile(@GetUUID() uuid: string) {
+    return this.userService.getUserProfile(uuid);
   }
 
-  @Get('/nickname/:nickName')
-  @ApiOperation({ summary: '회원탈퇴 API' })
-  @ApiDefaultResponses()
-  async checkNickName(@Param() nickNameDTO: NickNameDTO) {
-    return new SuccessResponseDTO(await this.userService.findUserNickName(nickNameDTO));
-  }
-
-  @Post('/nickname')
-  @ApiOperation({ summary: '닉네임 저장 API' })
-  @ApiNoContentResponse()
-  @ApiDefaultResponses()
+  @Patch('/me')
   @UseGuards(JwtAuthGuard)
-  async setNickName(@Body() nickNameDTO: NickNameDTO, @GetUUID() uuid: string) {
-    return new SuccessResponseDTO(await this.userService.findAndUpdateUserNickname(nickNameDTO, uuid));
-  }
-
-  @Get('/profile')
-  @UseGuards(JwtAuthGuard)
-  async getProfile(@GetUUID() uuid: string) {
-    return new SuccessResponseDTO(await this.userService.getUserProfile(uuid));
-  }
-
-  @Patch('/profile')
-  @ApiOperation({ summary: '유저 프로필 업데이트 API' })
-  @ApiNoContentResponse()
-  @ApiDefaultResponses()
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async updateProfile(
+  @UseInterceptors(FileInterceptor('profileImage'))
+  @ApiBearerAuth('JWT-auth')
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '프로필 정보 수정하기', description: '프로필 사진(옵션), 닉네임(옵션)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: [],
+      properties: {
+        nickName: {
+          type: 'string',
+          nullable: true,
+          example: '소소한유저',
+        },
+        profileImage: {
+          type: 'string',
+          nullable: true,
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOkResponse({ description: '프로필 정보 수정 성공', type: SuccessNoResultResponseDTO })
+  updateProfile(
     @GetUUID() uuid: string,
-    @Body() updateProfileDTO?: UpdateProfileDTO,
+    @Body() updateProfileDTO: UpdateProfileDTO,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), new FileTypeValidator({ fileType: /image\/(jpg|jpeg|png)/ })],
@@ -77,24 +94,126 @@ export class UserController {
     )
     file?: Express.Multer.File,
   ) {
-    return new SuccessResponseDTO(await this.userService.updateUserProfile(updateProfileDTO, uuid, file));
+    return this.userService.updateUserProfile(updateProfileDTO, uuid, file);
   }
 
-  @Get('/submit')
+  @Delete('/me')
   @UseGuards(JwtAuthGuard)
-  async getSubmitShop(@GetUUID() uuid: string, @Query() pageNation: PageNationDTO) {
-    return new SuccessResponseDTO(await this.userService.findSubmitRecord(pageNation, uuid));
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '회원탈퇴' })
+  @ApiOkResponse({ description: '회원탈퇴 성공', type: SuccessNoResultResponseDTO })
+  deleteUser(@Query() withdrawalReasonDTO: WithdrawalReasonDTO, @GetUUID() uuid: string) {
+    return this.userService.deleteUser(uuid, withdrawalReasonDTO);
   }
 
-  @Get('/review')
-  @UseGuards(JwtAuthGuard)
-  async getUserReview(@GetUUID() uuid: string, @Query() pageNation: ReviewPageNationDTO) {
-    return new SuccessResponseDTO(await this.userService.findUserReviews(pageNation, uuid));
+  @Get('/duplicate-check')
+  @ApiOperation({ summary: '닉네임 중복 체크', description: 'true: 중복됨 / false: 중복되지 않음' })
+  @ApiOkResponse({
+    description: '닉네임 중복 체크 결과',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { type: 'boolean', enum: [true, false] } } }],
+    },
+  })
+  validateNickName(@Query() validationNickNameDTO: ValidateNickNameDTO) {
+    return this.userService.findUserNickName(validationNickNameDTO);
   }
 
-  @Get('/wishlist')
+  @Get('/me/shop-submissions')
   @UseGuards(JwtAuthGuard)
-  async getUserWishlist(@GetUUID() uuid: string, @Query() pageNation: WishlistPageNationDTO) {
-    return new SuccessResponseDTO(await this.userService.getWishlist(pageNation, uuid));
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '사용자가 등록/제안한 소품샵 정보' })
+  @ApiExtraModels(UserSubmitRecordDTO, UserSubmitRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
+  @ApiOkResponse({
+    description: '사용자가 등록/제안한 소품샵 정보 조회 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserSubmitRecordDTO) } } }],
+    },
+  })
+  getUserShopSubmissions(@GetUUID() uuid: string, @Query() pageNation: PaginationQueryDTO) {
+    return this.userService.findUserShopSubmissions(pageNation as any, uuid);
+  }
+
+  @Delete('/me/shop-submissions/:submitId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '제보한 데이터 제거' })
+  @ApiOkResponse({ description: '제보한 데이터 제거 성공', type: SuccessNoResultResponseDTO })
+  deleteUserShopSubmission(@Param('submitId', ParseIntPipe) submitId: number, @GetUUID() uuid: string) {
+    return this.userService.deleteUserShopSubmission(submitId, uuid);
+  }
+
+  @Get('/me/reviews')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '사용자가 등록한 리뷰 정보' })
+  @ApiExtraModels(UserReviewsRecordDTO, UserReviewsRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
+  @ApiOkResponse({
+    description: '사용자가 등록한 리뷰 조회 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserReviewsRecordDTO) } } }],
+    },
+  })
+  getUserReviews(@GetUUID() uuid: string, @Query() reviewPageNation: ReviewPaginationDTO) {
+    return this.userService.findUserReviews(reviewPageNation, uuid);
+  }
+
+  @Get('/me/favorite')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '사용자가 찜한 소품샵 리스트' })
+  @ApiExtraModels(UserFavoriteRecordDTO, UserFavoriteRecordItemDTO, PageInfoDTO, PaginationResponsesDto)
+  @ApiOkResponse({
+    description: '찜한 소품샵 리스트 조회 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UserFavoriteRecordDTO) } } }],
+    },
+  })
+  getUserFavorites(@GetUUID() uuid: string, @Query() pageNation: UserFavoritePageNationDTO) {
+    return this.userService.getUserFavorites(pageNation as any, uuid);
+  }
+
+  @Post('/me/favorite')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '소품샵 찜하기', description: '찜하기 리스트에 해당 소품샵을 넣습니다.' })
+  @ApiOkResponse({ description: '찜하기 성공', type: SuccessNoResultResponseDTO })
+  addUserFavorite(@GetUUID() uuid: string, @Body() userFavoriteRequestsDto: UserFavoriteRequestsDto) {
+    return this.userService.addUserFavorite(userFavoriteRequestsDto, uuid);
+  }
+
+  @Get('/me/recent-searches')
+  @UseGuards(OptionalAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '최근 검색 기록 조회', description: '로그인된 경우 최근 검색한 소품샵 리스트를 반환합니다.' })
+  @ApiExtraModels(SuccessResponseDTO, RecentSearchResponsesDto)
+  @ApiOkResponse({
+    description: '최근 검색 기록 조회 성공',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(SuccessResponseDTO) },
+        { properties: { result: { type: 'array', items: { $ref: getSchemaPath(RecentSearchResponsesDto) } } } },
+      ],
+    },
+  })
+  getUserRecentSearches(@GetUUID() uuid: string) {
+    return this.userService.getUserRecentSearches(uuid);
+  }
+
+  @Delete('/me/recent-searches')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '최근 검색 기록 전체 삭제' })
+  @ApiOkResponse({ description: '최근 검색 기록 전체 삭제 완료', type: SuccessNoResultResponseDTO })
+  deleteAllRecentSearch(@GetUUID() uuid: string) {
+    return this.userService.deleteAllRecentSearch(uuid);
+  }
+
+  @Delete('/me/recent-searches/:recentSearchId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '최근 검색 기록 삭제', description: '최근 검색 기록 id로 삭제' })
+  @ApiOkResponse({ description: '최근 검색 기록 삭제 성공', type: SuccessNoResultResponseDTO })
+  deleteRecentSearchById(@GetUUID() uuid: string, @Param('recentSearchId', ParseIntPipe) recentSearchId: number) {
+    return this.userService.deleteRecentSearchById(uuid, recentSearchId);
   }
 }

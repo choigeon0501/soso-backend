@@ -1,49 +1,75 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ReviewRepository } from './review.repository';
-import { DeleteReviewDto, PostReviewDto, UpdateReviewDto } from './dto/review.dto';
-import { AwsService } from '../aws/aws.service';
-import { ReviewTransactionsRepository } from '../transactions/review.repository';
+import { ReviewRepository } from './repositories/review.repository';
+import { ReviewImage } from './entities/review-image.entity';
 
 @Injectable()
 export class ReviewService {
-  constructor(
-    private reviewRepository: ReviewRepository,
-    private awsService: AwsService,
-    private reviewTransactionsRepository: ReviewTransactionsRepository,
-  ) {}
+  constructor(private reviewRepository: ReviewRepository) {}
 
-  async createReview(uuid: string, postReviewDto: PostReviewDto, files?: Express.Multer.File[]): Promise<void> {
-    const { shopId, content } = postReviewDto;
+  async toggleReviewHidden(reviewId: number, isHidden: boolean): Promise<void> {
+    // 해당 로직에는 추후 '밴'에 대한 로직이 추가될 예정
+    const review = await this.reviewRepository.findByIdForHiddenReview(reviewId);
+    if (!review) {
+      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+    }
 
-    // 이미지 업로드 및 URL 생성 (파일이 없을 경우 빈 배열 반환)
-    const imageUrls = files ? await this.awsService.uploadImagesToS3(files, 'jpg') : [];
+    review.isHidden = isHidden;
 
-    // 트랜잭션을 사용하여 Review 생성
-    await this.reviewTransactionsRepository.createReview(uuid, Number(shopId), content, imageUrls);
-  }
-
-  async updateReview(uuid: string, updateReviewDto: UpdateReviewDto, newFiles?: Express.Multer.File[]): Promise<void> {
-    const { reviewId, content, deleteImages } = updateReviewDto;
-
-    // 새 파일이 존재하면 업로드
-    const newImageUrls = newFiles?.length > 0 ? await this.awsService.uploadImagesToS3(newFiles, 'jpg') : [];
-
-    // 트랜잭션을 사용하여 Review 업데이트
-    await this.reviewTransactionsRepository.updateReview(uuid, reviewId, content, deleteImages || [], newImageUrls);
-  }
-
-  async deleteReviewByUUID(uuid: string, deleteReviewDto: DeleteReviewDto): Promise<void> {
-    const { reviewId } = deleteReviewDto;
-    await this.reviewTransactionsRepository.deleteReview(uuid, reviewId);
+    await this.reviewRepository.saveReview(review);
   }
 
   async findShopReviewsByShopId(shopId: number, uuid: string) {
     const reviews = await this.reviewRepository.findShopReviewsByShopId(shopId);
-    const userReviews = reviews.filter((review) => review.user?.uuid === uuid);
-    const otherReviews = reviews.filter((review) => review.user == null || review.user?.uuid != uuid);
+
+    const transformImages = async (reviewImages: ReviewImage[] = []) => {
+      return Promise.all(
+        reviewImages
+          .filter((img) => !!img)
+          .map(async (image) => {
+            const url = image.fileKey;
+            return { ...image, url };
+          }),
+      );
+    };
+
+    // uuid는 필터링용으로만 유지
+    const transformReview = async (review: any) => {
+      const images = await transformImages(review.images ?? []);
+
+      return {
+        ...review,
+        images,
+        user: review.user
+          ? {
+              uuid: review.user.uuid, // 👉 필터링 전까진 유지
+              profileImg: review.user.profileImg ?? null,
+              nickName: review.user.nickName ?? null,
+            }
+          : null,
+      };
+    };
+
+    const reviewsWithPresigned = await Promise.all(reviews.map(transformReview));
+
+    // uuid 포함 상태에서 필터링
+    const userReviewsRaw = reviewsWithPresigned.filter((r) => r.user?.uuid === uuid);
+    const otherReviewsRaw = reviewsWithPresigned.filter((r) => !r.user || r.user.uuid !== uuid);
+
+    // 이제 uuid 제거
+    const stripUuid = (reviews: any[]) =>
+      reviews.map((r) => ({
+        ...r,
+        user: r.user
+          ? {
+              profileImg: r.user.profileImg,
+              nickName: r.user.nickName,
+            }
+          : null,
+      }));
+
     return {
-      userReviews,
-      otherReviews,
+      userReviews: stripUuid(userReviewsRaw),
+      otherReviews: stripUuid(otherReviewsRaw),
     };
   }
 }

@@ -11,9 +11,8 @@ async function bootstrap() {
 
   const httpsOptions = isProd
     ? {
-        key: fs.readFileSync('/opt/bitnami/letsencrypt/certificates/api.sosohan.shop.key', 'utf8'),
-        cert: fs.readFileSync('/opt/bitnami/letsencrypt/certificates/api.sosohan.shop.crt', 'utf8'),
-        ca: fs.readFileSync('/opt/bitnami/letsencrypt/certificates/api.sosohan.shop.issuer.crt', 'utf8'),
+        key: fs.readFileSync('/etc/letsencrypt/live/api.sosohan.shop/privkey.pem', 'utf8'),
+        cert: fs.readFileSync('/etc/letsencrypt/live/api.sosohan.shop/fullchain.pem', 'utf8'),
       }
     : undefined;
 
@@ -51,7 +50,7 @@ async function bootstrap() {
   });
   setupSwagger(app);
 
-  app.setGlobalPrefix('v1/api');
+  app.setGlobalPrefix('v2/api');
   // HTTPS 포트 443 사용
   await app.listen(port);
 }

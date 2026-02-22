@@ -1,71 +1,111 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { SubmitRepository } from '../submit/submit.repository';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { UserService } from '../user/user.service';
+import { ShopService } from '../shop/shop.service';
+import * as bcrypt from 'bcrypt';
+import { AdminUserRepository } from './repositories/admin-user.repository';
+import { AdminLoginDto } from './dto/request/admin-login.dto';
+import { AuthTokenService } from '../auth/services/auth-token.service';
+import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/response/get-all-users-response.dto';
+import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
+import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
+import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
 import {
-  RejectSubmitProducts,
-  AllowSubmitProducts,
-  AllowSubmitOperatingInfo,
-  RejectSubmitOperatingInfo,
-  AllowSubmitNewShop,
-  RejectSubmitNewShop,
-} from './dto/admin.dto';
-import { ProductRepository } from '../product/product.repository';
-import { OperateRepository } from '../operate/operate.repository';
-import { ShopRepository } from '../shop/shop.repository';
-import { SubmitNewShopResponseDTO, SubmitOperatingsResponseDTO, SubmitProductsResponseDTO } from './dto/admin-response';
-import { AdminTransactionsRepository } from '../transactions/admin.repository';
+  NewShopSubmissionResponseDto,
+  NewOperatingSubmissionResponseDto,
+  NewProductSubmissionResponseDto,
+} from './dto/response/get-all-submission-response.dto';
+import { GetSubmissionsQueryDto } from './dto/query/get-submissions-query.dto';
+import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
+import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
+import { ReviewService } from '../review/review.service';
+import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
+import { FeedbackService } from '../feedback/feedback.service';
+import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
 
 @Injectable()
 export class AdminService {
   constructor(
-    private submitRepository: SubmitRepository,
-    private productRepository: ProductRepository,
-    private operateRepository: OperateRepository,
-    private shopRepository: ShopRepository,
-    private adminTransactionsRepository: AdminTransactionsRepository,
+    private readonly userService: UserService,
+    private readonly shopService: ShopService,
+    private readonly reviewService: ReviewService,
+    private readonly authTokenService: AuthTokenService,
+    private readonly feedbackService: FeedbackService,
+    private readonly adminUserRepository: AdminUserRepository,
   ) {}
 
-  async getAllSubmitProducts() {
-    const submitUserProducts = await this.submitRepository.findAllSubmitProducts();
-    return submitUserProducts.map(SubmitProductsResponseDTO.fromEntity);
+  async adminLogin(adminLoginDto: AdminLoginDto) {
+    const { email, password } = adminLoginDto;
+
+    const admin = await this.adminUserRepository.findByEmail(email);
+    if (!admin) {
+      throw new ForbiddenException();
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    if (!isPasswordValid) {
+      throw new ForbiddenException();
+    }
+
+    await this.adminUserRepository.updateLastLogin(admin.id);
+
+    return this.authTokenService.issueAdminToken(admin.id);
   }
 
-  async allowSubmitProduct(allowSubmitProducts: AllowSubmitProducts) {
-    const { submitId, userUUID, shopId } = allowSubmitProducts;
-    await this.adminTransactionsRepository.allowSubmitProduct(submitId, userUUID, shopId);
+  async getAllUsers(query: GetUsersQueryDto): Promise<ActivityUserResponseDto[] | WithdrawalUserResponseDto[]> {
+    return await this.userService.getAllUsersForAdmin(query);
   }
 
-  async rejectSubmitProduct(rejectSubmitProducts: RejectSubmitProducts) {
-    const { submitId, userUUID, shopId, rejectMessage } = rejectSubmitProducts;
-    await this.adminTransactionsRepository.rejectSubmitProduct(submitId, userUUID, shopId, rejectMessage);
+  async getAllShopReports(): Promise<GetAllShopReportResponseDto[]> {
+    return await this.shopService.getAllShopReportsForAdmin();
   }
 
-  async getAllSubmitOperatings() {
-    const submitUserOperatings = await this.submitRepository.findAllSubmitOperatings();
-    return submitUserOperatings.map(SubmitOperatingsResponseDTO.fromEntity);
+  async getAllReviewReports(): Promise<GetAllReviewReportResponseDto[]> {
+    return await this.shopService.getAllReviewReportsForAdmin();
   }
 
-  async allowSubmitOperatingInfo(allowSubmitOperatingInfo: AllowSubmitOperatingInfo) {
-    const { submitId, userUUID, shopId, operatingId } = allowSubmitOperatingInfo;
-    await this.adminTransactionsRepository.allowSubmitOperatingInfo(submitId, userUUID, shopId, operatingId);
+  async getAllPendingSubmissions(
+    query: GetSubmissionsQueryDto,
+  ): Promise<NewShopSubmissionResponseDto[] | NewOperatingSubmissionResponseDto[] | NewProductSubmissionResponseDto[]> {
+    return await this.shopService.getAllPendingSubmissions(query);
   }
 
-  async rejectSubmitOperatingInfo(rejectSubmitOperatingInfo: RejectSubmitOperatingInfo) {
-    const { submitId, userUUID, operatingId, rejectMessage } = rejectSubmitOperatingInfo;
-    await this.adminTransactionsRepository.rejectSubmitOperatingInfo(submitId, userUUID, operatingId, rejectMessage);
+  async getAllFeedbacks(): Promise<GetAllFeedbacksResponseDto[]> {
+    return await this.feedbackService.getAllFeedbacks();
   }
 
-  async getAllNewShops() {
-    const submitUserNewShops = await this.submitRepository.findAllSubmitNewShops();
-    return submitUserNewShops.map(SubmitNewShopResponseDTO.fromEntity);
+  async acceptProductSubmission(submissionId: number) {
+    return await this.shopService.acceptProductSubmission(submissionId);
   }
 
-  async allowNewShop(allowSubmitNewShop: AllowSubmitNewShop) {
-    const { submitId, userUUID, newShopId } = allowSubmitNewShop;
-    await this.adminTransactionsRepository.allowNewShop(submitId, userUUID, newShopId);
+  async rejectProductSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectProductSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
   }
 
-  async rejectNewShop(rejectSubmitNewShop: RejectSubmitNewShop) {
-    const { submitId, userUUID, newShopId, rejectMessage } = rejectSubmitNewShop;
-    await this.adminTransactionsRepository.rejectNewShop(submitId, userUUID, newShopId, rejectMessage);
+  async acceptOperatingInfoSubmission(submissionId: number) {
+    return await this.shopService.acceptOperatingInfoSubmission(submissionId);
+  }
+
+  async rejectOperatingInfoSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectOperatingInfoSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
+  async acceptNewShopSubmission(submissionId: number) {
+    return await this.shopService.acceptNewShopSubmission(submissionId);
+  }
+
+  async rejectNewShopSubmission(submissionId: number, rejectProductSubmissionDto: RejectProductSubmissionDto) {
+    return await this.shopService.rejectNewShopSubmission(submissionId, rejectProductSubmissionDto.rejectMessage);
+  }
+
+  async toggleShopHidden(shopId: number, toggleShopHiddenDto: ToggleShopHiddenDto): Promise<void> {
+    const { isHidden } = toggleShopHiddenDto;
+
+    return await this.shopService.toggleShopHidden(shopId, isHidden);
+  }
+
+  async toggleReviewHidden(reviewId: number, toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
+    const { isHidden } = toggleReviewHiddenDto;
+
+    await this.reviewService.toggleReviewHidden(reviewId, isHidden);
   }
 }

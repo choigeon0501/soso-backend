@@ -3,27 +3,21 @@ import { AuthModule } from './api/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './api/user/user.module';
 import { ShopModule } from './api/shop/shop.module';
-import { SubmitModule } from './api/submit/submit.module';
-import { WishlistModule } from './api/wishlist/wishlist.module';
 import { ReviewModule } from './api/review/review.module';
-import { AwsModule } from './api/aws/aws.module';
+import { AwsModule } from './common/aws/aws.module';
 import { AppController } from './app.controller';
-import { ProductModule } from './api/product/product.module';
-import { OperateModule } from './api/operate/operate.module';
 import { RegionModule } from './api/region/region.module';
 import { NoticeModule } from './api/notice/notice.module';
 import { FeedbackModule } from './api/feedback/feedback.module';
-import { RecentSearchModule } from './api/recent-search/recent-search.module';
-import { LoggerModule } from './api/logger/logger.module';
-import { ReportModule } from './api/report/report.module';
-import { ImageModule } from './api/image/image.module';
-import { AdminModule } from './api/admin/admin.module';
+import { LoggerModule } from './common/logger/logger.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from './api/jwt/jwt.module';
+import { JwtModule } from './common/jwt/jwt.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { TransactionsModule } from './api/transactions/transactions.module';
-import { HttpExceptionFilter } from './common/filter/http-exception.filter';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ExceptionFilter } from './common/filter/http-exception.filter';
+import { AdminModule } from './api/admin/admin.module';
+import { SuccessResponseFilter } from './common/filter/success-response.filter';
+import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
 
 @Module({
   imports: [
@@ -40,8 +34,8 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [__dirname + '/database/entity/*.entity.{ts,js}'],
-        synchronize: false,
+        entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
+        synchronize: true,
       }),
     }),
     ThrottlerModule.forRoot({
@@ -57,22 +51,15 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
     AuthModule,
     UserModule,
     ShopModule,
-    SubmitModule,
-    WishlistModule,
     ReviewModule,
     AwsModule,
-    ProductModule,
-    OperateModule,
     RegionModule,
     NoticeModule,
     FeedbackModule,
-    RecentSearchModule,
     LoggerModule,
-    ReportModule,
-    ImageModule,
-    AdminModule,
     JwtModule,
-    TransactionsModule,
+    AdminModule,
+    AdminJwtModule,
   ],
   controllers: [AppController],
   providers: [
@@ -82,7 +69,11 @@ import { HttpExceptionFilter } from './common/filter/http-exception.filter';
     },
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: ExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SuccessResponseFilter,
     },
   ],
 })

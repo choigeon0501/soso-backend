@@ -1,9 +1,15 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException } from '@nestjs/common';
-import { Response, Request } from 'express';
-import { LoggerService } from '../../api/logger/logger.service';
+import {
+  ExceptionFilter as NestExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+import { LoggerService } from '../logger/logger.service';
 
-@Catch() // 모든 예외를 잡음
-export class HttpExceptionFilter implements ExceptionFilter {
+@Catch()
+export class ExceptionFilter implements NestExceptionFilter {
   constructor(private readonly loggerService: LoggerService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
@@ -11,23 +17,51 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = 500; // 기본적으로 Internal Server Error
-    let message = 'Internal Server Error';
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      message = exception.message;
-    } else if (exception instanceof Error) {
-      // 일반적인 런타임 오류 처리
-      message = exception.message;
-    }
+    const exceptionResponse =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : { message: 'Internal server error' };
 
-    // WARN 로그 저장
-    this.loggerService.warn(`[${request.method}] |IP: ${request.ip}| ${request.url} - Status: ${status}, Message: ${message}`);
+    const message =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : (exceptionResponse as any).message || 'Unknown error';
 
-    response.status(status).json({
-      status: status,
-      message: message,
-    });
+    // 모든 요청에 대해 로깅
+    const errorResponse = {
+      timestamp: new Date().toISOString(),
+      statusCode: status,
+      message: Array.isArray(message) ? message.join(', ') : message,
+      error:
+        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
+          ? (exceptionResponse as any).error
+          : undefined,
+      path: request.url,
+      method: request.method,
+      stack: exception instanceof Error ? exception.stack : undefined,
+      body: request.body,
+      query: request.query,
+      params: request.params,
+    };
+
+    // 모든 에러를 하나의 폴더에서 관리
+    this.loggerService.logError(request.url, errorResponse);
+
+    // 클라이언트 응답 (스택 트레이스 제외)
+    const clientResponse: any = {
+      statusCode: status,
+      message: Array.isArray(message) ? message.join(', ') : message,
+      error:
+        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
+          ? (exceptionResponse as any).error
+          : undefined,
+    };
+
+    response.status(status).json(clientResponse);
   }
 }

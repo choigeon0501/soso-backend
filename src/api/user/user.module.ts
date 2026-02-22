@@ -1,30 +1,23 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { User } from 'src/database/entity/user.entity';
+import { User } from 'src/api/user/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserRepository } from './user.repository';
-import { AwsModule } from '../aws/aws.module';
+import { UserRepository } from './repositories/user.repository';
+import { AwsModule } from '../../common/aws/aws.module';
 import { ReviewModule } from '../review/review.module';
-import { WishlistModule } from '../wishlist/wishlist.module';
-import { SubmitModule } from '../submit/submit.module';
-import { ImageModule } from '../image/image.module';
-import { RecentSearchModule } from '../recent-search/recent-search.module';
-import { TransactionsModule } from '../transactions/transactions.module';
+import { ShopModule } from '../shop/shop.module';
+import { UserFavoriteRepository } from './repositories/user-favorite.repository';
+import { UserFavorite } from './entities/user-favorite.entity';
+import { UserTransactionsRepository } from './repositories/user-transactions.repository';
+import { AuthModule } from '../auth/auth.module';
+import { UserWithdrawalRepository } from './repositories/user-withdrawal.repository';
+import { UserWithdrawal } from './entities/user-withdrawal.entity';
 
 @Module({
-  imports: [
-    forwardRef(() => SubmitModule),
-    TypeOrmModule.forFeature([User]),
-    AwsModule,
-    ReviewModule,
-    WishlistModule,
-    ImageModule,
-    RecentSearchModule,
-    TransactionsModule,
-  ],
+  imports: [forwardRef(() => ShopModule), TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]), AuthModule, AwsModule, ReviewModule],
   controllers: [UserController],
-  providers: [UserService, UserRepository],
-  exports: [UserService, UserRepository],
+  providers: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
+  exports: [UserService, UserRepository, UserFavoriteRepository, UserTransactionsRepository, UserWithdrawalRepository],
 })
 export class UserModule {}

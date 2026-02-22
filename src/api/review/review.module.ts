@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
-import { ReviewController } from './review.controller';
-import { ReviewService } from './review.service';
-import { Review } from 'src/database/entity/review.entity';
+import { Review } from 'src/api/review/entities/review.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ReviewRepository } from './review.repository';
-import { AwsModule } from '../aws/aws.module';
-import { Image } from 'src/database/entity/image.entity';
-import { ImageModule } from '../image/image.module';
-import { TransactionsModule } from '../transactions/transactions.module';
+import { ReviewRepository } from './repositories/review.repository';
+import { AwsModule } from '../../common/aws/aws.module';
+import { ReviewImage } from 'src/api/review/entities/review-image.entity';
+import { ReviewService } from './review.service';
+import { ReviewBan } from './entities/review-ban.entity';
+import { ReviewBanRepository } from './repositories/review-ban.repository';
+import { ReviewReportRepository } from './repositories/review-report.repository';
+import { ReviewReport } from './entities/review-report.entity';
+import { ReviewTransactionsRepository } from './repositories/review-transactions.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Review, Image]), AwsModule, ImageModule, TransactionsModule],
-  controllers: [ReviewController],
-  providers: [ReviewService, ReviewRepository],
-  exports: [ReviewService, ReviewRepository],
+  imports: [TypeOrmModule.forFeature([Review, ReviewImage, ReviewBan, ReviewReport]), AwsModule],
+  providers: [ReviewService, ReviewRepository, ReviewBanRepository, ReviewReportRepository, ReviewTransactionsRepository],
+  exports: [ReviewService, ReviewRepository, ReviewBanRepository, ReviewReportRepository, ReviewTransactionsRepository],
 })
 export class ReviewModule {}
