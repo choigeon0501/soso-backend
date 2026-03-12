@@ -11,10 +11,11 @@ export class ActivityUserResponseDto {
   num: number;
 
   @ApiProperty({
-    description: '사용자 uuid',
-    example: 'uuid',
+    description: '사용자 이메일',
+    example: 'user@example.com',
+    nullable: true,
   })
-  uuid: string;
+  email: string | null;
 
   @ApiProperty({
     description: '사용자 닉네임',

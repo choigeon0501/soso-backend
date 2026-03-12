@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { ShopSubmitRecord } from '../entities/shop-submit-user-record.entity';
 import { Shop } from '../entities/shop.entity';
 import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
+import { normalizePhoneNumber } from '../../../common/function/normalize-phone-number.function';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from '../dto/requests/submit_shop_requests.dto';
 import { ShopOperatingHour } from '../entities/shop-operating-hour.entity';
 import { ShopProductMapping } from '../entities/shop-product-mapping.entity';
@@ -298,6 +299,7 @@ export class ShopSubmitTransactionsRepository {
           shop: { id: createShop.id },
           isVerified: true, // true로 두는 이유는, 어차피 shop의 verified만 true로 바꾸면 전부 사용할 수 있도록 해야 되기 때문 -> shop에 종속되어있음
           ...operatingHours,
+          phoneNumber: normalizePhoneNumber(operatingHours.phoneNumber),
         });
       }
 
@@ -373,6 +375,7 @@ export class ShopSubmitTransactionsRepository {
         shop: { id: shopId },
         isVerified: false,
         ...operatingHours,
+        phoneNumber: normalizePhoneNumber(operatingHours.phoneNumber),
       });
 
       await submitRepo.save({

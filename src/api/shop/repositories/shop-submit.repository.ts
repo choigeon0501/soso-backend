@@ -42,33 +42,33 @@ export class ShopSubmitRepository {
     });
   }
 
-  async findAllNewShopSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
+  async findAllNewShopSubmissions(order: 'ASC' | 'DESC' = 'DESC', status: SubmitStatus = SubmitStatus.Pending) {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewShop,
-        status: SubmitStatus.Pending,
+        status,
       },
       relations: ['shop', 'shop.operatingHours', 'shop.productMappings', 'shop.productMappings.product', 'user'],
       order: { createdAt: order },
     });
   }
 
-  async findAllNewOperatingSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
+  async findAllNewOperatingSubmissions(order: 'ASC' | 'DESC' = 'DESC', status: SubmitStatus = SubmitStatus.Pending) {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewOperating,
-        status: SubmitStatus.Pending,
+        status,
       },
       relations: ['shop', 'shop.operatingHours', 'shopOperatingHour', 'user'],
       order: { createdAt: order },
     });
   }
 
-  async findAllNewProductSubmissions(order: 'ASC' | 'DESC' = 'DESC') {
+  async findAllNewProductSubmissions(order: 'ASC' | 'DESC' = 'DESC', status: SubmitStatus = SubmitStatus.Pending) {
     return await this.ShopSubmitRecordRepository.find({
       where: {
         type: SubmitType.NewProduct,
-        status: SubmitStatus.Pending,
+        status,
       },
       relations: ['shop', 'shop.productMappings', 'shop.productMappings.product', 'shopProducts', 'shopProducts.product', 'user'],
       order: { createdAt: order },

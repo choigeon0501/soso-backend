@@ -98,7 +98,9 @@ export class AdminController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '전체 Submission 조회 (Admin)',
-    description: 'type=shop: 신규 소품샵, type=operate: 운영정보 수정, type=product: 판매정보 수정. ' + 'sortBy=created, order=desc|asc 로 정렬.',
+    description:
+      'type=shop: 신규 소품샵, type=operate: 운영정보 수정, type=product: 판매정보 수정. ' +
+      'status=pending|approved 로 처리 상태 필터(거절 제외). sortBy=created, order=desc|asc 로 정렬.',
   })
   @ApiExtraModels(NewShopSubmissionResponseDto, NewOperatingSubmissionResponseDto, NewProductSubmissionResponseDto)
   @ApiOkResponse({

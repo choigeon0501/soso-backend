@@ -74,7 +74,18 @@
   },
   "overrides": {
     "sha.js": ">=2.4.12",
-    "tmp": "0.2.4"
+    "tmp": "0.2.4",
+    "tar": ">=7.5.11",
+    "minimatch": ">=9.0.7",
+    "multer": ">=2.1.1",
+    "serialize-javascript": ">=7.0.3",
+    "glob": ">=10.4.6",
+    "fast-xml-parser": ">=5.3.8",
+    "file-type": ">=21.3.1",
+    "ajv": ">=8.17.2",
+    "js-yaml": ">=4.1.1",
+    "lodash": ">=4.17.22",
+    "webpack": ">=5.105.0"
   },
   "jest": {
     "moduleFileExtensions": [
