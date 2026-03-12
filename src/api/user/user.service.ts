@@ -203,7 +203,7 @@ export class UserService {
       const allActivityUsers = await this.userRepository.findActivityUsers(orderKey, order);
       return allActivityUsers.map((user, index) => ({
         num: index + 1,
-        uuid: user.uuid,
+        email: user.email,
         nickName: user.nickName,
         createdAt: user.createdAt,
         lastActivityAt: user.lastActivityAt,

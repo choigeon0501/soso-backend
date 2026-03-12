@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { ShopRepository } from './repositories/shop.repository';
 import { RegionRepository } from '../region/region.repository';
 import { ShopRecentSearchRepository } from './repositories/shop-recent-search.repository';
+import { normalizePhoneNumber } from '../../common/function/normalize-phone-number.function';
 import { convertTimeToAmPm } from '../../common/function/time-to-am-pm.function';
 import { getLastSegment } from 'src/common/function/get-insta-id';
 import { ShopSubmitTransactionsRepository } from './repositories/shop-submit-transactions.repository';
@@ -17,10 +18,15 @@ import { Paging } from './dto/responses/pagination_response.dto';
 import { ShopSearchPageNationResultDTO } from './dto/responses/shop_response.dto';
 import { ReviewReportDto, ShopReportDto } from './dto/requests/report_request';
 import { UserFavoriteRepository } from '../user/repositories/user-favorite.repository';
-import { SubmitType } from '../../common/enum/role.enum';
+import { SubmitStatus, SubmitType } from '../../common/enum/role.enum';
 import { ReviewBanRepository } from '../review/repositories/review-ban.repository';
 import { ReviewReportRepository } from '../review/repositories/review-report.repository';
 import { AwsService } from '../../common/aws/aws.service';
+
+function withNormalizedPhoneNumber<T extends { phoneNumber?: string | null }>(obj: T | null): T | null {
+  if (obj == null) return null;
+  return { ...obj, phoneNumber: normalizePhoneNumber(obj.phoneNumber) };
+}
 
 @Injectable()
 export class ShopService {
@@ -136,6 +142,7 @@ export class ShopService {
 
     const operatingHours = shop.operatingHours.map((operating) => ({
       ...operating,
+      phoneNumber: normalizePhoneNumber(operating.phoneNumber),
       startTime: convertTimeToAmPm(operating.startTime),
       endTime: convertTimeToAmPm(operating.endTime),
     }));
@@ -350,27 +357,29 @@ export class ShopService {
 
   async getAllPendingSubmissions(query: {
     type?: 'shop' | 'operate' | 'product';
+    status?: SubmitStatus;
     sortBy?: 'created';
     order?: 'desc' | 'asc';
   }) {
     const type = query.type ?? 'shop';
     const order = (query.order ?? 'desc').toUpperCase() as 'ASC' | 'DESC';
+    const status = query.status ?? SubmitStatus.Pending;
 
     switch (type) {
       case 'shop': {
-        const list = await this.submitRepository.findAllNewShopSubmissions(order);
+        const list = await this.submitRepository.findAllNewShopSubmissions(order, status);
         return list.map((record) => {
           const { operatingHours, productMappings, ...shopBase } = record.shop;
           return {
             ...record,
             shop: shopBase,
-            shopOperatingHour: operatingHours?.[0] ?? null,
+            shopOperatingHour: withNormalizedPhoneNumber(operatingHours?.[0] ?? null),
             shopProducts: productMappings?.map((m) => m.product) ?? [],
           };
         });
       }
       case 'operate': {
-        const list = await this.submitRepository.findAllNewOperatingSubmissions(order);
+        const list = await this.submitRepository.findAllNewOperatingSubmissions(order, status);
         return list.map((record) => {
           const { shopOperatingHour, shop, ...rest } = record;
           const verifiedOperatingHour =
@@ -379,13 +388,13 @@ export class ShopService {
           return {
             ...rest,
             shop: shopBase,
-            shopOperatingHour: verifiedOperatingHour,
-            newShopOperatingHour: shopOperatingHour,
+            shopOperatingHour: withNormalizedPhoneNumber(verifiedOperatingHour),
+            newShopOperatingHour: withNormalizedPhoneNumber(shopOperatingHour)!,
           };
         });
       }
       case 'product': {
-        const list = await this.submitRepository.findAllNewProductSubmissions(order);
+        const list = await this.submitRepository.findAllNewProductSubmissions(order, status);
         return list.map((record) => {
           const { shopProducts: newMappings, shop, ...rest } = record;
           const verifiedProducts =
@@ -400,13 +409,13 @@ export class ShopService {
         });
       }
       default: {
-        const list = await this.submitRepository.findAllNewShopSubmissions(order);
+        const list = await this.submitRepository.findAllNewShopSubmissions(order, status);
         return list.map((record) => {
           const { operatingHours, productMappings, ...shopBase } = record.shop;
           return {
             ...record,
             shop: shopBase,
-            shopOperatingHour: operatingHours?.[0] ?? null,
+            shopOperatingHour: withNormalizedPhoneNumber(operatingHours?.[0] ?? null),
             shopProducts: productMappings?.map((m) => m.product) ?? [],
           };
         });

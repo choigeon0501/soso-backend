@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional } from 'class-validator';
+import { SubmitStatus } from '../../../../common/enum/role.enum';
 
 export class GetSubmissionsQueryDto {
   @ApiPropertyOptional({
@@ -11,6 +12,16 @@ export class GetSubmissionsQueryDto {
   @IsOptional()
   @IsIn(['shop', 'operate', 'product'])
   type?: 'shop' | 'operate' | 'product' = 'shop';
+
+  @ApiPropertyOptional({
+    description: '처리 상태 (pending: 대기, approved: 승인됨). admin에서는 거절(rejected) 조회 미지원.',
+    example: 'pending',
+    enum: [SubmitStatus.Pending, SubmitStatus.Approved],
+    default: 'pending',
+  })
+  @IsOptional()
+  @IsIn([SubmitStatus.Pending, SubmitStatus.Approved])
+  status?: SubmitStatus = SubmitStatus.Pending;
 
   @ApiPropertyOptional({
     description: '정렬 기준 (가입일 순: created)',
