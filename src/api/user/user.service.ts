@@ -207,7 +207,7 @@ export class UserService {
         nickName: user.nickName,
         createdAt: user.createdAt,
         lastActivityAt: user.lastActivityAt,
-        provider: user.authIdentities[0].provider,
+        provider: user.authIdentities?.[0]?.provider ?? null,
       }));
     }
 
