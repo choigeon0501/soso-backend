@@ -20,7 +20,7 @@ export class UserSubmitRecordItemDTO {
   @ApiProperty() submitStatus: string;
   @ApiProperty({ nullable: true }) rejectMessage: string | null;
   @ApiProperty() createdAt: Date;
-  @ApiProperty({ type: ShopResponseDTO }) shop: ShopResponseDTO;
+  @ApiProperty({ type: ShopResponseDTO, nullable: true }) shop: ShopResponseDTO | null;
 
   constructor(record: ShopSubmitRecord) {
     this.id = record.id;
@@ -29,14 +29,16 @@ export class UserSubmitRecordItemDTO {
     this.submitStatus = getSubmitCombinedStatus(record.type, record.status);
     this.rejectMessage = record.rejectMessage;
     this.createdAt = record.createdAt;
-    this.shop = {
-      id: record.shop.id,
-      name: record.shop.name,
-      mainImage: record.shop.mainImage ?? null,
-      isVerified: !!record.shop.isVerified,
-      instagram: record.shop.instagram ?? null,
-      location: record.shop.location ?? null,
-    };
+    this.shop = record.shop
+      ? {
+          id: record.shop.id,
+          name: record.shop.name,
+          mainImage: record.shop.mainImage ?? null,
+          isVerified: !!record.shop.isVerified,
+          instagram: record.shop.instagram ?? null,
+          location: record.shop.location ?? null,
+        }
+      : null;
   }
 }
 
