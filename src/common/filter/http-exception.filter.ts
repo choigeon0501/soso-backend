@@ -4,12 +4,15 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
 
 @Catch()
 export class ExceptionFilter implements NestExceptionFilter {
+  private readonly logger = new Logger(ExceptionFilter.name);
+
   constructor(private readonly loggerService: LoggerService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
@@ -32,7 +35,17 @@ export class ExceptionFilter implements NestExceptionFilter {
         ? exceptionResponse
         : (exceptionResponse as any).message || 'Unknown error';
 
-    // 모든 요청에 대해 로깅
+    // NestJS Logger → 콘솔 출력 (Railway 대시보드에서 확인 가능)
+    this.logger.error(
+      `HTTP Status: ${status} Error Message: ${JSON.stringify(exceptionResponse)}`,
+    );
+    this.logger.error(`Request URL: ${request.method} ${request.url}`);
+    this.logger.error(`Request Body: ${JSON.stringify(request.body)}`);
+    if (exception instanceof Error) {
+      this.logger.error(`Stack: ${exception.stack}`);
+    }
+
+    // Winston → 파일 로깅 (PM2/로컬 서버용)
     const errorResponse = {
       timestamp: new Date().toISOString(),
       statusCode: status,
@@ -48,8 +61,6 @@ export class ExceptionFilter implements NestExceptionFilter {
       query: request.query,
       params: request.params,
     };
-
-    // 모든 에러를 하나의 폴더에서 관리
     this.loggerService.logError(request.url, errorResponse);
 
     // 클라이언트 응답 (스택 트레이스 제외)
