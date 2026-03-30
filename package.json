@@ -86,7 +86,8 @@
     "ajv": ">=8.17.2",
     "js-yaml": ">=4.1.1",
     "lodash": ">=4.17.22",
-    "webpack": ">=5.105.0"
+    "webpack": ">=5.105.0",
+    "picomatch": ">=4.0.4"
   },
   "jest": {
     "moduleFileExtensions": [
