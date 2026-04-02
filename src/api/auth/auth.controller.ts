@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { SuccessResponseDTO } from 'src/common/response/response.dto';
 import { AppleAuthLoginDto, AuthTokenResponseDTO, GoogleAuthLoginDTO, RefreshTokenDTO } from './dto/auth.dto';
@@ -73,10 +73,5 @@ export class AuthController {
   })
   refreshToken(@Body() refreshTokenDTO: RefreshTokenDTO) {
     return this.authService.refreshToken(refreshTokenDTO);
-  }
-
-  @Get('/test')
-  test() {
-    return this.authService.test();
   }
 }

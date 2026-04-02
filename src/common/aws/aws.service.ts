@@ -26,6 +26,7 @@ export class AwsService {
       });
     } catch (err) {
       this.loggerService.logError('S3/ 초기화 에러', err);
+      throw err;
     }
   }
 

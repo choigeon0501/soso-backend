@@ -124,8 +124,4 @@ export class AuthService {
   async refreshToken(refreshTokenDTO: RefreshTokenDTO) {
     return this.authTokenService.reissueTokens(refreshTokenDTO.refreshToken);
   }
-
-  async test() {
-    return this.authTokenService.issueTokens(this.configService.get<string>('TEST_UUID'), Role.User);
-  }
 }
