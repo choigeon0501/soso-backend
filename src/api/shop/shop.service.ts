@@ -338,12 +338,14 @@ export class ShopService {
 
     // Admin 반환용 데이터 가공
     const adminReviewReportList = allReviewReports.map((report) => ({
+      reviewId: report.review.id,
       userEmail: report.user.email,
       reportType: report.reportType,
       reportMessage: report.reportMessage,
       reviewContent: report.review.content,
       reportDate: report.createdAt,
       reportCount: reviewReportCountMap[report.review.id],
+      isHidden: report.review.isHidden,
     }));
 
     //  누적 횟수 기준 내림차순 정렬

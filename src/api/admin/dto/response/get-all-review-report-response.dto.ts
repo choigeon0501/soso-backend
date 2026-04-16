@@ -8,6 +8,12 @@ export class GetAllReviewReportResponseDto {
   num: number;
 
   @ApiProperty({
+    description: '신고된 리뷰 ID',
+    example: 42,
+  })
+  reviewId: number;
+
+  @ApiProperty({
     description: '신고한 사용자 이메일',
     example: 'reporter@example.com',
   })
@@ -44,4 +50,10 @@ export class GetAllReviewReportResponseDto {
     example: 3,
   })
   reportCount: number;
+
+  @ApiProperty({
+    description: '리뷰 숨김 여부',
+    example: false,
+  })
+  isHidden: boolean;
 }
