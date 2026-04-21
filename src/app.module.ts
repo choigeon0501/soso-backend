@@ -18,6 +18,7 @@ import { ExceptionFilter } from './common/filter/http-exception.filter';
 import { AdminModule } from './api/admin/admin.module';
 import { SuccessResponseFilter } from './common/filter/success-response.filter';
 import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
+import { CourseModule } from './api/course/course.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { AdminJwtModule } from './common/admin-jwt/admin-jwt.module';
     JwtModule,
     AdminModule,
     AdminJwtModule,
+    CourseModule,
   ],
   controllers: [AppController],
   providers: [
