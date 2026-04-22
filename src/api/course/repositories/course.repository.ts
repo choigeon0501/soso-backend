@@ -59,4 +59,19 @@ export class CourseRepository {
   async deleteCourseById(courseId: number): Promise<void> {
     await this.courseRepo.delete({ id: courseId });
   }
+
+  async findByShareToken(token: string): Promise<Course | null> {
+    return this.courseRepo
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.user', 'user')
+      .leftJoinAndSelect('course.courseShops', 'courseShops')
+      .leftJoinAndSelect('courseShops.shop', 'shop')
+      .where('course.shareToken = :token', { token })
+      .orderBy('courseShops.orderIndex', 'ASC')
+      .getOne();
+  }
+
+  async updateShareToken(courseId: number, token: string | null): Promise<void> {
+    await this.courseRepo.update({ id: courseId }, { shareToken: token });
+  }
 }

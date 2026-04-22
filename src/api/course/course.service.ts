@@ -1,4 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { CourseRepository } from './repositories/course.repository';
 import { CourseTransactionsRepository } from './repositories/course-transactions.repository';
 import { ShopRepository } from '../shop/repositories/shop.repository';
@@ -8,6 +9,7 @@ import { CourseListStatusFilter, GetCourseListQueryDto } from './dto/query/get-c
 import { CourseListItemDto, GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { CourseStopDto, GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
+import { ImportCourseResponseDto, ShareCourseResponseDto, SharedCourseResponseDto } from './dto/responses/share-response.dto';
 import { Course } from './entities/course.entity';
 import { CourseShop } from './entities/course-shop.entity';
 
@@ -185,6 +187,85 @@ export class CourseService {
     const { progress, status } = this.calculateProgress(updatedShops);
 
     return { progress, status };
+  }
+
+  async generateShareToken(uuid: string, courseId: number): Promise<ShareCourseResponseDto> {
+    const course = await this.courseRepository.findCourseByIdWithOwner(courseId);
+    if (!course) {
+      throw new NotFoundException('코스를 찾을 수 없습니다.');
+    }
+
+    this.assertOwnership(course, uuid);
+
+    if (course.shareToken) {
+      return { shareToken: course.shareToken };
+    }
+
+    const token = randomBytes(24).toString('base64url');
+    await this.courseRepository.updateShareToken(courseId, token);
+
+    return { shareToken: token };
+  }
+
+  async revokeShareToken(uuid: string, courseId: number): Promise<void> {
+    const course = await this.courseRepository.findCourseByIdWithOwner(courseId);
+    if (!course) {
+      throw new NotFoundException('코스를 찾을 수 없습니다.');
+    }
+
+    this.assertOwnership(course, uuid);
+
+    await this.courseRepository.updateShareToken(courseId, null);
+  }
+
+  async getSharedCourse(token: string): Promise<SharedCourseResponseDto> {
+    const course = await this.courseRepository.findByShareToken(token);
+    if (!course) {
+      throw new NotFoundException('공유된 코스를 찾을 수 없습니다.');
+    }
+
+    const visibleStops = [...course.courseShops]
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .filter((cs) => cs.shop && !cs.shop.isHidden);
+
+    const stops = visibleStops.map((cs) => ({
+      orderIndex: cs.orderIndex,
+      shop: {
+        id: cs.shop.id,
+        name: cs.shop.name,
+        mainImage: cs.shop.mainImage ?? null,
+        lat: Number(cs.shop.lat),
+        lng: Number(cs.shop.lng),
+        instagram: cs.shop.instagram ?? null,
+      },
+    }));
+
+    return {
+      name: course.name,
+      ownerNickname: course.user?.nickName ?? null,
+      totalStops: stops.length,
+      stops,
+    };
+  }
+
+  async importSharedCourse(uuid: string, token: string): Promise<ImportCourseResponseDto> {
+    const course = await this.courseRepository.findByShareToken(token);
+    if (!course) {
+      throw new NotFoundException('공유된 코스를 찾을 수 없습니다.');
+    }
+
+    const visibleShopIds = [...course.courseShops]
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .filter((cs) => cs.shop && !cs.shop.isHidden)
+      .map((cs) => cs.shop.id);
+
+    if (visibleShopIds.length < 2) {
+      throw new BadRequestException('복제 가능한 소품샵이 2개 미만이어서 코스를 가져올 수 없습니다.');
+    }
+
+    const courseId = await this.courseTransactionsRepository.createCourse(uuid, course.name, visibleShopIds);
+
+    return { courseId };
   }
 
   private assertOwnership(course: Course, uuid: string): void {

@@ -33,11 +33,19 @@ function makeCourseShop(id: number, shop: Shop, orderIndex: number, visitedAt: D
   return { id, shop, orderIndex, visitedAt, course: undefined as any };
 }
 
-function makeCourse(id: number, uuid: string, createdAt: Date, courseShops: CourseShop[], name = 'test'): Course {
+function makeCourse(
+  id: number,
+  uuid: string,
+  createdAt: Date,
+  courseShops: CourseShop[],
+  name = 'test',
+  extras: { shareToken?: string | null; nickName?: string | null } = {},
+): Course {
   return {
     id,
     name,
-    user: { uuid } as any,
+    user: { uuid, nickName: extras.nickName ?? null } as any,
+    shareToken: extras.shareToken ?? null,
     courseShops,
     createdAt,
     updatedAt: createdAt,
@@ -61,6 +69,8 @@ describe('CourseService', () => {
       findCourseShopsByCourseId: jest.fn(),
       updateVisitedAt: jest.fn(),
       deleteCourseById: jest.fn(),
+      findByShareToken: jest.fn(),
+      updateShareToken: jest.fn(),
     } as any;
 
     txRepo = {
@@ -383,6 +393,154 @@ describe('CourseService', () => {
 
       expect(res.progress).toBe(50);
       expect(res.status).toBe('in_progress');
+    });
+  });
+
+  // ==================== share 기능 ====================
+  describe('generateShareToken', () => {
+    it('토큰이 없는 경우 새로 생성하고 DB에 저장', async () => {
+      const course = makeCourse(10, OWNER, new Date(), []);
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(course);
+
+      const res = await service.generateShareToken(OWNER, 10);
+
+      expect(res.shareToken).toEqual(expect.any(String));
+      expect(res.shareToken.length).toBeGreaterThanOrEqual(20);
+      expect(courseRepo.updateShareToken).toHaveBeenCalledWith(10, res.shareToken);
+    });
+
+    it('기존 토큰이 있으면 재사용 (멱등) — updateShareToken 호출 안 함', async () => {
+      const course = makeCourse(10, OWNER, new Date(), [], 'test', { shareToken: 'existing-token-abc' });
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(course);
+
+      const res = await service.generateShareToken(OWNER, 10);
+
+      expect(res.shareToken).toBe('existing-token-abc');
+      expect(courseRepo.updateShareToken).not.toHaveBeenCalled();
+    });
+
+    it('코스 없으면 NotFoundException', async () => {
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(null);
+      await expect(service.generateShareToken(OWNER, 99)).rejects.toThrow(NotFoundException);
+    });
+
+    it('다른 유저의 코스 → ForbiddenException', async () => {
+      const course = makeCourse(10, OWNER, new Date(), []);
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(course);
+      await expect(service.generateShareToken(STRANGER, 10)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('revokeShareToken', () => {
+    it('본인 코스 → shareToken을 null로 업데이트', async () => {
+      const course = makeCourse(10, OWNER, new Date(), [], 'test', { shareToken: 'abc' });
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(course);
+
+      await service.revokeShareToken(OWNER, 10);
+
+      expect(courseRepo.updateShareToken).toHaveBeenCalledWith(10, null);
+    });
+
+    it('남의 코스 → ForbiddenException', async () => {
+      const course = makeCourse(10, OWNER, new Date(), []);
+      courseRepo.findCourseByIdWithOwner.mockResolvedValue(course);
+      await expect(service.revokeShareToken(STRANGER, 10)).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('getSharedCourse', () => {
+    it('유효한 토큰 → 이름/닉네임/stops 반환, visited_at은 포함하지 않음', async () => {
+      const s1 = makeShop({ id: 1, name: 'A' });
+      const s2 = makeShop({ id: 2, name: 'B' });
+      const course = makeCourse(
+        10,
+        OWNER,
+        new Date(),
+        [makeCourseShop(1, s1, 1, new Date()), makeCourseShop(2, s2, 2)],
+        '성수 데이트',
+        { shareToken: 'tok-1', nickName: 'owner-nick' },
+      );
+      courseRepo.findByShareToken.mockResolvedValue(course);
+
+      const res = await service.getSharedCourse('tok-1');
+
+      expect(res.name).toBe('성수 데이트');
+      expect(res.ownerNickname).toBe('owner-nick');
+      expect(res.totalStops).toBe(2);
+      expect(res.stops.map((s) => s.orderIndex)).toEqual([1, 2]);
+      expect(res.stops.map((s) => s.shop.name)).toEqual(['A', 'B']);
+      // visited_at 필드는 응답에 없음을 보장
+      expect((res.stops[0] as any).visitedAt).toBeUndefined();
+    });
+
+    it('is_hidden 샵은 stops에서 제외', async () => {
+      const s1 = makeShop({ id: 1, isHidden: false });
+      const s2 = makeShop({ id: 2, isHidden: true });
+      const s3 = makeShop({ id: 3, isHidden: false });
+      const course = makeCourse(
+        10,
+        OWNER,
+        new Date(),
+        [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2), makeCourseShop(3, s3, 3)],
+        'x',
+        { shareToken: 'tok-2' },
+      );
+      courseRepo.findByShareToken.mockResolvedValue(course);
+
+      const res = await service.getSharedCourse('tok-2');
+
+      expect(res.totalStops).toBe(2);
+      expect(res.stops.map((s) => s.shop.id)).toEqual([1, 3]);
+    });
+
+    it('존재하지 않는 토큰 → NotFoundException', async () => {
+      courseRepo.findByShareToken.mockResolvedValue(null);
+      await expect(service.getSharedCourse('nope')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('importSharedCourse', () => {
+    it('유효한 토큰 → 새 코스 생성, visited_at=null, 숨김 샵 제외', async () => {
+      const s1 = makeShop({ id: 1 });
+      const s2 = makeShop({ id: 2, isHidden: true }); // 숨김 → 제외
+      const s3 = makeShop({ id: 3 });
+      const source = makeCourse(
+        10,
+        OWNER,
+        new Date(),
+        [makeCourseShop(1, s1, 1, new Date()), makeCourseShop(2, s2, 2), makeCourseShop(3, s3, 3)],
+        '원본 코스',
+        { shareToken: 'tok-import' },
+      );
+      courseRepo.findByShareToken.mockResolvedValue(source);
+      txRepo.createCourse.mockResolvedValue(99);
+
+      const res = await service.importSharedCourse(STRANGER, 'tok-import');
+
+      expect(res).toEqual({ courseId: 99 });
+      expect(txRepo.createCourse).toHaveBeenCalledWith(STRANGER, '원본 코스', [1, 3]);
+    });
+
+    it('공유된 코스에서 보이는 샵이 2개 미만이면 BadRequestException', async () => {
+      const s1 = makeShop({ id: 1, isHidden: true });
+      const s2 = makeShop({ id: 2, isHidden: true });
+      const source = makeCourse(
+        10,
+        OWNER,
+        new Date(),
+        [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2)],
+        'x',
+        { shareToken: 'tok-few' },
+      );
+      courseRepo.findByShareToken.mockResolvedValue(source);
+
+      await expect(service.importSharedCourse(STRANGER, 'tok-few')).rejects.toThrow(BadRequestException);
+      expect(txRepo.createCourse).not.toHaveBeenCalled();
+    });
+
+    it('존재하지 않는 토큰 → NotFoundException', async () => {
+      courseRepo.findByShareToken.mockResolvedValue(null);
+      await expect(service.importSharedCourse(STRANGER, 'nope')).rejects.toThrow(NotFoundException);
     });
   });
 });

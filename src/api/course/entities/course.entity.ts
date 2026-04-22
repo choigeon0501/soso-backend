@@ -15,6 +15,9 @@ export class Course {
   @Column('varchar', { length: 30 })
   name: string;
 
+  @Column('varchar', { length: 32, nullable: true, unique: true, name: 'share_token' })
+  shareToken: string | null;
+
   @OneToMany(() => CourseShop, (courseShop) => courseShop.course)
   courseShops: CourseShop[];
 

@@ -10,15 +10,16 @@ import { GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
 import { GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
+import { ImportCourseResponseDto, ShareCourseResponseDto, SharedCourseResponseDto } from './dto/responses/share-response.dto';
 
 @ApiTags('Course')
-@ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard)
 @Controller('courses')
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Get('/')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '내 코스 목록 조회', description: 'status 필터(all/in_progress/completed)와 페이지네이션을 지원합니다.' })
   @ApiExtraModels(SuccessResponseDTO, GetCourseListResponseDto)
   @ApiOkResponse({
@@ -32,6 +33,8 @@ export class CourseController {
   }
 
   @Post('/')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '코스 생성',
     description:
@@ -48,7 +51,45 @@ export class CourseController {
     return this.courseService.createCourse(uuid, dto);
   }
 
+  @Get('/shared/:token')
+  @ApiOperation({
+    summary: '공유된 코스 조회 (로그인 불필요)',
+    description:
+      '공유 링크 토큰으로 해당 코스의 이름·소유자 닉네임·스톱 리스트를 조회합니다. `visited_at` 같은 개인 진행 정보는 포함되지 않으며, 숨김 처리된 소품샵은 결과에서 제외됩니다.',
+  })
+  @ApiExtraModels(SuccessResponseDTO, SharedCourseResponseDto)
+  @ApiOkResponse({
+    description: '공유 코스 조회 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(SharedCourseResponseDto) } } }],
+    },
+  })
+  getSharedCourse(@Param('token') token: string) {
+    return this.courseService.getSharedCourse(token);
+  }
+
+  @Post('/shared/:token/import')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '공유된 코스를 내 코스로 가져오기 (복제)',
+    description:
+      '공유 토큰으로 받은 코스를 **내 계정의 새 코스로 복제**합니다. 복제본은 원본과 독립적이며, `visited_at`은 전부 `null`로 초기화됩니다. 숨김 샵은 복제에서 제외됩니다.',
+  })
+  @ApiExtraModels(SuccessResponseDTO, ImportCourseResponseDto)
+  @ApiOkResponse({
+    description: '복제 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(ImportCourseResponseDto) } } }],
+    },
+  })
+  importSharedCourse(@Param('token') token: string, @GetUUID() uuid: string) {
+    return this.courseService.importSharedCourse(uuid, token);
+  }
+
   @Get('/:courseId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '코스 상세 조회' })
   @ApiExtraModels(SuccessResponseDTO, GetCourseDetailResponseDto)
   @ApiOkResponse({
@@ -62,6 +103,8 @@ export class CourseController {
   }
 
   @Patch('/:courseId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '코스 수정 (이름/스톱 배열 전체 교체, visited_at 보존)',
     description:
@@ -73,13 +116,48 @@ export class CourseController {
   }
 
   @Delete('/:courseId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '코스 삭제' })
   @ApiOkResponse({ description: '코스 삭제 성공', type: SuccessNoResultResponseDTO })
   deleteCourse(@Param('courseId', ParseIntPipe) courseId: number, @GetUUID() uuid: string) {
     return this.courseService.deleteCourse(uuid, courseId);
   }
 
+  @Post('/:courseId/share')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '코스 공유 링크 생성',
+    description:
+      '해당 코스의 공유 토큰을 반환합니다. 이미 발급된 토큰이 있으면 **기존 토큰을 그대로** 반환(멱등). 프론트는 이 토큰으로 공유 URL을 조립하면 됩니다 (예: `https://sosohan.shop/shared/{shareToken}`).',
+  })
+  @ApiExtraModels(SuccessResponseDTO, ShareCourseResponseDto)
+  @ApiOkResponse({
+    description: '공유 토큰 발급 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(ShareCourseResponseDto) } } }],
+    },
+  })
+  generateShareToken(@Param('courseId', ParseIntPipe) courseId: number, @GetUUID() uuid: string) {
+    return this.courseService.generateShareToken(uuid, courseId);
+  }
+
+  @Delete('/:courseId/share')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '코스 공유 링크 폐기',
+    description: '기존 공유 토큰을 무효화합니다. 이후 해당 링크로는 조회·복제 모두 404가 됩니다.',
+  })
+  @ApiOkResponse({ description: '폐기 성공', type: SuccessNoResultResponseDTO })
+  revokeShareToken(@Param('courseId', ParseIntPipe) courseId: number, @GetUUID() uuid: string) {
+    return this.courseService.revokeShareToken(uuid, courseId);
+  }
+
   @Post('/:courseId/stops/:shopId/stamp')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '도장 찍기 (visited_at = now)' })
   @ApiExtraModels(SuccessResponseDTO, StampResponseDto)
   @ApiOkResponse({
@@ -93,6 +171,8 @@ export class CourseController {
   }
 
   @Delete('/:courseId/stops/:shopId/stamp')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: '도장 취소 (visited_at = null)' })
   @ApiExtraModels(SuccessResponseDTO, UnstampResponseDto)
   @ApiOkResponse({
