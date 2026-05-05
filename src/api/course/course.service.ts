@@ -243,6 +243,7 @@ export class CourseService {
     return {
       name: course.name,
       ownerNickname: course.user?.nickName ?? null,
+      ownerProfileImg: course.user?.profileImg ?? null,
       totalStops: stops.length,
       stops,
     };

@@ -45,6 +45,9 @@ export class SharedCourseResponseDto {
   @ApiProperty({ description: '코스 소유자 닉네임', example: 'tester', nullable: true })
   ownerNickname: string | null;
 
+  @ApiProperty({ description: '코스 소유자 프로필 이미지', example: 'https://.../profile.jpg', nullable: true })
+  ownerProfileImg: string | null;
+
   @ApiProperty({ description: '공유된 stop 개수', example: 3 })
   totalStops: number;
 
