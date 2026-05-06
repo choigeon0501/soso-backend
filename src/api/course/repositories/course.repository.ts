@@ -74,4 +74,8 @@ export class CourseRepository {
   async updateShareToken(courseId: number, token: string | null): Promise<void> {
     await this.courseRepo.update({ id: courseId }, { shareToken: token });
   }
+
+  async updateOgImageUrl(courseId: number, ogImageUrl: string | null): Promise<void> {
+    await this.courseRepo.update({ id: courseId }, { ogImageUrl });
+  }
 }

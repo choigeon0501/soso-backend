@@ -3,13 +3,19 @@ import { randomBytes } from 'crypto';
 import { CourseRepository } from './repositories/course.repository';
 import { CourseTransactionsRepository } from './repositories/course-transactions.repository';
 import { ShopRepository } from '../shop/repositories/shop.repository';
+import { AwsService } from '../../common/aws/aws.service';
 import { CreateCourseDto } from './dto/requests/create-course.dto';
 import { UpdateCourseDto } from './dto/requests/update-course.dto';
 import { CourseListStatusFilter, GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
 import { CourseListItemDto, GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { CourseStopDto, GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
-import { ImportCourseResponseDto, ShareCourseResponseDto, SharedCourseResponseDto } from './dto/responses/share-response.dto';
+import {
+  ImportCourseResponseDto,
+  ShareCourseResponseDto,
+  SharedCourseResponseDto,
+  UploadShareOgImageResponseDto,
+} from './dto/responses/share-response.dto';
 import { Course } from './entities/course.entity';
 import { CourseShop } from './entities/course-shop.entity';
 
@@ -21,6 +27,7 @@ export class CourseService {
     private readonly courseRepository: CourseRepository,
     private readonly courseTransactionsRepository: CourseTransactionsRepository,
     private readonly shopRepository: ShopRepository,
+    private readonly awsService: AwsService,
   ) {}
 
   async getCourseList(uuid: string, query: GetCourseListQueryDto): Promise<GetCourseListResponseDto> {
@@ -244,9 +251,32 @@ export class CourseService {
       name: course.name,
       ownerNickname: course.user?.nickName ?? null,
       ownerProfileImg: course.user?.profileImg ?? null,
+      ogImageUrl: course.ogImageUrl ?? null,
       totalStops: stops.length,
       stops,
     };
+  }
+
+  async uploadShareOgImage(uuid: string, courseId: number, file: Express.Multer.File): Promise<UploadShareOgImageResponseDto> {
+    if (!file) {
+      throw new BadRequestException('이미지 파일이 필요합니다.');
+    }
+
+    const course = await this.courseRepository.findCourseByIdWithOwner(courseId);
+    if (!course) {
+      throw new NotFoundException('코스를 찾을 수 없습니다.');
+    }
+
+    this.assertOwnership(course, uuid);
+
+    const [ogImageUrl] = await this.awsService.uploadImagesToS3(file, 'course-share-og');
+    // 이미 코스에 og 이미지가 존재하는 경우 제거 후 업데이트
+    if (course.ogImageUrl) {
+      await this.awsService.deleteImageFromS3(course.ogImageUrl);
+    }
+    await this.courseRepository.updateOgImageUrl(courseId, ogImageUrl);
+
+    return { ogImageUrl };
   }
 
   async importSharedCourse(uuid: string, token: string): Promise<ImportCourseResponseDto> {

@@ -46,6 +46,7 @@ function makeCourse(
     name,
     user: { uuid, nickName: extras.nickName ?? null } as any,
     shareToken: extras.shareToken ?? null,
+    ogImageUrl: null,
     courseShops,
     createdAt,
     updatedAt: createdAt,
@@ -82,7 +83,12 @@ describe('CourseService', () => {
       findByShopIdForHiddenShop: jest.fn(),
     } as any;
 
-    service = new CourseService(courseRepo as any, txRepo as any, shopRepo as any);
+    const awsService = {
+      uploadImagesToS3: jest.fn(),
+      deleteImageFromS3: jest.fn(),
+    } as any;
+
+    service = new CourseService(courseRepo as any, txRepo as any, shopRepo as any, awsService);
   });
 
   // ==================== progress 계산 (getCourseDetail로 간접 검증) ====================

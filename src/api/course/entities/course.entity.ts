@@ -18,6 +18,9 @@ export class Course {
   @Column('varchar', { length: 32, nullable: true, unique: true, name: 'share_token' })
   shareToken: string | null;
 
+  @Column('varchar', { length: 512, nullable: true, name: 'og_image_url' })
+  ogImageUrl: string | null;
+
   @OneToMany(() => CourseShop, (courseShop) => courseShop.course)
   courseShops: CourseShop[];
 

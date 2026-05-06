@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  FileTypeValidator,
+  Get,
+  MaxFileSizeValidator,
+  Param,
+  ParseFilePipe,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { GetUUID } from '../../common/deco/get-user.deco';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from '../../common/response/response.dto';
@@ -10,7 +27,12 @@ import { GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
 import { GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
-import { ImportCourseResponseDto, ShareCourseResponseDto, SharedCourseResponseDto } from './dto/responses/share-response.dto';
+import {
+  ImportCourseResponseDto,
+  ShareCourseResponseDto,
+  SharedCourseResponseDto,
+  UploadShareOgImageResponseDto,
+} from './dto/responses/share-response.dto';
 
 @ApiTags('Course')
 @Controller('courses')
@@ -153,6 +175,46 @@ export class CourseController {
   @ApiOkResponse({ description: '폐기 성공', type: SuccessNoResultResponseDTO })
   revokeShareToken(@Param('courseId', ParseIntPipe) courseId: number, @GetUUID() uuid: string) {
     return this.courseService.revokeShareToken(uuid, courseId);
+  }
+
+  @Post('/:courseId/share/og-image')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('ogImage'))
+  @ApiBearerAuth('JWT-auth')
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({
+    summary: '공유 페이지 OG 이미지 업로드 (지도 스냅샷)',
+    description:
+      '클라이언트가 캡처한 지도 스냅샷을 업로드합니다. 권장 사이즈 1200x630, 최대 5MB. 업로드된 public URL은 `GET /courses/shared/{token}` 응답의 `ogImageUrl`로 노출됩니다. 같은 코스에 재업로드하면 기존 이미지는 S3에서 삭제됩니다.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['ogImage'],
+      properties: {
+        ogImage: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiExtraModels(SuccessResponseDTO, UploadShareOgImageResponseDto)
+  @ApiOkResponse({
+    description: 'OG 이미지 업로드 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(UploadShareOgImageResponseDto) } } }],
+    },
+  })
+  uploadShareOgImage(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @GetUUID() uuid: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), new FileTypeValidator({ fileType: /image\/(jpg|jpeg|png)/ })],
+        fileIsRequired: true,
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.courseService.uploadShareOgImage(uuid, courseId, file);
   }
 
   @Post('/:courseId/stops/:shopId/stamp')

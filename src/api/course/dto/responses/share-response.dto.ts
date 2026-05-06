@@ -5,6 +5,11 @@ export class ShareCourseResponseDto {
   shareToken: string;
 }
 
+export class UploadShareOgImageResponseDto {
+  @ApiProperty({ description: '업로드된 OG 이미지 public URL', example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/course-share-og/1714984000-snapshot.jpg' })
+  ogImageUrl: string;
+}
+
 export class ImportCourseResponseDto {
   @ApiProperty({ description: '새로 생성된 내 코스의 id', example: 42 })
   courseId: number;
@@ -47,6 +52,9 @@ export class SharedCourseResponseDto {
 
   @ApiProperty({ description: '코스 소유자 프로필 이미지', example: 'https://.../profile.jpg', nullable: true })
   ownerProfileImg: string | null;
+
+  @ApiProperty({ description: '공유 페이지 OG 이미지 (지도 스냅샷)', example: 'https://.../snapshot.jpg', nullable: true })
+  ogImageUrl: string | null;
 
   @ApiProperty({ description: '공유된 stop 개수', example: 3 })
   totalStops: number;
