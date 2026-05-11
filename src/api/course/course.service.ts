@@ -7,8 +7,10 @@ import { AwsService } from '../../common/aws/aws.service';
 import { CreateCourseDto } from './dto/requests/create-course.dto';
 import { UpdateCourseDto } from './dto/requests/update-course.dto';
 import { CourseListStatusFilter, GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
+import { GetVisitedShopsQueryDto } from './dto/query/get-visited-shops-query.dto';
 import { CourseListItemDto, GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { CourseStopDto, GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
+import { GetVisitedShopsResponseDto, VisitedShopItemDto } from './dto/responses/get-visited-shops-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
 import {
   ImportCourseResponseDto,
@@ -70,6 +72,36 @@ export class CourseService {
         .filter((img): img is string => !!img)
         .slice(0, 4),
     }));
+
+    return { items, total, page, limit };
+  }
+
+  async getVisitedShops(uuid: string, query: GetVisitedShopsQueryDto): Promise<GetVisitedShopsResponseDto> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+
+    const visited = await this.courseRepository.findVisitedCourseShopsByUuid(uuid);
+
+    const byShopId = new Map<number, VisitedShopItemDto>();
+    for (const cs of visited) {
+      if (!cs.shop || !cs.visitedAt) continue;
+
+      if (byShopId.has(cs.shop.id)) continue;
+
+      byShopId.set(cs.shop.id, {
+        shopId: cs.shop.id,
+        name: cs.shop.name,
+        mainImage: cs.shop.mainImage ?? null,
+        isHidden: cs.shop.isHidden,
+        lastVisitedAt: cs.visitedAt,
+      });
+    }
+
+    const aggregated = [...byShopId.values()].sort((a, b) => b.lastVisitedAt.getTime() - a.lastVisitedAt.getTime());
+
+    const total = aggregated.length;
+    const start = (page - 1) * limit;
+    const items = aggregated.slice(start, start + limit);
 
     return { items, total, page, limit };
   }

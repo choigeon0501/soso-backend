@@ -24,8 +24,10 @@ import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/requests/create-course.dto';
 import { UpdateCourseDto } from './dto/requests/update-course.dto';
 import { GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
+import { GetVisitedShopsQueryDto } from './dto/query/get-visited-shops-query.dto';
 import { GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
 import { GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
+import { GetVisitedShopsResponseDto } from './dto/responses/get-visited-shops-response.dto';
 import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
 import {
   ImportCourseResponseDto,
@@ -71,6 +73,25 @@ export class CourseController {
   })
   createCourse(@Body() dto: CreateCourseDto, @GetUUID() uuid: string) {
     return this.courseService.createCourse(uuid, dto);
+  }
+
+  @Get('/visited-shops')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '내가 방문한 소품샵 목록',
+    description:
+      '내 코스의 스톱 중 도장이 찍힌(`visitedAt`이 존재하는) 소품샵을 모아서 반환합니다. 같은 샵이 여러 코스에 걸쳐 도장이 찍혀 있어도 **샵 단위로 중복 제거** 되며, `lastVisitedAt`은 가장 최근 방문 시각입니다. 결과는 최근 방문 순으로 정렬되며, 페이지네이션(`page`, `limit`)을 지원합니다.',
+  })
+  @ApiExtraModels(SuccessResponseDTO, GetVisitedShopsResponseDto)
+  @ApiOkResponse({
+    description: '방문 소품샵 조회 성공',
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(GetVisitedShopsResponseDto) } } }],
+    },
+  })
+  getVisitedShops(@Query() query: GetVisitedShopsQueryDto, @GetUUID() uuid: string) {
+    return this.courseService.getVisitedShops(uuid, query);
   }
 
   @Get('/shared/:token')

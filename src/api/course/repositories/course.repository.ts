@@ -42,6 +42,18 @@ export class CourseRepository {
       .getOne();
   }
 
+  async findVisitedCourseShopsByUuid(uuid: string): Promise<CourseShop[]> {
+    return this.courseShopRepo
+      .createQueryBuilder('cs')
+      .innerJoin('cs.course', 'course')
+      .innerJoin('course.user', 'user')
+      .innerJoinAndSelect('cs.shop', 'shop')
+      .where('user.uuid = :uuid', { uuid })
+      .andWhere('cs.visitedAt IS NOT NULL')
+      .orderBy('cs.visitedAt', 'DESC')
+      .getMany();
+  }
+
   async findCourseShopsByCourseId(courseId: number): Promise<CourseShop[]> {
     return this.courseShopRepo
       .createQueryBuilder('cs')
