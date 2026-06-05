@@ -1,9 +1,10 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ShopRepository } from './repositories/shop.repository';
 import { RegionRepository } from '../region/region.repository';
 import { ShopRecentSearchRepository } from './repositories/shop-recent-search.repository';
 import { normalizePhoneNumber } from '../../common/function/normalize-phone-number.function';
 import { convertTimeToAmPm } from '../../common/function/time-to-am-pm.function';
+import { normalizeRegionName } from '../../common/function/normalize-region-name.function';
 import { getLastSegment } from 'src/common/function/get-insta-id';
 import { ShopSubmitTransactionsRepository } from './repositories/shop-submit-transactions.repository';
 import { ShopSubmitRepository } from './repositories/shop-submit.repository';
@@ -120,8 +121,15 @@ export class ShopService {
   }
 
   async createNewShop(newShopData: SubmitNewShopDto, uuid: string): Promise<void> {
-    const region = await this.regionRepository.findRegionByLocation(newShopData.shop.location);
-    if (!region) throw new NotFoundException('check region location');
+    const regionName = normalizeRegionName(newShopData.shop.region1DepthName);
+    if (!regionName) {
+      throw new BadRequestException('유효하지 않은 지역(region1DepthName)입니다.');
+    }
+
+    const region = await this.regionRepository.findRegionByName(regionName);
+    if (!region) {
+      throw new NotFoundException('일치하는 지역(region)을 찾을 수 없습니다.');
+    }
 
     await this.shopSubmitTransactionsRepository.createNewShop(newShopData, region.id, uuid);
   }

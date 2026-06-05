@@ -11,11 +11,10 @@ export class RegionRepository {
     private regionRepository: Repository<Region>,
   ) {}
 
-  async findRegionByLocation(location: string) {
-    const regionName = location[0] + location[1];
+  async findRegionByName(name: string) {
     return await this.regionRepository.findOne({
       where: {
-        name: regionName,
+        name,
       },
     });
   }

@@ -287,7 +287,10 @@ export class ShopSubmitTransactionsRepository {
       const productRepo = queryRunner.manager.getRepository(ShopProductMapping);
 
       const createShop = await shopRepo.save({
-        ...shop,
+        name: shop.name,
+        lat: shop.lat,
+        lng: shop.lng,
+        location: shop.location,
         isVerified: false,
         region: {
           id: regionId,
