@@ -6,7 +6,7 @@ import { AuthIdentity } from '../../auth/entities/auth-identity.entity';
 @Unique(['email'])
 @Unique(['nickName'])
 export class User {
-  @PrimaryColumn('char', { length: 36 })
+  @PrimaryColumn('char', { length: 36, charset: 'utf8mb3', collation: 'utf8mb3_general_ci' })
   uuid: string;
 
   @Column('varchar', { length: 255, nullable: true })
