@@ -1,0 +1,4046 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppModule API 계약(경로·파라미터·필드 구조)이 바뀌지 않는다 1`] = `
+{
+  "DELETE /v2/api/courses/{courseId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/courses/{courseId}/share": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/courses/{courseId}/stops/{shopId}/stamp": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "progress": {
+                      "type": "number",
+                    },
+                    "status": {
+                      "enum": [
+                        "in_progress",
+                        "completed",
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "progress",
+                    "status",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/shops/{shopId}/reviews/{reviewId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "reviewId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/users/me": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "withdrawalReasonCode",
+        "required": true,
+        "schema": {
+          "enum": [
+            "not_using",
+            "privacy_concern",
+            "inconvenient",
+            "other_account",
+          ],
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/users/me/recent-searches": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/users/me/recent-searches/{recentSearchId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "recentSearchId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "DELETE /v2/api/users/me/shop-submissions/{submitId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submitId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": null,
+    },
+    "security": [],
+  },
+  "GET /v2/api/admin/feedback": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "items": {
+            "properties": {
+              "createdAt": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "email": {
+                "type": "string",
+              },
+              "feedback": {
+                "type": "string",
+              },
+              "num": {
+                "type": "number",
+              },
+            },
+            "required": [
+              "createdAt",
+              "email",
+              "feedback",
+              "num",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/admin/review-reports": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "items": {
+            "properties": {
+              "isHidden": {
+                "type": "boolean",
+              },
+              "num": {
+                "type": "number",
+              },
+              "reportCount": {
+                "type": "number",
+              },
+              "reportDate": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "reportMessage": {
+                "type": "string",
+              },
+              "reportType": {
+                "type": "string",
+              },
+              "reviewContent": {
+                "type": "string",
+              },
+              "reviewId": {
+                "type": "number",
+              },
+              "userEmail": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "isHidden",
+              "num",
+              "reportCount",
+              "reportDate",
+              "reportMessage",
+              "reportType",
+              "reviewContent",
+              "reviewId",
+              "userEmail",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/admin/shop-reports": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "items": {
+            "properties": {
+              "isHidden": {
+                "type": "boolean",
+              },
+              "num": {
+                "type": "number",
+              },
+              "reportCount": {
+                "type": "number",
+              },
+              "reportDate": {
+                "format": "date-time",
+                "type": "string",
+              },
+              "reportType": {
+                "type": "string",
+              },
+              "shopId": {
+                "type": "number",
+              },
+              "shopLocation": {
+                "type": "string",
+              },
+              "shopName": {
+                "type": "string",
+              },
+              "userEmail": {
+                "type": "string",
+              },
+            },
+            "required": [
+              "isHidden",
+              "num",
+              "reportCount",
+              "reportDate",
+              "reportType",
+              "shopId",
+              "shopLocation",
+              "shopName",
+              "userEmail",
+            ],
+            "type": "object",
+          },
+          "type": "array",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/admin/submission": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "order",
+        "required": false,
+        "schema": {
+          "enum": [
+            "desc",
+            "asc",
+          ],
+          "type": "string",
+        },
+      },
+      {
+        "in": "query",
+        "name": "sortBy",
+        "required": false,
+        "schema": {
+          "enum": [
+            "created",
+          ],
+          "type": "string",
+        },
+      },
+      {
+        "in": "query",
+        "name": "status",
+        "required": false,
+        "schema": {
+          "enum": [
+            "pending",
+            "approved",
+          ],
+          "type": "string",
+        },
+      },
+      {
+        "in": "query",
+        "name": "type",
+        "required": false,
+        "schema": {
+          "enum": [
+            "shop",
+            "operate",
+            "product",
+          ],
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "oneOf": [
+            {
+              "items": {
+                "properties": {
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "id": {
+                    "type": "number",
+                  },
+                  "rejectMessage": {
+                    "type": "string",
+                  },
+                  "shop": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "instagram": "…",
+                          "isHidden": "…",
+                          "isVerified": "…",
+                          "lat": "…",
+                          "lng": "…",
+                          "location": "…",
+                          "mainImage": "…",
+                          "name": "…",
+                          "updatedAt": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "instagram",
+                          "isHidden",
+                          "isVerified",
+                          "lat",
+                          "lng",
+                          "location",
+                          "mainImage",
+                          "name",
+                          "updatedAt",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "shopOperatingHour": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "daysOfWeek": "…",
+                          "endTime": "…",
+                          "id": "…",
+                          "isVerified": "…",
+                          "phoneNumber": "…",
+                          "startTime": "…",
+                        },
+                        "required": [
+                          "daysOfWeek",
+                          "endTime",
+                          "id",
+                          "isVerified",
+                          "phoneNumber",
+                          "startTime",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "shopProducts": {
+                    "items": {
+                      "properties": {
+                        "id": "…",
+                        "name": "…",
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "status": {
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected",
+                    ],
+                    "type": "string",
+                  },
+                  "type": {
+                    "enum": [
+                      "new_shop",
+                      "new_product",
+                      "new_operating",
+                    ],
+                    "type": "string",
+                  },
+                  "user": {
+                    "properties": {
+                      "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "email": {
+                        "type": "string",
+                      },
+                      "lastActivityAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "nickName": {
+                        "type": "string",
+                      },
+                      "profileImg": {
+                        "type": "string",
+                      },
+                      "updatedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "uuid": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "createdAt",
+                      "email",
+                      "lastActivityAt",
+                      "nickName",
+                      "profileImg",
+                      "updatedAt",
+                      "uuid",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "createdAt",
+                  "id",
+                  "rejectMessage",
+                  "shop",
+                  "shopOperatingHour",
+                  "shopProducts",
+                  "status",
+                  "type",
+                  "user",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+            {
+              "items": {
+                "properties": {
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "id": {
+                    "type": "number",
+                  },
+                  "newShopOperatingHour": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "daysOfWeek": "…",
+                          "endTime": "…",
+                          "id": "…",
+                          "isVerified": "…",
+                          "phoneNumber": "…",
+                          "startTime": "…",
+                        },
+                        "required": [
+                          "daysOfWeek",
+                          "endTime",
+                          "id",
+                          "isVerified",
+                          "phoneNumber",
+                          "startTime",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "rejectMessage": {
+                    "type": "string",
+                  },
+                  "shop": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "instagram": "…",
+                          "isHidden": "…",
+                          "isVerified": "…",
+                          "lat": "…",
+                          "lng": "…",
+                          "location": "…",
+                          "mainImage": "…",
+                          "name": "…",
+                          "updatedAt": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "instagram",
+                          "isHidden",
+                          "isVerified",
+                          "lat",
+                          "lng",
+                          "location",
+                          "mainImage",
+                          "name",
+                          "updatedAt",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "shopOperatingHour": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "daysOfWeek": "…",
+                          "endTime": "…",
+                          "id": "…",
+                          "isVerified": "…",
+                          "phoneNumber": "…",
+                          "startTime": "…",
+                        },
+                        "required": [
+                          "daysOfWeek",
+                          "endTime",
+                          "id",
+                          "isVerified",
+                          "phoneNumber",
+                          "startTime",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "status": {
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected",
+                    ],
+                    "type": "string",
+                  },
+                  "type": {
+                    "enum": [
+                      "new_shop",
+                      "new_product",
+                      "new_operating",
+                    ],
+                    "type": "string",
+                  },
+                  "user": {
+                    "properties": {
+                      "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "email": {
+                        "type": "string",
+                      },
+                      "lastActivityAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "nickName": {
+                        "type": "string",
+                      },
+                      "profileImg": {
+                        "type": "string",
+                      },
+                      "updatedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "uuid": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "createdAt",
+                      "email",
+                      "lastActivityAt",
+                      "nickName",
+                      "profileImg",
+                      "updatedAt",
+                      "uuid",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "createdAt",
+                  "id",
+                  "newShopOperatingHour",
+                  "rejectMessage",
+                  "shop",
+                  "shopOperatingHour",
+                  "status",
+                  "type",
+                  "user",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+            {
+              "items": {
+                "properties": {
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "id": {
+                    "type": "number",
+                  },
+                  "newShopProducts": {
+                    "items": {
+                      "properties": {
+                        "id": "…",
+                        "name": "…",
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "rejectMessage": {
+                    "type": "string",
+                  },
+                  "shop": {
+                    "allOf": [
+                      {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "instagram": "…",
+                          "isHidden": "…",
+                          "isVerified": "…",
+                          "lat": "…",
+                          "lng": "…",
+                          "location": "…",
+                          "mainImage": "…",
+                          "name": "…",
+                          "updatedAt": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "instagram",
+                          "isHidden",
+                          "isVerified",
+                          "lat",
+                          "lng",
+                          "location",
+                          "mainImage",
+                          "name",
+                          "updatedAt",
+                        ],
+                        "type": "object",
+                      },
+                    ],
+                  },
+                  "shopProducts": {
+                    "items": {
+                      "properties": {
+                        "id": "…",
+                        "name": "…",
+                      },
+                      "required": [
+                        "id",
+                        "name",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "status": {
+                    "enum": [
+                      "pending",
+                      "approved",
+                      "rejected",
+                    ],
+                    "type": "string",
+                  },
+                  "type": {
+                    "enum": [
+                      "new_shop",
+                      "new_product",
+                      "new_operating",
+                    ],
+                    "type": "string",
+                  },
+                  "user": {
+                    "properties": {
+                      "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "email": {
+                        "type": "string",
+                      },
+                      "lastActivityAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "nickName": {
+                        "type": "string",
+                      },
+                      "profileImg": {
+                        "type": "string",
+                      },
+                      "updatedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "uuid": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "createdAt",
+                      "email",
+                      "lastActivityAt",
+                      "nickName",
+                      "profileImg",
+                      "updatedAt",
+                      "uuid",
+                    ],
+                    "type": "object",
+                  },
+                },
+                "required": [
+                  "createdAt",
+                  "id",
+                  "newShopProducts",
+                  "rejectMessage",
+                  "shop",
+                  "shopProducts",
+                  "status",
+                  "type",
+                  "user",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/admin/users": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "active",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+        },
+      },
+      {
+        "in": "query",
+        "name": "order",
+        "required": false,
+        "schema": {
+          "enum": [
+            "desc",
+            "asc",
+          ],
+          "type": "string",
+        },
+      },
+      {
+        "in": "query",
+        "name": "sortBy",
+        "required": false,
+        "schema": {
+          "enum": [
+            "created",
+            "lastActiveAt",
+          ],
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "oneOf": [
+            {
+              "items": {
+                "properties": {
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "email": {
+                    "type": "string",
+                  },
+                  "lastActivityAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "nickName": {
+                    "type": "string",
+                  },
+                  "num": {
+                    "type": "number",
+                  },
+                  "provider": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "createdAt",
+                  "email",
+                  "lastActivityAt",
+                  "nickName",
+                  "num",
+                  "provider",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+            {
+              "items": {
+                "properties": {
+                  "createdAt": {
+                    "format": "date-time",
+                    "type": "string",
+                  },
+                  "nickName": {
+                    "type": "string",
+                  },
+                  "num": {
+                    "type": "number",
+                  },
+                  "uuid": {
+                    "type": "string",
+                  },
+                  "withdrawalReason": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "createdAt",
+                  "nickName",
+                  "num",
+                  "uuid",
+                  "withdrawalReason",
+                ],
+                "type": "object",
+              },
+              "type": "array",
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/courses": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "status",
+        "required": false,
+        "schema": {
+          "enum": [
+            "in_progress",
+            "completed",
+            "all",
+          ],
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "name": "…",
+                          "progress": "…",
+                          "status": "…",
+                          "thumbnails": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "name",
+                          "progress",
+                          "status",
+                          "thumbnails",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "limit": {
+                      "type": "number",
+                    },
+                    "page": {
+                      "type": "number",
+                    },
+                    "total": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "items",
+                    "limit",
+                    "page",
+                    "total",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/courses/shared/{token}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "token",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                    },
+                    "ogImageUrl": {
+                      "type": "string",
+                    },
+                    "ownerNickname": {
+                      "type": "string",
+                    },
+                    "ownerProfileImg": {
+                      "type": "string",
+                    },
+                    "stops": {
+                      "items": {
+                        "properties": {
+                          "orderIndex": "…",
+                          "shop": "…",
+                        },
+                        "required": [
+                          "orderIndex",
+                          "shop",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "totalStops": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "name",
+                    "ogImageUrl",
+                    "ownerNickname",
+                    "ownerProfileImg",
+                    "stops",
+                    "totalStops",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "GET /v2/api/courses/visited-shops": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "limit",
+        "required": false,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": false,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "isHidden": "…",
+                          "lastVisitedAt": "…",
+                          "mainImage": "…",
+                          "name": "…",
+                          "shopId": "…",
+                        },
+                        "required": [
+                          "isHidden",
+                          "lastVisitedAt",
+                          "mainImage",
+                          "name",
+                          "shopId",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "limit": {
+                      "type": "number",
+                    },
+                    "page": {
+                      "type": "number",
+                    },
+                    "total": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "items",
+                    "limit",
+                    "page",
+                    "total",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/courses/{courseId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "createdAt": {
+                      "format": "date-time",
+                      "type": "string",
+                    },
+                    "id": {
+                      "type": "number",
+                    },
+                    "name": {
+                      "type": "string",
+                    },
+                    "progress": {
+                      "type": "number",
+                    },
+                    "status": {
+                      "enum": [
+                        "in_progress",
+                        "completed",
+                      ],
+                      "type": "string",
+                    },
+                    "stops": {
+                      "items": {
+                        "properties": {
+                          "orderIndex": "…",
+                          "shop": "…",
+                          "shopId": "…",
+                          "visitedAt": "…",
+                        },
+                        "required": [
+                          "orderIndex",
+                          "shop",
+                          "shopId",
+                          "visitedAt",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "updatedAt": {
+                      "format": "date-time",
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "createdAt",
+                    "id",
+                    "name",
+                    "progress",
+                    "status",
+                    "stops",
+                    "updatedAt",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/notices": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "items": {
+                    "properties": {
+                      "content": {
+                        "type": "string",
+                      },
+                      "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                      },
+                      "id": {
+                        "type": "number",
+                      },
+                      "title": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "content",
+                      "createdAt",
+                      "id",
+                      "title",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "GET /v2/api/regions": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "items": {
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                      },
+                      "name": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "GET /v2/api/shops": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "isWishlist",
+        "required": false,
+        "schema": {
+          "type": "boolean",
+        },
+      },
+      {
+        "in": "query",
+        "name": "lat",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "lng",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "productIds",
+        "required": false,
+        "schema": {
+          "items": {
+            "type": "number",
+          },
+          "type": "array",
+        },
+      },
+      {
+        "in": "query",
+        "name": "sorting",
+        "required": true,
+        "schema": {
+          "type": "boolean",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "items": {
+                    "properties": {
+                      "distance": {
+                        "type": "number",
+                      },
+                      "id": {
+                        "type": "number",
+                      },
+                      "image": {
+                        "type": "string",
+                      },
+                      "lat": {
+                        "type": "number",
+                      },
+                      "lng": {
+                        "type": "number",
+                      },
+                      "location": {
+                        "type": "string",
+                      },
+                      "name": {
+                        "type": "string",
+                      },
+                      "regionId": {
+                        "type": "number",
+                      },
+                      "reportStatus": {
+                        "type": "string",
+                      },
+                      "type": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "distance",
+                      "id",
+                      "image",
+                      "lat",
+                      "lng",
+                      "location",
+                      "name",
+                      "regionId",
+                      "reportStatus",
+                      "type",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/shops/search": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "keyword",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
+      {
+        "in": "query",
+        "name": "lat",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "limit",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "lng",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "distance": "…",
+                          "id": "…",
+                          "lat": "…",
+                          "lng": "…",
+                          "location": "…",
+                          "mainImage": "…",
+                          "name": "…",
+                        },
+                        "required": [
+                          "distance",
+                          "id",
+                          "lat",
+                          "lng",
+                          "location",
+                          "mainImage",
+                          "name",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "pageInfo": {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "limit": "…",
+                            "nextPage": "…",
+                            "page": "…",
+                            "totalElements": "…",
+                            "totalPages": "…",
+                          },
+                          "required": [
+                            "limit",
+                            "nextPage",
+                            "page",
+                            "totalElements",
+                            "totalPages",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "data",
+                    "pageInfo",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "GET /v2/api/shops/{shopId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "imageList": {
+                      "items": {
+                        "type": "string",
+                      },
+                      "type": "array",
+                    },
+                    "otherReviews": {
+                      "items": {
+                        "properties": {
+                          "content": "…",
+                          "createdAt": "…",
+                          "id": "…",
+                          "user": "…",
+                        },
+                        "required": [
+                          "content",
+                          "createdAt",
+                          "id",
+                          "user",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "shop": {
+                      "properties": {
+                        "id": {
+                          "type": "number",
+                        },
+                        "instagramId": {
+                          "type": "string",
+                        },
+                        "lat": {
+                          "type": "number",
+                        },
+                        "lng": {
+                          "type": "number",
+                        },
+                        "location": {
+                          "type": "string",
+                        },
+                        "name": {
+                          "type": "string",
+                        },
+                        "operatingHours": {
+                          "items": "…",
+                          "type": "array",
+                        },
+                        "products": {
+                          "items": "…",
+                          "type": "array",
+                        },
+                      },
+                      "required": [
+                        "id",
+                        "instagramId",
+                        "lat",
+                        "lng",
+                        "location",
+                        "name",
+                        "operatingHours",
+                        "products",
+                      ],
+                      "type": "object",
+                    },
+                    "userReviews": {
+                      "items": {
+                        "properties": {
+                          "content": "…",
+                          "createdAt": "…",
+                          "id": "…",
+                          "user": "…",
+                        },
+                        "required": [
+                          "content",
+                          "createdAt",
+                          "id",
+                          "user",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "wishlist": {
+                      "type": "boolean",
+                    },
+                  },
+                  "required": [
+                    "imageList",
+                    "otherReviews",
+                    "shop",
+                    "userReviews",
+                    "wishlist",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/users/duplicate-check": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "nickName",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "enum": [
+                    true,
+                    false,
+                  ],
+                  "type": "boolean",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "GET /v2/api/users/me": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                    },
+                    "nickName": {
+                      "type": "string",
+                    },
+                    "profileImg": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "email",
+                    "nickName",
+                    "profileImg",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/users/me/favorite": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "areaId",
+        "required": false,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "limit",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "shop": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "shop",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "pageInfo": {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "limit": "…",
+                            "nextPage": "…",
+                            "page": "…",
+                            "totalElements": "…",
+                            "totalPages": "…",
+                          },
+                          "required": [
+                            "limit",
+                            "nextPage",
+                            "page",
+                            "totalElements",
+                            "totalPages",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "data",
+                    "pageInfo",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/users/me/recent-searches": {
+    "parameters": [],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "items": {
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                      },
+                      "shopId": {
+                        "type": "number",
+                      },
+                      "shopName": {
+                        "type": "string",
+                      },
+                    },
+                    "required": [
+                      "id",
+                      "shopId",
+                      "shopName",
+                    ],
+                    "type": "object",
+                  },
+                  "type": "array",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/users/me/reviews": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "limit",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "sort",
+        "required": false,
+        "schema": {
+          "enum": [
+            "ASC",
+            "DESC",
+          ],
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "content": "…",
+                          "createdAt": "…",
+                          "id": "…",
+                          "images": "…",
+                          "shop": "…",
+                        },
+                        "required": [
+                          "content",
+                          "createdAt",
+                          "id",
+                          "images",
+                          "shop",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "pageInfo": {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "limit": "…",
+                            "nextPage": "…",
+                            "page": "…",
+                            "totalElements": "…",
+                            "totalPages": "…",
+                          },
+                          "required": [
+                            "limit",
+                            "nextPage",
+                            "page",
+                            "totalElements",
+                            "totalPages",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "data",
+                    "pageInfo",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "GET /v2/api/users/me/shop-submissions": {
+    "parameters": [
+      {
+        "in": "query",
+        "name": "limit",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "query",
+        "name": "page",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "properties": {
+                          "createdAt": "…",
+                          "id": "…",
+                          "rejectMessage": "…",
+                          "shop": "…",
+                          "status": "…",
+                          "submitStatus": "…",
+                          "type": "…",
+                        },
+                        "required": [
+                          "createdAt",
+                          "id",
+                          "rejectMessage",
+                          "shop",
+                          "status",
+                          "submitStatus",
+                          "type",
+                        ],
+                        "type": "object",
+                      },
+                      "type": "array",
+                    },
+                    "pageInfo": {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "limit": "…",
+                            "nextPage": "…",
+                            "page": "…",
+                            "totalElements": "…",
+                            "totalPages": "…",
+                          },
+                          "required": [
+                            "limit",
+                            "nextPage",
+                            "page",
+                            "totalElements",
+                            "totalPages",
+                          ],
+                          "type": "object",
+                        },
+                      ],
+                    },
+                  },
+                  "required": [
+                    "data",
+                    "pageInfo",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/reviews/{reviewId}/hidden": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "reviewId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "isHidden": {
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "isHidden",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/shops/{shopId}/hidden": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "isHidden": {
+            "type": "boolean",
+          },
+        },
+        "required": [
+          "isHidden",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/new-shop/accept": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/new-shop/reject": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "rejectMessage": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/operating-info/accept": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/operating-info/reject": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "rejectMessage": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/product/accept": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/admin/submission/{submissionId}/product/reject": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "submissionId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "rejectMessage": {
+            "type": "string",
+          },
+        },
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": null,
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/courses/{courseId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "name": {
+            "type": "string",
+          },
+          "shopIds": {
+            "items": {
+              "type": "number",
+            },
+            "type": "array",
+          },
+        },
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/shops/{shopId}/reviews/{reviewId}": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "reviewId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "multipart/form-data": {
+        "properties": {
+          "content": {
+            "type": "string",
+          },
+          "deleteReviewImages": {
+            "items": {
+              "type": "number",
+            },
+            "type": "array",
+          },
+          "newReviewImages": {
+            "items": {
+              "format": "binary",
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+        "required": [],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "PATCH /v2/api/users/me": {
+    "parameters": [],
+    "requestBody": {
+      "multipart/form-data": {
+        "properties": {
+          "nickName": {
+            "type": "string",
+          },
+          "profileImage": {
+            "format": "binary",
+            "type": "string",
+          },
+        },
+        "required": [],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/admin/login": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "email": {
+            "type": "string",
+          },
+          "password": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "email",
+          "password",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": undefined,
+      },
+    },
+    "security": [],
+  },
+  "POST /v2/api/auth/apple": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "idToken": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "idToken",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "accessToken",
+                    "refreshToken",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "POST /v2/api/auth/google": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "code": {
+            "type": "string",
+          },
+          "redirectUri": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "code",
+          "redirectUri",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "accessToken",
+                    "refreshToken",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "POST /v2/api/auth/refresh": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "refreshToken",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "accessToken": {
+                      "type": "string",
+                    },
+                    "refreshToken": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "accessToken",
+                    "refreshToken",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [],
+  },
+  "POST /v2/api/courses": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "name": {
+            "type": "string",
+          },
+          "shopIds": {
+            "items": {
+              "type": "number",
+            },
+            "type": "array",
+          },
+        },
+        "required": [
+          "name",
+          "shopIds",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "courseId": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "courseId",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/courses/shared/{token}/import": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "token",
+        "required": true,
+        "schema": {
+          "type": "string",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "courseId": {
+                      "type": "number",
+                    },
+                  },
+                  "required": [
+                    "courseId",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/courses/{courseId}/share": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "shareToken": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "shareToken",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/courses/{courseId}/share/og-image": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "multipart/form-data": {
+        "properties": {
+          "ogImage": {
+            "format": "binary",
+            "type": "string",
+          },
+        },
+        "required": [
+          "ogImage",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "ogImageUrl": {
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "ogImageUrl",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/courses/{courseId}/stops/{shopId}/stamp": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "courseId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": null,
+    "responses": {
+      "200": {
+        "application/json": {
+          "allOf": [
+            {
+              "properties": {
+                "message": {
+                  "type": "string",
+                },
+                "result": {
+                  "type": "object",
+                },
+                "status": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "message",
+                "result",
+                "status",
+              ],
+              "type": "object",
+            },
+            {
+              "properties": {
+                "result": {
+                  "properties": {
+                    "progress": {
+                      "type": "number",
+                    },
+                    "status": {
+                      "enum": [
+                        "in_progress",
+                        "completed",
+                      ],
+                      "type": "string",
+                    },
+                    "visitedAt": {
+                      "format": "date-time",
+                      "type": "string",
+                    },
+                  },
+                  "required": [
+                    "progress",
+                    "status",
+                    "visitedAt",
+                  ],
+                  "type": "object",
+                },
+              },
+            },
+          ],
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/feedback": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "feedback": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "feedback",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "operatingHours": {
+            "allOf": [
+              {
+                "properties": {
+                  "daysOfWeek": {
+                    "items": {
+                      "enum": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "endTime": {
+                    "type": "string",
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                  },
+                  "startTime": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+          },
+          "products": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "id",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+          "shop": {
+            "allOf": [
+              {
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                  },
+                  "lng": {
+                    "type": "number",
+                  },
+                  "location": {
+                    "type": "string",
+                  },
+                  "name": {
+                    "type": "string",
+                  },
+                  "region1DepthName": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "lat",
+                  "lng",
+                  "location",
+                  "name",
+                  "region1DepthName",
+                ],
+                "type": "object",
+              },
+            ],
+          },
+        },
+        "required": [
+          "shop",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops/{shopId}/operating": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "operatingHours": {
+            "allOf": [
+              {
+                "properties": {
+                  "daysOfWeek": {
+                    "items": {
+                      "enum": [
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                      ],
+                      "type": "string",
+                    },
+                    "type": "array",
+                  },
+                  "endTime": {
+                    "type": "string",
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                  },
+                  "startTime": {
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
+            ],
+          },
+        },
+        "required": [
+          "operatingHours",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops/{shopId}/products": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "products": {
+            "items": {
+              "properties": {
+                "id": {
+                  "type": "number",
+                },
+              },
+              "required": [
+                "id",
+              ],
+              "type": "object",
+            },
+            "type": "array",
+          },
+        },
+        "required": [
+          "products",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops/{shopId}/reviews": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "multipart/form-data": {
+        "properties": {
+          "content": {
+            "type": "string",
+          },
+          "reviewImages": {
+            "items": {
+              "format": "binary",
+              "type": "string",
+            },
+            "type": "array",
+          },
+        },
+        "required": [
+          "content",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops/{shopId}/reviews/{reviewId}/report": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "reviewId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "reportMessage": {
+            "type": "string",
+          },
+          "reportType": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "reportType",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/shops/{shopId}/shop/report": {
+    "parameters": [
+      {
+        "in": "path",
+        "name": "shopId",
+        "required": true,
+        "schema": {
+          "type": "number",
+        },
+      },
+    ],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "reportMessage": {
+            "type": "string",
+          },
+          "reportType": {
+            "type": "string",
+          },
+        },
+        "required": [
+          "reportType",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+  "POST /v2/api/users/me/favorite": {
+    "parameters": [],
+    "requestBody": {
+      "application/json": {
+        "properties": {
+          "shopId": {
+            "type": "number",
+          },
+        },
+        "required": [
+          "shopId",
+        ],
+        "type": "object",
+      },
+    },
+    "responses": {
+      "200": {
+        "application/json": {
+          "properties": {
+            "message": {
+              "type": "string",
+            },
+            "status": {
+              "type": "number",
+            },
+          },
+          "required": [
+            "message",
+            "status",
+          ],
+          "type": "object",
+        },
+      },
+    },
+    "security": [
+      {
+        "JWT-auth": [],
+      },
+    ],
+  },
+}
+`;
