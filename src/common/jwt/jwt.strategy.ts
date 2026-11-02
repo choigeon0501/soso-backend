@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private readonly configService: ConfigService, // ✅ ConfigService 주입
+    private readonly configService: ConfigService,
   ) {
     super({
       secretOrKey: configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new NotFoundException('Not Exist User');
     }
 
-    // 최근 활동 시각 모니터링
+    /** lastActivityAt은 10분 간격으로만 갱신해 요청마다 쓰기가 일어나지 않게 한다. */
     const now = Date.now();
     const lastActivityTime = user.lastActivityAt?.getTime() ?? 0;
     if (now - lastActivityTime > 10 * 60 * 1000) {

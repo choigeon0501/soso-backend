@@ -35,9 +35,7 @@ export class ReviewService {
     const shapedReviews = reviews.map((review) => ({
       ...review,
       images: (review.images ?? []).filter((image) => !!image).map((image) => ({ ...image, url: image.fileKey })),
-      user: review.user
-        ? { uuid: review.user.uuid, profileImg: review.user.profileImg ?? null, nickName: review.user.nickName ?? null }
-        : null,
+      user: review.user ? { uuid: review.user.uuid, profileImg: review.user.profileImg ?? null, nickName: review.user.nickName ?? null } : null,
     }));
     const withoutUuid = (review: (typeof shapedReviews)[number]) => ({
       ...review,

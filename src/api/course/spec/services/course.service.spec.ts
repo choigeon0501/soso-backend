@@ -188,7 +188,7 @@ describe('CourseService', () => {
   });
 
   // ==================== getCourseList ====================
-  describe('getCourseList', () => {
+  describe('findMyCourses', () => {
     it('진행 중이 완료보다 먼저, 각 그룹 내에서 최신순', async () => {
       const s1 = makeShop({ id: 1 });
       const s2 = makeShop({ id: 2 });
@@ -202,7 +202,7 @@ describe('CourseService', () => {
 
       courseRepo.findCoursesByUuid.mockResolvedValue([completed, inProgressOld, inProgressNew]);
 
-      const res = await service.getCourseList(OWNER, { status: 'all', page: 1, limit: 10 });
+      const res = await service.findMyCourses(OWNER, { status: 'all', page: 1, limit: 10 });
 
       expect(res.items.map((i) => i.id)).toEqual([3, 2, 1]);
       expect(res.items[0].status).toBe('in_progress');
@@ -218,7 +218,7 @@ describe('CourseService', () => {
 
       courseRepo.findCoursesByUuid.mockResolvedValue([completed, inProgress]);
 
-      const res = await service.getCourseList(OWNER, { status: 'completed', page: 1, limit: 10 });
+      const res = await service.findMyCourses(OWNER, { status: 'completed', page: 1, limit: 10 });
 
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe(1);
@@ -242,7 +242,7 @@ describe('CourseService', () => {
       ]);
       courseRepo.findCoursesByUuid.mockResolvedValue([course]);
 
-      const res = await service.getCourseList(OWNER, { status: 'all', page: 1, limit: 10 });
+      const res = await service.findMyCourses(OWNER, { status: 'all', page: 1, limit: 10 });
 
       expect(res.items[0].thumbnails).toEqual(['a.jpg', 'c.jpg', 'd.jpg', 'e.jpg']);
     });
@@ -252,7 +252,7 @@ describe('CourseService', () => {
       const courses = [1, 2, 3, 4, 5].map((id) => makeCourse(id, OWNER, new Date(Date.now() - (5 - id) * 1000), [makeCourseShop(id, s1, 1)]));
       courseRepo.findCoursesByUuid.mockResolvedValue(courses);
 
-      const page2 = await service.getCourseList(OWNER, { status: 'all', page: 2, limit: 2 });
+      const page2 = await service.findMyCourses(OWNER, { status: 'all', page: 2, limit: 2 });
 
       expect(page2.items).toHaveLength(2);
       expect(page2.total).toBe(5);
@@ -469,14 +469,10 @@ describe('CourseService', () => {
     it('유효한 토큰 → 이름/닉네임/stops 반환, visited_at은 포함하지 않음', async () => {
       const s1 = makeShop({ id: 1, name: 'A' });
       const s2 = makeShop({ id: 2, name: 'B' });
-      const course = makeCourse(
-        10,
-        OWNER,
-        new Date(),
-        [makeCourseShop(1, s1, 1, new Date()), makeCourseShop(2, s2, 2)],
-        '성수 데이트',
-        { shareToken: 'tok-1', nickName: 'owner-nick' },
-      );
+      const course = makeCourse(10, OWNER, new Date(), [makeCourseShop(1, s1, 1, new Date()), makeCourseShop(2, s2, 2)], '성수 데이트', {
+        shareToken: 'tok-1',
+        nickName: 'owner-nick',
+      });
       courseRepo.findByShareToken.mockResolvedValue(course);
 
       const res = await service.getSharedCourse('tok-1');
@@ -494,14 +490,9 @@ describe('CourseService', () => {
       const s1 = makeShop({ id: 1, isHidden: false });
       const s2 = makeShop({ id: 2, isHidden: true });
       const s3 = makeShop({ id: 3, isHidden: false });
-      const course = makeCourse(
-        10,
-        OWNER,
-        new Date(),
-        [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2), makeCourseShop(3, s3, 3)],
-        'x',
-        { shareToken: 'tok-2' },
-      );
+      const course = makeCourse(10, OWNER, new Date(), [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2), makeCourseShop(3, s3, 3)], 'x', {
+        shareToken: 'tok-2',
+      });
       courseRepo.findByShareToken.mockResolvedValue(course);
 
       const res = await service.getSharedCourse('tok-2');
@@ -541,14 +532,7 @@ describe('CourseService', () => {
     it('공유된 코스에서 보이는 샵이 2개 미만이면 BadRequestException', async () => {
       const s1 = makeShop({ id: 1, isHidden: true });
       const s2 = makeShop({ id: 2, isHidden: true });
-      const source = makeCourse(
-        10,
-        OWNER,
-        new Date(),
-        [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2)],
-        'x',
-        { shareToken: 'tok-few' },
-      );
+      const source = makeCourse(10, OWNER, new Date(), [makeCourseShop(1, s1, 1), makeCourseShop(2, s2, 2)], 'x', { shareToken: 'tok-few' });
       courseRepo.findByShareToken.mockResolvedValue(source);
 
       await expect(service.importSharedCourse(STRANGER, 'tok-few')).rejects.toThrow(BadRequestException);

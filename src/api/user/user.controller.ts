@@ -122,7 +122,9 @@ export class UserController {
   @ApiExtraModels(GetMySubmissionsResponseDto, MySubmissionItemResponseDto, PageInfoDto)
   @ApiOkResponse({
     description: '사용자가 등록/제안한 소품샵 정보 조회 성공',
-    schema: { allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(GetMySubmissionsResponseDto) } } }] },
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(GetMySubmissionsResponseDto) } } }],
+    },
   })
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)
@@ -157,7 +159,9 @@ export class UserController {
   @ApiExtraModels(GetUserFavoritesResponseDto, UserFavoriteItemResponseDto, PageInfoDto)
   @ApiOkResponse({
     description: '찜한 소품샵 리스트 조회 성공',
-    schema: { allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(GetUserFavoritesResponseDto) } } }] },
+    schema: {
+      allOf: [{ $ref: getSchemaPath(SuccessResponseDTO) }, { properties: { result: { $ref: getSchemaPath(GetUserFavoritesResponseDto) } } }],
+    },
   })
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtAuthGuard)

@@ -7,10 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { AdminUser } from '../../api/admin/entities/admin-user.entity';
 
 @Injectable()
-export class AdminJwtStrategy extends PassportStrategy(
-  Strategy,
-  'admin-jwt', // ⭐ 전략 이름 중요
-) {
+export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
   constructor(
     @InjectRepository(AdminUser)
     private readonly adminRepository: Repository<AdminUser>,

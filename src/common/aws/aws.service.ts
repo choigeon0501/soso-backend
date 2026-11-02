@@ -62,7 +62,6 @@ export class AwsService {
     if (!imageUrl) return;
 
     try {
-      // 올바른 Key 추출 방법
       const fileName = imageUrl.split(`.amazonaws.com/`)[1];
 
       const command = new DeleteObjectCommand({

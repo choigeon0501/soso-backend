@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 export class OptionalAuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly configService: ConfigService, // ✅ ConfigService 주입
+    private readonly configService: ConfigService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -20,7 +20,7 @@ export class OptionalAuthGuard implements CanActivate {
     }
 
     const token = authHeader.split(' ')[1];
-    const secret = this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'); // ✅ 환경변수에서 secret 읽기
+    const secret = this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET');
 
     try {
       const decoded = jwt.verify(token, secret);
@@ -32,6 +32,6 @@ export class OptionalAuthGuard implements CanActivate {
       }
     }
 
-    return true; // 인증 여부와 관계없이 요청 계속 허용
+    return true;
   }
 }

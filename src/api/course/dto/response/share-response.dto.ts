@@ -6,7 +6,10 @@ export class ShareCourseResponseDto {
 }
 
 export class UploadShareOgImageResponseDto {
-  @ApiProperty({ description: '업로드된 OG 이미지 public URL', example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/course-share-og/1714984000-snapshot.jpg' })
+  @ApiProperty({
+    description: '업로드된 OG 이미지 public URL',
+    example: 'https://bucket.s3.ap-northeast-2.amazonaws.com/course-share-og/1714984000-snapshot.jpg',
+  })
   ogImageUrl: string;
 }
 

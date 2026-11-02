@@ -205,10 +205,10 @@ export class SubmissionShopBaseResponseDto {
   })
   instagram: string | null;
 
-  @ApiProperty({ example: 37.1234560 })
+  @ApiProperty({ example: 37.123456 })
   lat: number;
 
-  @ApiProperty({ example: 127.1234560 })
+  @ApiProperty({ example: 127.123456 })
   lng: number;
 
   @ApiProperty({

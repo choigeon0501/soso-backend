@@ -1,11 +1,4 @@
-import {
-  ExceptionFilter as NestExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ExceptionFilter as NestExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LoggerService } from '../logger/logger.service';
 
@@ -20,25 +13,14 @@ export class ExceptionFilter implements NestExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const exceptionResponse =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : { message: 'Internal server error' };
+    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : { message: 'Internal server error' };
 
-    const message =
-      typeof exceptionResponse === 'string'
-        ? exceptionResponse
-        : (exceptionResponse as any).message || 'Unknown error';
+    const message = typeof exceptionResponse === 'string' ? exceptionResponse : (exceptionResponse as any).message || 'Unknown error';
 
     // NestJS Logger → 콘솔 출력 (Railway 대시보드에서 확인 가능)
-    this.logger.error(
-      `HTTP Status: ${status} Error Message: ${JSON.stringify(exceptionResponse)}`,
-    );
+    this.logger.error(`HTTP Status: ${status} Error Message: ${JSON.stringify(exceptionResponse)}`);
     this.logger.error(`Request URL: ${request.method} ${request.url}`);
     this.logger.error(`Request Body: ${JSON.stringify(request.body)}`);
     if (exception instanceof Error) {
@@ -50,10 +32,7 @@ export class ExceptionFilter implements NestExceptionFilter {
       timestamp: new Date().toISOString(),
       statusCode: status,
       message: Array.isArray(message) ? message.join(', ') : message,
-      error:
-        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
-          ? (exceptionResponse as any).error
-          : undefined,
+      error: typeof exceptionResponse === 'object' && 'error' in exceptionResponse ? (exceptionResponse as any).error : undefined,
       path: request.url,
       method: request.method,
       stack: exception instanceof Error ? exception.stack : undefined,
@@ -67,10 +46,7 @@ export class ExceptionFilter implements NestExceptionFilter {
     const clientResponse: any = {
       statusCode: status,
       message: Array.isArray(message) ? message.join(', ') : message,
-      error:
-        typeof exceptionResponse === 'object' && 'error' in exceptionResponse
-          ? (exceptionResponse as any).error
-          : undefined,
+      error: typeof exceptionResponse === 'object' && 'error' in exceptionResponse ? (exceptionResponse as any).error : undefined,
     };
 
     response.status(status).json(clientResponse);

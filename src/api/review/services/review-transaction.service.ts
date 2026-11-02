@@ -30,7 +30,13 @@ export class ReviewTransactionService {
   /**
    * 이미지 삭제는 S3 → 조인 테이블(review_image_mappings) → review_images 순서다. 매핑이 남아 있으면 이미지 행을 지울 수 없다.
    */
-  async updateReview(uuid: string, reviewId: number, content: string | undefined, deleteImageIds: number[] | undefined, newImageUrls: string[]): Promise<void> {
+  async updateReview(
+    uuid: string,
+    reviewId: number,
+    content: string | undefined,
+    deleteImageIds: number[] | undefined,
+    newImageUrls: string[],
+  ): Promise<void> {
     await this.runInTransaction('updateReview', async (manager) => {
       const reviewRepository = manager.getRepository(Review);
       const reviewImageRepository = manager.getRepository(ReviewImage);

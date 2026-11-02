@@ -20,9 +20,7 @@ export function setupSwagger(app: INestApplication): void {
     .addServer('/v2/api')
     .build();
 
-  // SwaggerModule.createDocument를 사용해 자동 생성된 문서 생성
   const document = SwaggerModule.createDocument(app, config);
 
-  // SwaggerModule.setup에 병합된 document 전달
   SwaggerModule.setup('api-docs', app, document);
 }

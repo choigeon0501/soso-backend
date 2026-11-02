@@ -31,7 +31,7 @@ export class CourseService {
     private readonly awsService: AwsService,
   ) {}
 
-  async getCourseList(uuid: string, query: GetCourseListQueryDto): Promise<GetCourseListResponseDto> {
+  async findMyCourses(uuid: string, query: GetCourseListQueryDto): Promise<GetCourseListResponseDto> {
     const status = query.status ?? 'all';
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
@@ -75,7 +75,7 @@ export class CourseService {
     return { items, total, page, limit };
   }
 
-  async getVisitedShops(uuid: string, query: GetVisitedShopsQueryDto): Promise<GetVisitedShopsResponseDto> {
+  async findVisitedShops(uuid: string, query: GetVisitedShopsQueryDto): Promise<GetVisitedShopsResponseDto> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
 
@@ -196,9 +196,7 @@ export class CourseService {
     const now = new Date();
     await this.courseRepository.updateVisitedAt(target.id, now);
 
-    const updatedShops = course.courseShops.map((cs) =>
-      cs.id === target.id ? { ...cs, visitedAt: now } : cs,
-    ) as CourseShop[];
+    const updatedShops = course.courseShops.map((cs) => (cs.id === target.id ? { ...cs, visitedAt: now } : cs)) as CourseShop[];
     const { progress, status } = this.calculateProgress(updatedShops);
 
     return { visitedAt: now, progress, status };
@@ -219,9 +217,7 @@ export class CourseService {
 
     await this.courseRepository.updateVisitedAt(target.id, null);
 
-    const updatedShops = course.courseShops.map((cs) =>
-      cs.id === target.id ? { ...cs, visitedAt: null } : cs,
-    ) as CourseShop[];
+    const updatedShops = course.courseShops.map((cs) => (cs.id === target.id ? { ...cs, visitedAt: null } : cs)) as CourseShop[];
     const { progress, status } = this.calculateProgress(updatedShops);
 
     return { progress, status };
@@ -262,9 +258,7 @@ export class CourseService {
       throw new NotFoundException('공유된 코스를 찾을 수 없습니다.');
     }
 
-    const visibleStops = [...course.courseShops]
-      .sort((a, b) => a.orderIndex - b.orderIndex)
-      .filter((cs) => cs.shop && !cs.shop.isHidden);
+    const visibleStops = [...course.courseShops].sort((a, b) => a.orderIndex - b.orderIndex).filter((cs) => cs.shop && !cs.shop.isHidden);
 
     const stops = visibleStops.map((cs) => ({
       orderIndex: cs.orderIndex,

@@ -23,10 +23,7 @@ export class ShopSubmitTransactionService {
       await manager.getRepository(Shop).delete({ id: shopId, isVerified: false });
       await manager
         .getRepository(ShopSubmitRecord)
-        .update(
-          { id: submitId, type: SubmitType.NewShop, status: SubmitStatus.Pending },
-          { status: SubmitStatus.Rejected, rejectMessage },
-        );
+        .update({ id: submitId, type: SubmitType.NewShop, status: SubmitStatus.Pending }, { status: SubmitStatus.Rejected, rejectMessage });
     });
   }
 
@@ -71,10 +68,7 @@ export class ShopSubmitTransactionService {
 
       await operatingHourRepository.delete({ shop: { id: shopId }, isVerified: true });
       await operatingHourRepository.update({ id: record.shopOperatingHour.id, isVerified: false }, { isVerified: true });
-      await submitRepository.update(
-        { id: submitId, type: SubmitType.NewOperating, status: SubmitStatus.Pending },
-        { status: SubmitStatus.Approved },
-      );
+      await submitRepository.update({ id: submitId, type: SubmitType.NewOperating, status: SubmitStatus.Pending }, { status: SubmitStatus.Approved });
     });
   }
 
@@ -86,10 +80,7 @@ export class ShopSubmitTransactionService {
       });
       await manager
         .getRepository(ShopSubmitRecord)
-        .update(
-          { id: submitId, type: SubmitType.NewProduct, status: SubmitStatus.Pending },
-          { status: SubmitStatus.Rejected, rejectMessage },
-        );
+        .update({ id: submitId, type: SubmitType.NewProduct, status: SubmitStatus.Pending }, { status: SubmitStatus.Rejected, rejectMessage });
     });
   }
 

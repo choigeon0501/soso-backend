@@ -16,13 +16,7 @@ import { ReviewModule } from '../review/review.module';
 import { AwsModule } from '../../common/aws/aws.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]),
-    forwardRef(() => ShopModule),
-    ReviewModule,
-    AuthModule,
-    AwsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User, UserFavorite, UserWithdrawal]), forwardRef(() => ShopModule), ReviewModule, AuthModule, AwsModule],
   exports: [UserService, UserFavoriteService],
   controllers: [UserController],
   providers: [UserService, UserFavoriteService, UserTransactionService, UserRepository, UserFavoriteRepository, UserWithdrawalRepository],
