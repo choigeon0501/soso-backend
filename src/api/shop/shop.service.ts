@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ShopRepository } from './repositories/shop.repository';
-import { RegionRepository } from '../region/region.repository';
+import { RegionService } from '../region/region.service';
 import { ShopRecentSearchRepository } from './repositories/shop-recent-search.repository';
 import { normalizePhoneNumber } from './utils/normalize-phone-number.util';
 import { convertTimeToAmPm } from './utils/convert-time-to-am-pm.util';
@@ -35,7 +35,7 @@ export class ShopService {
     private shopRepository: ShopRepository,
     private reviewService: ReviewService,
     private userFavoriteRepository: UserFavoriteRepository,
-    private regionRepository: RegionRepository,
+    private regionService: RegionService,
     private recentSearchRepository: ShopRecentSearchRepository,
     private shopSubmitTransactionsRepository: ShopSubmitTransactionsRepository,
     private submitRepository: ShopSubmitRepository,
@@ -126,7 +126,7 @@ export class ShopService {
       throw new BadRequestException('유효하지 않은 지역(region1DepthName)입니다.');
     }
 
-    const region = await this.regionRepository.findRegionByName(regionName);
+    const region = await this.regionService.findRegionByName(regionName);
     if (!region) {
       throw new NotFoundException('일치하는 지역(region)을 찾을 수 없습니다.');
     }

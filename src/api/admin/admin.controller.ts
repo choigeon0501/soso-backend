@@ -16,7 +16,7 @@ import { GetSubmissionsQueryDto } from './dto/query/get-submissions-query.dto';
 import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
 import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
-import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
+import { GetAllFeedbacksResponseDto } from '../feedback/dto/response/get-all-feedbacks-response.dto';
 
 @ApiTags('Admin')
 @Controller('admin')

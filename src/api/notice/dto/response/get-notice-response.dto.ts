@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Notice } from '../entities/notice.entity';
 
-export class NoticeDTO {
+export class GetNoticeResponseDto {
   @ApiProperty({ description: '공지 ID', example: 1 })
   id: number;
 
@@ -13,15 +12,4 @@ export class NoticeDTO {
 
   @ApiProperty({ description: '작성일', example: '2025-08-06T12:34:56.000Z' })
   createdAt: Date;
-
-  constructor(id: number, title: string, content: string, createdAt: Date) {
-    this.id = id;
-    this.title = title;
-    this.content = content;
-    this.createdAt = createdAt;
-  }
-
-  static fromEntity(entity: Notice): NoticeDTO {
-    return new NoticeDTO(entity.id, entity.title, entity.content, entity.createdAt);
-  }
 }

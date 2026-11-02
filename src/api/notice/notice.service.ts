@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { NoticeRepository } from './notice.repository';
-import { NoticeDTO } from './dto/notice-response.dto';
+import { NoticeRepository } from './repositories/notice.repository';
+import { GetNoticeResponseDto } from './dto/response/get-notice-response.dto';
 
 @Injectable()
 export class NoticeService {
   constructor(private readonly noticeRepository: NoticeRepository) {}
-  async findAll() {
+
+  async findNotices(): Promise<GetNoticeResponseDto[]> {
     const notices = await this.noticeRepository.findAll();
-    return notices.map(NoticeDTO.fromEntity);
+
+    return notices.map((notice) => ({
+      id: notice.id,
+      title: notice.title,
+      content: notice.content,
+      createdAt: notice.createdAt,
+    }));
   }
 }

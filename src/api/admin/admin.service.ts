@@ -20,7 +20,7 @@ import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
 import { ReviewService } from '../review/review.service';
 import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
 import { FeedbackService } from '../feedback/feedback.service';
-import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
+import { GetAllFeedbacksResponseDto } from '../feedback/dto/response/get-all-feedbacks-response.dto';
 
 @Injectable()
 export class AdminService {
@@ -70,7 +70,7 @@ export class AdminService {
   }
 
   async getAllFeedbacks(): Promise<GetAllFeedbacksResponseDto[]> {
-    return await this.feedbackService.getAllFeedbacks();
+    return await this.feedbackService.findAllFeedbacksForAdmin();
   }
 
   async acceptProductSubmission(submissionId: number) {

@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { FeedbackRepository } from './feedback.repository';
-import { SaveFeedbackDTO } from './dto/feedback.dto';
+import { FeedbackRepository } from './repositories/feedback.repository';
+import { CreateFeedbackDto } from './dto/request/create-feedback.dto';
+import { GetAllFeedbacksResponseDto } from './dto/response/get-all-feedbacks-response.dto';
 
 @Injectable()
 export class FeedbackService {
-  constructor(private feedbackRepository: FeedbackRepository) {}
+  constructor(private readonly feedbackRepository: FeedbackRepository) {}
 
-  async getAllFeedbacks() {
-    const allFeedbacks = await this.feedbackRepository.findAll();
+  async findAllFeedbacksForAdmin(): Promise<GetAllFeedbacksResponseDto[]> {
+    const feedbacks = await this.feedbackRepository.findAllWithUser();
 
-    return allFeedbacks.map((feedback, index) => ({
+    return feedbacks.map((feedback, index) => ({
       num: index + 1,
       email: feedback.user.email,
       feedback: feedback.content,
@@ -17,8 +18,7 @@ export class FeedbackService {
     }));
   }
 
-  async saveFeedback(uuid: string, saveFeedbackDTO: SaveFeedbackDTO): Promise<void> {
-    const { feedback } = saveFeedbackDTO;
-    await this.feedbackRepository.saveFeedback(uuid, feedback);
+  async createFeedback(body: CreateFeedbackDto, uuid: string): Promise<void> {
+    await this.feedbackRepository.create(uuid, body.feedback);
   }
 }
