@@ -17,8 +17,7 @@ globs: src/**/*.ts,src/**/*.tsx
 | 단계 | 내용 | 예시 | 다음에 빈 줄 |
 |------|------|------|----------------|
 | 입력 검증 | 파라미터/ID 유효성 검사 후 throw | `ParseIntPipe`, `if (!id) throw ...` | ✅ |
-| 조회 | Repository/Service 조회 | `findById`, `findUserWithFavoriteGenresById` 등 | ✅ |
-| 존재/유효성 검사 | 조회 결과 null 체크 후 throw | `if (!user) throw new NotFoundException(...)` | ✅ |
+| 조회 + 존재 검사 | Repository/Service 조회와 그 결과의 null 체크 후 throw. **둘 사이엔 빈 줄을 넣지 않는다**(`code-conventions.mdc` "조회 직후의 검사는 붙여 쓴다") | `findUserWithFavoriteGenresById` → `if (!user) throw new NotFoundException(...)` | ✅ |
 | 추가 비즈니스 검증 | 중복 검사, 권한 검사 등 | `existsNickname`, `validateUserInCluster` 후 throw | ✅ |
 | 실제 수행 | create/update/delete 등 Repository·Service 호출 | `save`, `create`, `remove` 등 | (메서드 끝) |
 
@@ -27,43 +26,54 @@ globs: src/**/*.ts,src/**/*.tsx
 
 ### 1.2 예시 (NestJS/TypeORM 스타일)
 
+`VenuesService.unbookmarkVenue` — 조회 + 존재 검사 → 수행.
+
 ```ts
-async deleteBookmark(userId: number, venueId: number): Promise<void> {
-  const bookmark =
-    await this.venueBookmarkRepository.findByUserIdAndVenueId(userId, venueId);
+async unbookmarkVenue(venueId: number, userId: number) {
+  const bookmark = await this.venueBookmarkRepository.findByUserIdAndVenueId(
+    venueId,
+    userId,
+  );
   if (!bookmark) {
-    throw new NotFoundException('북마크를 찾을 수 없습니다.');
+    throw new NotFoundException('북마크 기록이 없습니다.');
   }
 
   await this.venueBookmarkRepository.remove(bookmark);
 }
 ```
 
+`UserProfileService.patchUserProfile`(일부 생략) — 입력 검증 → 조회 + 존재 검사 → 필드별 갱신 → 저장 → 응답.
+필드 하나를 고치는 `if` 블록은 각각 한 단락이다.
+
 ```ts
-async updateUserProfile(
+async patchUserProfile(
   userId: number,
   updateData: UpdateUserDto,
 ): Promise<UpdateUserProfileResponseDto> {
+  if (
+    updateData.profileImage != null &&
+    !this.imageStorageService.isOwnImageUrl(
+      updateData.profileImage,
+      IMAGE_PART.USER_PROFILE,
+    )
+  ) {
+    throw new BadRequestException(OWN_IMAGE_URL_MESSAGE);
+  }
+
   const user =
     await this.usersRepository.findUserWithFavoriteGenresById(userId);
   if (!user) {
     throw new NotFoundException('사용자를 찾을 수 없습니다.');
   }
 
-  if (updateData.profileImage != null) {
-    if (updateData.profileImage.startsWith('http')) {
-      user.profileImage = updateData.profileImage;
-    } else {
-      user.profileImage = await this.processProfileImage(
-        updateData.profileImage,
-      );
-    }
-  }
-
   if (updateData.favoriteGenres != null) {
-    user.favoriteGenres = await this.genresService.findOrCreateMany(
+    user.favoriteGenres = await this.genresService.resolveMany(
       updateData.favoriteGenres,
     );
+  }
+
+  if (updateData.bio != null) {
+    user.bio = updateData.bio;
   }
 
   await this.usersRepository.save(user);

@@ -148,7 +148,7 @@ const phoneNumberExists = await this.usersRepository.existsPhoneNumber(
   단일 책임을 기계적으로 적용해 쪼개지 않는다(`project-structure.mdc` 9절과 같은 결).
 - `get*`·`validate*`(없으면 throw)는 서비스에 둔다. 리포지토리에서 받은 null을 여기서 예외로 바꾼다.
 - 메서드 안의 단락은 `code-paragraphs.mdc` 1절 + 위 "조회 직후의 검사는 붙여 쓴다".
-- **`await`는 문장의 머리에만.** `const x = await …` / `const [a, b] = await Promise.all([…])` / `return await …` / `await …;`
+- **`await`는 문장의 머리에만.** `const x = await …` / `const [a, b] = await Promise.all([…])` / `x.y = await …;` / `return await …` / `await …;`
   형태로만 쓴다. 객체 리터럴의 값·함수 인자·조건식·삼항 안에 `await`를 끼워 넣지 않는다. 한 줄짜리라도 변수로 먼저 받는다.
 
   ```ts
@@ -186,7 +186,7 @@ const phoneNumberExists = await this.usersRepository.existsPhoneNumber(
 ## Module
 
 - `@Module` 키 순서: `imports` → `exports` → `controllers` → `providers`.
-- 리포지토리도 `providers`에 넣고, 다른 도메인이 쓰면 `exports`에 올린다.
+- 리포지토리는 `providers`에만 넣는다. `exports`에는 Service만 올린다(공통 절 "다른 도메인의 Repository를 주입하지 않는다").
 
 ---
 
