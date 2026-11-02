@@ -1,8 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
-
-export type CourseListStatusFilter = 'in_progress' | 'completed' | 'all';
+import { CourseListStatusFilter } from '../../const/course-status.const';
 
 export class GetCourseListQueryDto {
   @ApiPropertyOptional({

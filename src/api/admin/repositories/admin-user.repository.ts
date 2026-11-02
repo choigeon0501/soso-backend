@@ -1,6 +1,6 @@
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AdminUser } from '../entities/admin-user.entity';
 
 @Injectable()
@@ -10,22 +10,11 @@ export class AdminUserRepository {
     private readonly adminUserRepository: Repository<AdminUser>,
   ) {}
 
-  async findByEmail(email: string){
-    return await this.adminUserRepository.findOne({
-      where: {
-        email: email,
-      },
-    });
+  async findByEmail(email: string): Promise<AdminUser | null> {
+    return this.adminUserRepository.findOne({ where: { email } });
   }
 
-  async updateLastLogin(adminId: number) {
-    return await this.adminUserRepository.update(
-      {
-        id: adminId,
-      },
-      {
-        lastLoginAt: new Date(),
-      },
-    );
+  async updateLastLoginAt(adminId: number): Promise<void> {
+    await this.adminUserRepository.update({ id: adminId }, { lastLoginAt: new Date() });
   }
 }

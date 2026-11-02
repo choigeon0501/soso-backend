@@ -1,24 +1,21 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Shop } from '../entities/shop.entity';
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { Shop } from '../entities/shop.entity';
+import { EARTH_RADIUS_KM, NEARBY_DISTANCE_LIMIT_KM } from '../const/distance.const';
 
 @Injectable()
-export class ShopRepository extends Repository<Shop> {
+export class ShopRepository {
   constructor(
     @InjectRepository(Shop)
-    private shopRepository: Repository<Shop>,
-    private dataSource: DataSource,
-  ) {
-    super(Shop, dataSource.createEntityManager());
-  }
+    private readonly shopRepository: Repository<Shop>,
+  ) {}
 
-  async findShopsByKeyword(keyword: string, page: number, limit: number, lat: number, lng: number, radius: number = 6371) {
-    return await this.shopRepository
+  async findVisibleByKeywordWithDistance(keyword: string, page: number, limit: number, lat: number, lng: number) {
+    return this.shopRepository
       .createQueryBuilder('shop')
       .addSelect(
-        `(${radius} * acos(
+        `(${EARTH_RADIUS_KM} * acos(
           cos(radians(:lat)) * cos(radians(shop.lat)) *
           cos(radians(shop.lng) - radians(:lng)) +
           sin(radians(:lat)) * sin(radians(shop.lat))
@@ -34,111 +31,105 @@ export class ShopRepository extends Repository<Shop> {
       .getRawMany();
   }
 
-  async findAllShopsCountByKeyword(keyword: string) {
-    return await this.shopRepository
+  async countVisibleByKeyword(keyword: string): Promise<number> {
+    return this.shopRepository
       .createQueryBuilder('shop')
-      .where('shop.name LIKE :keyword', { keyword: `%${keyword}%` }) // 부분 검색
-      .orWhere('shop.location LIKE :keyword', { keyword: `%${keyword}%` }) // 도로명 검색
-      .andWhere('shop.isVerified = :isVerified', { isVerified: true }) // 특정 타입 필터링
+      .where('shop.name LIKE :keyword', { keyword: `%${keyword}%` })
+      .orWhere('shop.location LIKE :keyword', { keyword: `%${keyword}%` })
+      .andWhere('shop.isVerified = :isVerified', { isVerified: true })
       .andWhere('shop.isHidden = :isHidden', { isHidden: false })
       .getCount();
   }
 
-  async findOnlyShopByShopId(shopId: number) {
-    return await this.shopRepository.findOne({
-      where: {
-        id: shopId,
-        isVerified: true,
-        isHidden: false,
-      },
-    });
+  async findVisibleById(shopId: number): Promise<Shop | null> {
+    return this.shopRepository.findOne({ where: { id: shopId, isVerified: true, isHidden: false } });
   }
 
-  async findByShopIdForHiddenShop(shopId: number) {
-    return await this.shopRepository.findOne({
-      where: {
-        id: shopId,
-        isVerified: true,
-      },
-    });
+  async findVerifiedById(shopId: number): Promise<Shop | null> {
+    return this.shopRepository.findOne({ where: { id: shopId, isVerified: true } });
   }
 
-  async findShopByShopId(shopId: number) {
-    return await this.shopRepository
+  async findVerifiedIdsByIds(shopIds: number[]): Promise<number[]> {
+    if (shopIds.length === 0) return [];
+
+    const shops = await this.shopRepository.find({ select: { id: true }, where: { id: In(shopIds), isVerified: true } });
+
+    return shops.map((shop) => shop.id);
+  }
+
+  async findVisibleDetailById(shopId: number): Promise<Shop | null> {
+    return this.shopRepository
       .createQueryBuilder('shop')
-      .leftJoinAndSelect('shop.operatingHours', 'operatingHours', 'operatingHours.isVerified= :operatingHoursType', { operatingHoursType: true }) // 운영 시간 필터링
-      .leftJoinAndSelect('shop.productMappings', 'productMapping', 'productMapping.isVerified = :productMappingType', { productMappingType: true }) // product_mapping에서 type=0 필터링
-      .leftJoinAndSelect('productMapping.product', 'product') // product_mapping을 통해 product 조인
+      .leftJoinAndSelect('shop.operatingHours', 'operatingHours', 'operatingHours.isVerified= :operatingHoursType', { operatingHoursType: true })
+      .leftJoinAndSelect('shop.productMappings', 'productMapping', 'productMapping.isVerified = :productMappingType', { productMappingType: true })
+      .leftJoinAndSelect('productMapping.product', 'product')
       .where('shop.id = :shopId', { shopId })
       .andWhere('shop.isVerified = :isVerified', { isVerified: true })
       .andWhere('shop.isHidden = :isHidden', { isHidden: false })
       .getOne();
   }
 
-  async findShopsWithin1Km(
-    lat: number,
-    lng: number,
-    distanceLimit: number,
-    radius: number,
-    sortByDistance = false, // 파라미터 이름 변경
-  ) {
-    let query = this.shopRepository
+  async findNearbyWithDistance(lat: number, lng: number, sortByDistance: boolean) {
+    const query = this.shopRepository
       .createQueryBuilder('shop')
       .addSelect(
-        `
-      (${radius} * acos(
-        cos(radians(:lat)) * cos(radians(shop.lat)) *
-        cos(radians(shop.lng) - radians(:lng)) +
-        sin(radians(:lat)) * sin(radians(shop.lat))
-      ))`,
+        `(${EARTH_RADIUS_KM} * acos(
+          cos(radians(:lat)) * cos(radians(shop.lat)) *
+          cos(radians(shop.lng) - radians(:lng)) +
+          sin(radians(:lat)) * sin(radians(shop.lat))
+        ))`,
         'distance',
       )
       .where('shop.isVerified = :isVerified', { isVerified: true })
       .andWhere('shop.isHidden = :isHidden', { isHidden: false })
-      .having('distance < :distanceLimit', { distanceLimit })
+      .having('distance < :distanceLimit', { distanceLimit: NEARBY_DISTANCE_LIMIT_KM })
       .setParameters({ lat, lng });
-
     if (sortByDistance) {
-      query = query.orderBy('distance', 'ASC');
+      query.orderBy('distance', 'ASC');
     }
 
-    return await query.getRawMany();
+    return query.getRawMany();
   }
 
-  async findShopsByProductIds(productIds: number[]) {
-    return this.createQueryBuilder('shop')
-      .innerJoin('shop.productMappings', 'productMapping')
-      .where('productMapping.product.id IN (:...productIds)', { productIds })
-      .andWhere('shop.isVerified = :isVerified', { isVerified: true })
-      .andWhere('shop.isHidden = :isHidden', { isHidden: false })
-      .getMany();
-  }
+  async findVisibleByIdsWithDistance(shopIds: number[], lat: number, lng: number, sortByDistance: boolean) {
+    if (shopIds.length === 0) return [];
 
-  async findShopsByIdsWithDistance(shopIds: number[], lat: number, lng: number, radius: number = 6371, sortByDistance = false) {
-    let query = this.shopRepository
+    const query = this.shopRepository
       .createQueryBuilder('shop')
       .addSelect(
-        `
-      (${radius} * acos(
-        cos(radians(:lat)) * cos(radians(shop.lat)) *
-        cos(radians(shop.lng) - radians(:lng)) +
-        sin(radians(:lat)) * sin(radians(shop.lat))
-      ))`,
+        `(${EARTH_RADIUS_KM} * acos(
+          cos(radians(:lat)) * cos(radians(shop.lat)) *
+          cos(radians(shop.lng) - radians(:lng)) +
+          sin(radians(:lat)) * sin(radians(shop.lat))
+        ))`,
         'distance',
       )
       .where('shop.id IN (:...shopIds)', { shopIds })
       .andWhere('shop.isVerified = :isVerified', { isVerified: true })
       .andWhere('shop.isHidden = :isHidden', { isHidden: false })
       .setParameters({ lat, lng });
-
     if (sortByDistance) {
-      query = query.orderBy('distance', 'ASC');
+      query.orderBy('distance', 'ASC');
     }
 
-    return await query.getRawMany();
+    return query.getRawMany();
   }
 
-  async saveShop(shop: Shop) {
+  async findVisibleIdsByProductIds(productIds: number[]): Promise<number[]> {
+    if (productIds.length === 0) return [];
+
+    const shops = await this.shopRepository
+      .createQueryBuilder('shop')
+      .innerJoin('shop.productMappings', 'productMapping')
+      .where('productMapping.product.id IN (:...productIds)', { productIds })
+      .andWhere('shop.isVerified = :isVerified', { isVerified: true })
+      .andWhere('shop.isHidden = :isHidden', { isHidden: false })
+      .getMany();
+
+    return shops.map((shop) => shop.id);
+  }
+
+  async save(shop: Shop): Promise<Shop> {
     return this.shopRepository.save(shop);
   }
 }

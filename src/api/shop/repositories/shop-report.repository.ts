@@ -1,8 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Injectable } from '@nestjs/common';
 import { ShopReport } from '../entities/shop-report.entity';
-import { ShopReportDto } from '../dto/requests/report_request';
+import { ReportShopDto } from '../dto/request/report-shop.dto';
 
 @Injectable()
 export class ShopReportRepository {
@@ -11,25 +11,20 @@ export class ShopReportRepository {
     private readonly shopReportRepository: Repository<ShopReport>,
   ) {}
 
-  async findAll() {
-    return await this.shopReportRepository.find({ relations: ['shop', 'user'] });
+  async findAllWithShopAndUser(): Promise<ShopReport[]> {
+    return this.shopReportRepository.find({ relations: ['shop', 'user'] });
   }
 
-  async findShopReport(uuid: string, shopId: number) {
-    return await this.shopReportRepository.findOne({
-      where: {
-        user: { uuid },
-        shop: { id: shopId },
-      },
-    });
+  async existsByUuidAndShopId(uuid: string, shopId: number): Promise<boolean> {
+    return this.shopReportRepository.exists({ where: { user: { uuid }, shop: { id: shopId } } });
   }
 
-  async saveShopReport(uuid: string, shopId: number, shopReportType: ShopReportDto) {
-    return await this.shopReportRepository.save({
+  async create(uuid: string, shopId: number, body: ReportShopDto): Promise<ShopReport> {
+    return this.shopReportRepository.save({
       user: { uuid },
       shop: { id: shopId },
-      reportType: shopReportType.reportType,
-      reportMessage: shopReportType.reportMessage,
+      reportType: body.reportType,
+      reportMessage: body.reportMessage,
     });
   }
 }

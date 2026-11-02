@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AdminService } from './admin.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminController } from './admin.controller';
+import { AdminService } from './admin.service';
+import { AdminUserRepository } from './repositories/admin-user.repository';
+import { AdminUser } from './entities/admin-user.entity';
 import { UserModule } from '../user/user.module';
 import { ShopModule } from '../shop/shop.module';
-import { AdminUserRepository } from './repositories/admin-user.repository';
-import { AuthModule } from '../auth/auth.module';
-import { AdminJwtModule } from '../../common/admin-jwt/admin-jwt.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminUser } from './entities/admin-user.entity';
 import { ReviewModule } from '../review/review.module';
+import { AuthModule } from '../auth/auth.module';
 import { FeedbackModule } from '../feedback/feedback.module';
+import { AdminJwtModule } from '../../common/admin-jwt/admin-jwt.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AdminUser]), UserModule, ShopModule, AuthModule, AdminJwtModule, ReviewModule, FeedbackModule],
+  imports: [TypeOrmModule.forFeature([AdminUser]), UserModule, ShopModule, ReviewModule, AuthModule, FeedbackModule, AdminJwtModule],
   controllers: [AdminController],
   providers: [AdminService, AdminUserRepository],
 })

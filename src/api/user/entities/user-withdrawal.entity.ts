@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
-import { WithdrawalReasonCode } from '../const/user-withdrawal-response-code.const';
+import { WithdrawalReasonCode } from '../const/withdrawal-reason-code.const';
 
 @Entity('user_withdrawals')
 export class UserWithdrawal {

@@ -20,21 +20,21 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, Api
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { GetUUID } from '../../common/decorators/get-uuid.decorator';
 import { SuccessNoResultResponseDTO, SuccessResponseDTO } from '../../common/dto/success-response.dto';
-import { CourseService } from './course.service';
-import { CreateCourseDto } from './dto/requests/create-course.dto';
-import { UpdateCourseDto } from './dto/requests/update-course.dto';
+import { CourseService } from './services/course.service';
+import { CreateCourseDto } from './dto/request/create-course.dto';
+import { UpdateCourseDto } from './dto/request/update-course.dto';
 import { GetCourseListQueryDto } from './dto/query/get-course-list-query.dto';
 import { GetVisitedShopsQueryDto } from './dto/query/get-visited-shops-query.dto';
-import { GetCourseListResponseDto } from './dto/responses/get-course-list-response.dto';
-import { GetCourseDetailResponseDto } from './dto/responses/get-course-detail-response.dto';
-import { GetVisitedShopsResponseDto } from './dto/responses/get-visited-shops-response.dto';
-import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/responses/stamp-response.dto';
+import { GetCourseListResponseDto } from './dto/response/get-course-list-response.dto';
+import { GetCourseDetailResponseDto } from './dto/response/get-course-detail-response.dto';
+import { GetVisitedShopsResponseDto } from './dto/response/get-visited-shops-response.dto';
+import { CreateCourseResponseDto, StampResponseDto, UnstampResponseDto } from './dto/response/stamp-response.dto';
 import {
   ImportCourseResponseDto,
   ShareCourseResponseDto,
   SharedCourseResponseDto,
   UploadShareOgImageResponseDto,
-} from './dto/responses/share-response.dto';
+} from './dto/response/share-response.dto';
 
 @ApiTags('Course')
 @Controller('courses')

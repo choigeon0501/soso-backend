@@ -1,84 +1,65 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { UserFavorite } from '../entities/user-favorite.entity';
 
 @Injectable()
 export class UserFavoriteRepository {
   constructor(
     @InjectRepository(UserFavorite)
-    private favoriteRepository: Repository<UserFavorite>,
+    private readonly userFavoriteRepository: Repository<UserFavorite>,
   ) {}
 
-  async findUserFavoriteByShopIdAndUUID(shopId: number, uuid: string) {
-    return await this.favoriteRepository.findOne({
-      where: {
-        user: { uuid },
-        shop: { id: shopId },
-      },
-      relations: ['user', 'shop'],
-    });
+  async findByShopIdAndUuid(shopId: number, uuid: string): Promise<UserFavorite | null> {
+    return this.userFavoriteRepository.findOne({ where: { user: { uuid }, shop: { id: shopId } }, relations: ['user', 'shop'] });
   }
 
-  async deleteUserFavoriteByUserFavoritesId(userFavoriteId: number) {
-    return await this.favoriteRepository.delete({
-      id: userFavoriteId,
-    });
+  async existsByShopIdAndUuid(shopId: number, uuid: string): Promise<boolean> {
+    return this.userFavoriteRepository.exists({ where: { user: { uuid }, shop: { id: shopId } } });
   }
 
-  async addUserFavoriteByShopIdAndUUID(shopId: number, uuid: string) {
-    return await this.favoriteRepository.save({
-      user: { uuid }, // User 엔티티와 연결
-      shop: { id: shopId }, // Shop 엔티티와 연결
-    });
+  async findShopIdsByUuid(uuid: string): Promise<number[]> {
+    const favorites = await this.userFavoriteRepository.find({ where: { user: { uuid } }, relations: ['shop'] });
+
+    return favorites.map((favorite) => favorite.shop.id);
   }
 
-  async findUserFavoritesCountByUUID(uuid: string, areaId?: number) {
-    const qb = this.favoriteRepository
+  async countByUuid(uuid: string, areaId?: number): Promise<number> {
+    const query = this.userFavoriteRepository
       .createQueryBuilder('uf')
       .leftJoin('uf.shop', 's')
       .leftJoin('s.region', 'r')
       .where('uf.user.uuid = :uuid', { uuid });
     if (areaId) {
-      qb.andWhere('r.id = :areaId', { areaId });
+      query.andWhere('r.id = :areaId', { areaId });
     }
-    return qb.getCount();
+
+    return query.getCount();
   }
 
-  async findUserFavoritesByPageNation(uuid: string, page: number, limit: number, areaId?: number) {
-    const qb = this.favoriteRepository
+  async findByUuidWithShop(uuid: string, page: number, limit: number, areaId?: number): Promise<UserFavorite[]> {
+    const query = this.userFavoriteRepository
       .createQueryBuilder('uf')
-      .innerJoin('uf.user', 'u') // ← user 조인
+      .innerJoin('uf.user', 'u')
       .leftJoinAndSelect('uf.shop', 's')
       .leftJoinAndSelect('s.region', 'r')
-      .where('u.uuid = :uuid', { uuid }); // ← 관계의 uuid로 필터
-
+      .where('u.uuid = :uuid', { uuid });
     if (areaId) {
-      qb.andWhere('r.id = :areaId', { areaId });
+      query.andWhere('r.id = :areaId', { areaId });
     }
 
-    return await qb
-      .orderBy('uf.createdAt', 'DESC') // 페이징 일관성 확보 권장
+    return query
+      .orderBy('uf.createdAt', 'DESC')
       .skip((page - 1) * limit)
       .take(limit)
       .getMany();
   }
 
-  async isShopInUserWishlist(shopId: number, uuid: string) {
-    return await this.favoriteRepository.findOne({
-      where: {
-        user: { uuid },
-        shop: { id: shopId },
-      },
-    });
+  async create(shopId: number, uuid: string): Promise<UserFavorite> {
+    return this.userFavoriteRepository.save({ user: { uuid }, shop: { id: shopId } });
   }
 
-  async findUserFavoriteShopsByUser(userUUID: string) {
-    return await this.favoriteRepository.find({
-      where: {
-        user: { uuid: userUUID },
-      },
-      relations: ['shop'],
-    });
+  async deleteById(userFavoriteId: number): Promise<DeleteResult> {
+    return this.userFavoriteRepository.delete({ id: userFavoriteId });
   }
 }

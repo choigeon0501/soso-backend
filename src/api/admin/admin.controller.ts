@@ -1,44 +1,49 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { AdminService } from './admin.service';
-import { AdminLoginDto } from './dto/request/admin-login.dto';
-import { AdminJwtAuthGuard } from '../../common/admin-jwt/admin-jwt-auth.guard';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
-import { ActivityUserResponseDto, WithdrawalUserResponseDto } from './dto/response/get-all-users-response.dto';
-import { GetUsersQueryDto } from './dto/query/get-users-query.dto';
-import { GetAllShopReportResponseDto } from './dto/response/get-all-shop-report-response.dto';
-import { GetAllReviewReportResponseDto } from './dto/response/get-all-review-report-response.dto';
+import { AdminService } from './admin.service';
+import { UserService } from '../user/services/user.service';
+import { ShopService } from '../shop/services/shop.service';
+import { ShopSubmitService } from '../shop/services/shop-submit.service';
+import { ReviewService } from '../review/services/review.service';
+import { FeedbackService } from '../feedback/feedback.service';
+import { AdminJwtAuthGuard } from '../../common/admin-jwt/admin-jwt-auth.guard';
+import { AdminLoginDto } from './dto/request/admin-login.dto';
+import { GetUsersQueryDto } from '../user/dto/query/get-users-query.dto';
+import { ActivityUserResponseDto, WithdrawalUserResponseDto } from '../user/dto/response/get-all-users-response.dto';
+import { GetSubmissionsQueryDto } from '../shop/dto/query/get-submissions-query.dto';
+import { RejectSubmissionDto } from '../shop/dto/request/reject-submission.dto';
+import { ToggleShopHiddenDto } from '../shop/dto/request/toggle-shop-hidden.dto';
+import { GetAllShopReportResponseDto } from '../shop/dto/response/get-all-shop-report-response.dto';
 import {
-  NewShopSubmissionResponseDto,
   NewOperatingSubmissionResponseDto,
   NewProductSubmissionResponseDto,
-} from './dto/response/get-all-submission-response.dto';
-import { GetSubmissionsQueryDto } from './dto/query/get-submissions-query.dto';
-import { ToggleShopHiddenDto } from './dto/request/toggle-shop-hidden.dto';
-import { ToggleReviewHiddenDto } from './dto/request/toggle-review-hidden.dto';
-import { RejectProductSubmissionDto } from './dto/request/reject-product-submission.dto';
+  NewShopSubmissionResponseDto,
+} from '../shop/dto/response/get-all-submission-response.dto';
+import { ToggleReviewHiddenDto } from '../review/dto/request/toggle-review-hidden.dto';
+import { GetAllReviewReportResponseDto } from '../review/dto/response/get-all-review-report-response.dto';
 import { GetAllFeedbacksResponseDto } from '../feedback/dto/response/get-all-feedbacks-response.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly userService: UserService,
+    private readonly shopService: ShopService,
+    private readonly shopSubmitService: ShopSubmitService,
+    private readonly reviewService: ReviewService,
+    private readonly feedbackService: FeedbackService,
+  ) {}
 
-  @ApiOperation({
-    summary: '관리자 로그인',
-    description: '관리자 계정으로 로그인하여 JWT 토큰을 발급합니다.',
-  })
-  @ApiOkResponse({
-    description: '로그인 성공',
-    example: '토큰',
-  })
+  @ApiOperation({ summary: '관리자 로그인 API', description: '관리자 계정으로 로그인하여 JWT 토큰을 발급합니다.' })
+  @ApiOkResponse({ description: '로그인 성공', example: '토큰' })
   @Post('login')
-  async adminLogin(@Body() adminLoginDto: AdminLoginDto) {
-    return await this.adminService.adminLogin(adminLoginDto);
+  adminLogin(@Body() body: AdminLoginDto) {
+    return this.adminService.adminLogin(body);
   }
 
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    summary: '전체 사용자 조회 (Admin)',
+    summary: '전체 사용자 조회 API',
     description:
       'active=true: 회원 목록(ActivityUserResponseDto[]), active=false: 탈퇴 목록(WithdrawalUserResponseDto[]). ' +
       'sortBy=created|lastActiveAt, order=desc|asc 로 정렬 가능.',
@@ -48,56 +53,38 @@ export class AdminController {
     description: 'active=true 시 ActivityUserResponseDto[], active=false 시 WithdrawalUserResponseDto[]',
     schema: {
       oneOf: [
-        {
-          type: 'array',
-          items: { $ref: getSchemaPath(ActivityUserResponseDto) },
-        },
-        {
-          type: 'array',
-          items: { $ref: getSchemaPath(WithdrawalUserResponseDto) },
-        },
+        { type: 'array', items: { $ref: getSchemaPath(ActivityUserResponseDto) } },
+        { type: 'array', items: { $ref: getSchemaPath(WithdrawalUserResponseDto) } },
       ],
     },
   })
+  @ApiBearerAuth('JWT-auth')
   @UseGuards(AdminJwtAuthGuard)
   @Get('users')
-  async getAllUsers(@Query() query: GetUsersQueryDto) {
-    return await this.adminService.getAllUsers(query);
+  getAllUsers(@Query() query: GetUsersQueryDto) {
+    return this.userService.findAllUsersForAdmin(query);
   }
 
+  @ApiOperation({ summary: '소품샵 신고 목록 조회 API', description: '누적 신고 횟수 기준으로 소품샵 신고 목록을 조회합니다.' })
+  @ApiOkResponse({ type: GetAllShopReportResponseDto, isArray: true })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '소품샵 신고 목록 조회 (Admin)',
-    description: '누적 신고 횟수 기준으로 소품샵 신고 목록을 조회합니다.',
-  })
-  @ApiOkResponse({
-    type: GetAllShopReportResponseDto,
-    isArray: true,
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Get('shop-reports')
-  async getAllShopReports() {
-    return await this.adminService.getAllShopReports();
+  getAllShopReports() {
+    return this.shopService.findAllShopReportsForAdmin();
   }
 
+  @ApiOperation({ summary: '리뷰 신고 목록 조회 API', description: '누적 신고 횟수 기준으로 리뷰 신고 목록을 조회합니다.' })
+  @ApiOkResponse({ type: GetAllReviewReportResponseDto, isArray: true })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '리뷰 신고 목록 조회 (Admin)',
-    description: '누적 신고 횟수 기준으로 리뷰 신고 목록을 조회합니다.',
-  })
-  @ApiOkResponse({
-    type: GetAllReviewReportResponseDto,
-    isArray: true,
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Get('review-reports')
-  async getAllReviewReports() {
-    return await this.adminService.getAllReviewReports();
+  getAllReviewReports() {
+    return this.reviewService.findAllReviewReportsForAdmin();
   }
 
-  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
-    summary: '전체 Submission 조회 (Admin)',
+    summary: '전체 Submission 조회 API',
     description:
       'type=shop: 신규 소품샵, type=operate: 운영정보 수정, type=product: 판매정보 수정. ' +
       'status=pending|approved 로 처리 상태 필터(거절 제외). sortBy=created, order=desc|asc 로 정렬.',
@@ -113,112 +100,83 @@ export class AdminController {
       ],
     },
   })
+  @ApiBearerAuth('JWT-auth')
   @UseGuards(AdminJwtAuthGuard)
   @Get('submission')
-  async getAllPendingSubmissions(@Query() query: GetSubmissionsQueryDto) {
-    return await this.adminService.getAllPendingSubmissions(query);
+  getAllSubmissions(@Query() query: GetSubmissionsQueryDto) {
+    return this.shopSubmitService.findSubmissionsForAdmin(query);
   }
 
+  @ApiOperation({ summary: '전체 Feedback 조회 API', description: '사용자가 작성한 피드백을 모두 조회합니다.' })
+  @ApiOkResponse({ type: GetAllFeedbacksResponseDto, isArray: true })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '전체 Feedback 조회 (Admin)',
-    description: '사용자가 작성한 피드백을 모두 조회합니다.',
-  })
-  @ApiOkResponse({
-    type: GetAllFeedbacksResponseDto,
-    isArray: true,
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Get('feedback')
-  async getAllFeedbacks() {
-    return await this.adminService.getAllFeedbacks();
+  getAllFeedbacks() {
+    return this.feedbackService.findAllFeedbacksForAdmin();
   }
 
+  @ApiOperation({ summary: '상품 제보 승인 API', description: '관리자가 상품 제보를 승인하여 실제 운영 데이터로 반영합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '상품 제보 승인',
-    description: '관리자가 상품 제보를 승인하여 실제 운영 데이터로 반영합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/product/accept')
-  async acceptProductSubmission(@Param('submissionId') submissionId: number) {
-    return await this.adminService.acceptProductSubmission(submissionId);
+  acceptProductSubmission(@Param('submissionId', ParseIntPipe) submissionId: number) {
+    return this.shopSubmitService.acceptProductSubmission(submissionId);
   }
 
+  @ApiOperation({ summary: '상품 제보 반려 API', description: '관리자가 상품 제보를 반려하고 반려 사유를 저장합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '상품 제보 반려',
-    description: '관리자가 상품 제보를 반려하고 반려 사유를 저장합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/product/reject')
-  async rejectProductSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
-    return await this.adminService.rejectProductSubmission(submissionId, rejectProductSubmissionDto);
+  rejectProductSubmission(@Param('submissionId', ParseIntPipe) submissionId: number, @Body() body: RejectSubmissionDto) {
+    return this.shopSubmitService.rejectProductSubmission(submissionId, body);
   }
 
+  @ApiOperation({ summary: '운영정보 제보 승인 API', description: '관리자가 운영정보 제보를 승인하여 실제 운영 데이터로 반영합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '운영정보 제보 승인',
-    description: '관리자가 운영정보 제보를 승인하여 실제 운영 데이터로 반영합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/operating-info/accept')
-  async acceptOperatingInfoSubmission(@Param('submissionId') submissionId: number) {
-    return await this.adminService.acceptOperatingInfoSubmission(submissionId);
+  acceptOperatingInfoSubmission(@Param('submissionId', ParseIntPipe) submissionId: number) {
+    return this.shopSubmitService.acceptOperatingInfoSubmission(submissionId);
   }
 
+  @ApiOperation({ summary: '운영정보 제보 반려 API', description: '관리자가 운영정보 제보를 반려하고 반려 사유를 저장합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '운영정보 제보 반려',
-    description: '관리자가 운영정보 제보를 반려하고 반려 사유를 저장합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/operating-info/reject')
-  async rejectOperatingInfoSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
-    return await this.adminService.rejectOperatingInfoSubmission(submissionId, rejectProductSubmissionDto);
+  rejectOperatingInfoSubmission(@Param('submissionId', ParseIntPipe) submissionId: number, @Body() body: RejectSubmissionDto) {
+    return this.shopSubmitService.rejectOperatingInfoSubmission(submissionId, body);
   }
 
+  @ApiOperation({ summary: '새로운 소품샵 제보 승인 API', description: '관리자가 새로운 소품샵 제보를 승인하여 실제 운영 데이터로 반영합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '새로운 소품샵 제보 승인',
-    description: '관리자가 새로운 소품샵 제보를 승인하여 실제 운영 데이터로 반영합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/new-shop/accept')
-  async acceptNewShopSubmission(@Param('submissionId') submissionId: number) {
-    return await this.adminService.acceptNewShopSubmission(submissionId);
+  acceptNewShopSubmission(@Param('submissionId', ParseIntPipe) submissionId: number) {
+    return this.shopSubmitService.acceptNewShopSubmission(submissionId);
   }
 
+  @ApiOperation({ summary: '새로운 소품샵 제보 반려 API', description: '관리자가 새로운 소품샵 제보를 반려하고 반려 사유를 저장합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '새로운 소품샵 제보 반려',
-    description: '관리자가 새로운 소품샵 제보를 반려하고 반려 사유를 저장합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('submission/:submissionId/new-shop/reject')
-  async rejectNewShopSubmission(@Param('submissionId') submissionId: number, @Body() rejectProductSubmissionDto: RejectProductSubmissionDto) {
-    return await this.adminService.rejectNewShopSubmission(submissionId, rejectProductSubmissionDto);
+  rejectNewShopSubmission(@Param('submissionId', ParseIntPipe) submissionId: number, @Body() body: RejectSubmissionDto) {
+    return this.shopSubmitService.rejectNewShopSubmission(submissionId, body);
   }
 
+  @ApiOperation({ summary: '소품샵 숨김/해제 API', description: '관리자가 소품샵을 유저에게 숨기거나 다시 노출합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '소품샵 숨김/해제 (Admin)',
-    description: '관리자가 소품샵을 유저에게 숨기거나 다시 노출합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('shops/:shopId/hidden')
-  async toggleShopHidden(@Param('shopId') shopId: number, @Body() toggleShopHiddenDto: ToggleShopHiddenDto) {
-    return await this.adminService.toggleShopHidden(shopId, toggleShopHiddenDto);
+  toggleShopHidden(@Param('shopId', ParseIntPipe) shopId: number, @Body() body: ToggleShopHiddenDto) {
+    return this.shopService.toggleShopHidden(shopId, body);
   }
 
+  @ApiOperation({ summary: '리뷰 숨김/해제 API', description: '관리자가 리뷰를 숨기거나 다시 노출합니다.' })
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: '리뷰 숨김/해제 (Admin)',
-    description: '관리자가 리뷰를 숨기거나 다시 노출합니다.',
-  })
   @UseGuards(AdminJwtAuthGuard)
   @Patch('reviews/:reviewId/hidden')
-  async toggleReviewHidden(@Param('reviewId') reviewId: number, @Body() toggleReviewHiddenDto: ToggleReviewHiddenDto): Promise<void> {
-    return await this.adminService.toggleReviewHidden(reviewId, toggleReviewHiddenDto);
+  toggleReviewHidden(@Param('reviewId', ParseIntPipe) reviewId: number, @Body() body: ToggleReviewHiddenDto) {
+    return this.reviewService.toggleReviewHidden(reviewId, body);
   }
 }

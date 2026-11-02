@@ -1900,25 +1900,31 @@ exports[`AppModule API 계약(경로·파라미터·필드 구조)이 바뀌지 
                       "type": "array",
                     },
                     "pageInfo": {
-                      "allOf": [
-                        {
-                          "properties": {
-                            "limit": "…",
-                            "nextPage": "…",
-                            "page": "…",
-                            "totalElements": "…",
-                            "totalPages": "…",
-                          },
-                          "required": [
-                            "limit",
-                            "nextPage",
-                            "page",
-                            "totalElements",
-                            "totalPages",
-                          ],
-                          "type": "object",
+                      "properties": {
+                        "limit": {
+                          "type": "number",
                         },
+                        "nextPage": {
+                          "type": "boolean",
+                        },
+                        "page": {
+                          "type": "number",
+                        },
+                        "totalElements": {
+                          "type": "number",
+                        },
+                        "totalPages": {
+                          "type": "number",
+                        },
+                      },
+                      "required": [
+                        "limit",
+                        "nextPage",
+                        "page",
+                        "totalElements",
+                        "totalPages",
                       ],
+                      "type": "object",
                     },
                   },
                   "required": [

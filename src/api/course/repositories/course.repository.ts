@@ -32,16 +32,6 @@ export class CourseRepository {
       .getOne();
   }
 
-  async findCourseShop(courseId: number, shopId: number): Promise<CourseShop | null> {
-    return this.courseShopRepo
-      .createQueryBuilder('cs')
-      .innerJoin('cs.course', 'course')
-      .innerJoin('cs.shop', 'shop')
-      .where('course.id = :courseId', { courseId })
-      .andWhere('shop.id = :shopId', { shopId })
-      .getOne();
-  }
-
   async findVisitedCourseShopsByUuid(uuid: string): Promise<CourseShop[]> {
     return this.courseShopRepo
       .createQueryBuilder('cs')
@@ -51,16 +41,6 @@ export class CourseRepository {
       .where('user.uuid = :uuid', { uuid })
       .andWhere('cs.visitedAt IS NOT NULL')
       .orderBy('cs.visitedAt', 'DESC')
-      .getMany();
-  }
-
-  async findCourseShopsByCourseId(courseId: number): Promise<CourseShop[]> {
-    return this.courseShopRepo
-      .createQueryBuilder('cs')
-      .innerJoin('cs.course', 'course')
-      .innerJoinAndSelect('cs.shop', 'shop')
-      .where('course.id = :courseId', { courseId })
-      .orderBy('cs.orderIndex', 'ASC')
       .getMany();
   }
 

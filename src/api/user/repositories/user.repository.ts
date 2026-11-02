@@ -1,37 +1,32 @@
-import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { User } from '../entities/user.entity';
 
+@Injectable()
 export class UserRepository {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  async saveUser(user: User) {
-    return await this.userRepository.save(user);
+  async findByUuid(uuid: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { uuid } });
   }
 
-  async findUserByUUID(uuid: string) {
-    return await this.userRepository.findOne({
-      where: {
-        uuid: uuid,
-      },
-    });
+  async existsByNickName(nickName: string): Promise<boolean> {
+    return this.userRepository.exists({ where: { nickName } });
   }
 
-  async findUserByNickName(nickName: string) {
-    return await this.userRepository.findOne({ where: { nickName } });
+  async findAllWithAuthIdentities(orderKey: 'createdAt' | 'lastActivityAt', order: 'ASC' | 'DESC'): Promise<User[]> {
+    return this.userRepository.find({ relations: ['authIdentities'], order: { [orderKey]: order } });
   }
 
-  async updateNickName(uuid: string, nickName: string) {
-    return await this.userRepository.update({ uuid }, { nickName });
+  async updateNickName(uuid: string, nickName: string): Promise<UpdateResult> {
+    return this.userRepository.update({ uuid }, { nickName });
   }
 
-  async findActivityUsers(orderKey: 'createdAt' | 'lastActivityAt', order: 'ASC' | 'DESC') {
-    return await this.userRepository.find({
-      relations: ['authIdentities'],
-      order: { [orderKey]: order },
-    });
+  async save(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 }

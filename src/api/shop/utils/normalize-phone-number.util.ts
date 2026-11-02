@@ -7,3 +7,8 @@ export function normalizePhoneNumber(value: string | null | undefined): string |
   const trimmed = typeof value === 'string' ? value.trim() : '';
   return trimmed === '' ? null : trimmed;
 }
+
+export function withNormalizedPhoneNumber<T extends { phoneNumber?: string | null }>(obj: T | null): T | null {
+  if (obj == null) return null;
+  return { ...obj, phoneNumber: normalizePhoneNumber(obj.phoneNumber) };
+}
