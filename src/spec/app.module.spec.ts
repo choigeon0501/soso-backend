@@ -72,6 +72,10 @@ describe('AppModule', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    /** .env 없이(CI·새 클론) 돌 때 Passport 전략 생성자가 secret 누락으로 실패하지 않게 기본값을 둔다. */
+    process.env.JWT_ACCESS_TOKEN_SECRET ??= 'test';
+    process.env.JWT_ADMIN_TOKEN_SECRET ??= 'test';
+
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
       .overrideProvider(getDataSourceToken())
       .useValue(fakeDataSource)
