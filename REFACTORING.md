@@ -39,7 +39,9 @@
 
 ## 🟠 P1 — 높은 우선순위 (아키텍처·버그)
 
-### 6. ShopService God Object (488줄, 의존성 15+개)
+### ~~6. ShopService God Object (488줄, 의존성 15+개)~~ ✅
+
+- **수정 완료**: ShopService(조회·숨김·신고) / ShopSubmitService(제보) / RecentSearchService로 분리, 리뷰 CRUD·신고는 ReviewService로 이동
 
 - **파일**: `src/api/shop/shop.service.ts`
 - **현상**: 소품샵 조회, 제보, 리뷰 CRUD, 신고, 관리자 승인까지 단일 서비스에 집중
@@ -50,7 +52,9 @@
   - `ShopAdminService` — 관리자 전용 (신고 조회, 숨김 토글)
   - 리뷰 관련 → `ReviewService`로 위임
 
-### 7. Repository에 비즈니스 로직 혼재
+### ~~7. Repository에 비즈니스 로직 혼재~~ ✅
+
+- **수정 완료**: *TransactionsRepository를 services/*TransactionService로 이동. 리포지토리는 순수 조회·쓰기만 담당
 
 - **파일**:
   - `src/api/user/repositories/user-transactions.repository.ts:56-121` — 탈퇴 시 제보 정리·S3 삭제·하드 삭제 오케스트레이션
@@ -80,20 +84,26 @@
 - **현상**: "소품샵을 찾을 수 없음"에 `NotFoundException` (line 134, 222, 244, 282) **과** `ConflictException` (line 200, 259, 269) 혼용
 - **수정 방향**: 존재하지 않는 리소스 → `NotFoundException`으로 통일
 
-### 11. `UserTransactionsRepository`에서 `commitTransaction()` 2회 호출
+### ~~11. `UserTransactionsRepository`에서 `commitTransaction()` 2회 호출~~ ✅
+
+- **수정 완료**: 트랜잭션을 dataSource.transaction으로 바꾸며 이중 commit 제거
 
 - **파일**: `src/api/user/repositories/user-transactions.repository.ts:39-41`
 - **현상**: 복사-붙여넣기로 `commitTransaction()`이 연속 2번 호출됨
 - **수정 방향**: 중복 호출 제거
 
-### 12. `AuthTransactionService`에서 User 엔티티에 없는 `provider` 필드 저장 시도
+### ~~12. `AuthTransactionService`에서 User 엔티티에 없는 `provider` 필드 저장 시도~~ ✅
+
+- **수정 완료**: 가입 트랜잭션에서 User에 없는 provider·profileImgKey 제거
 
 - **파일**: `src/api/auth/services/auth-transcation.service.ts:20-25`
 - **현상**: `User` 엔티티에 `provider` 컬럼이 없는데 save 객체에 포함
 - **영향**: TypeORM 설정에 따라 무시되거나 런타임 에러
 - **수정 방향**: `provider` 필드 제거 (AuthIdentity에만 저장)
 
-### 13. `issueAdminToken(email: number)` 파라미터 타입 오류
+### ~~13. `issueAdminToken(email: number)` 파라미터 타입 오류~~ ✅
+
+- **수정 완료**: 실제 전달값에 맞춰 issueAdminToken(adminId: number)로 이름 변경
 
 - **파일**: `src/api/auth/services/auth-token.service.ts:14`
 - **현상**: email 파라미터 타입이 `number`로 선언됨
@@ -136,18 +146,24 @@
 | `ToggleReviewHiddenDto` | `src/api/admin/dto/request/toggle-review-hidden.dto.ts` | `@IsNotEmpty()` 누락 (ToggleShopHiddenDto에는 있음) |
 | `ReviewReportDto` | `src/api/shop/dto/requests/report_request.ts` | `reportMessage`에 `@MaxLength` 없음 |
 
-### 19. `addUserFavorite()` 메서드명이 실제 동작(토글)과 불일치
+### ~~19. `addUserFavorite()` 메서드명이 실제 동작(토글)과 불일치~~ ✅
+
+- **수정 완료**: UserFavoriteService.toggleFavorite로 이름 변경
 
 - **파일**: `src/api/user/user.service.ts:147-157`
 - **현상**: 이미 즐겨찾기면 삭제, 없으면 추가 → **토글** 동작
 - **수정 방향**: `toggleUserFavorite()`로 이름 변경, 또는 add/remove 분리
 
-### 20. UserService 의존성 11개 — 과도한 책임
+### ~~20. UserService 의존성 11개 — 과도한 책임~~ ✅
+
+- **수정 완료**: UserService / UserFavoriteService / UserTransactionService로 분리, 제보·리뷰·최근검색 조회는 소유 도메인 서비스로 이동
 
 - **파일**: `src/api/user/user.service.ts:33-45`
 - **수정 방향**: 프로필 관련 / 즐겨찾기 관련 / 탈퇴 관련으로 서비스 분리 검토
 
-### 21. 트랜잭션 catch에서 원본 에러 미로깅
+### ~~21. 트랜잭션 catch에서 원본 에러 미로깅~~ ✅
+
+- **수정 완료**: 트랜잭션 서비스 catch에서 loggerService.logError로 원본 에러 기록
 
 - **파일**:
   - `src/api/shop/repositories/shop-submit-transactions.repository.ts:44-46, 83-85`
@@ -165,14 +181,18 @@
 
 ## 🟢 P3 — 낮은 우선순위 (네이밍·정리·컨벤션)
 
-### 23. 스텁/미완성 모듈 정리
+### ~~23. 스텁/미완성 모듈 정리~~ ✅
+
+- **수정 완료**: wishlist·recent-search 스텁 삭제
 
 | 모듈 | 상태 | 조치 |
 |------|------|------|
 | `src/api/wishlist/` | 컨트롤러·DTO 모두 빈 파일 | 삭제 (기능은 User 모듈에 구현됨) |
 | `src/api/recent-search/` | 서비스 파일 비어 있음 | 삭제 (기능은 Shop 모듈에 구현됨) |
 
-### 24. 파일 네이밍 컨벤션 불일치
+### ~~24. 파일 네이밍 컨벤션 불일치~~ ✅
+
+- **수정 완료**: 파일명 kebab-case·.dto.ts 접미사로 통일, transaction 오타 수정
 
 | 현재 | 문제 |
 |------|------|
@@ -181,7 +201,9 @@
 | `region_response.ts` | `.dto` 접미사 누락 |
 | DTO 파일들 | snake_case (`user_requests.dto.ts`) vs kebab-case (`notice-response.dto.ts`) 혼재 |
 
-### 25. `SuccessResponseFilter` 네이밍 오류
+### ~~25. `SuccessResponseFilter` 네이밍 오류~~ ✅
+
+- **수정 완료**: interceptors/SuccessResponseInterceptor로 이름·위치 변경
 
 - **파일**: `src/common/filter/success-response.filter.ts`
 - **현상**: `NestInterceptor`를 구현하지만 클래스명은 `*Filter`, `filter/` 폴더에 위치
@@ -196,7 +218,9 @@
 - **파일**: `src/api/review/entities/review.entity.ts:21, 17`
   - 동일 패턴
 
-### 27. 빈 enum·데드 코드 정리
+### ~~27. 빈 enum·데드 코드 정리~~ ✅
+
+- **수정 완료**: BanReason·SanitizePipe·createReviewBan 삭제
 
 | 파일 | 내용 |
 |------|------|
@@ -204,19 +228,25 @@
 | `src/common/pipe/sanitize.pipe.ts` | 전체가 주석 처리 — 사용처 없음 |
 | `src/api/review/repositories/review-ban.repository.ts:23-31` | `createReviewBan()` — "추후 사용 예정" 주석, 파라미터명이 엔티티 필드와 불일치 |
 
-### 28. `any` 타입 사용
+### ~~28. `any` 타입 사용~~ ✅
+
+- **수정 완료**: ReviewService의 any 제거
 
 - **파일**: `src/api/review/review.service.ts:36, 59`
 - **현상**: `review: any`, `reviews: any[]`
 - **수정 방향**: `Review` 엔티티 또는 전용 인터페이스로 교체
 
-### 29. `@Injectable()` 데코레이터 누락
+### ~~29. `@Injectable()` 데코레이터 누락~~ ✅
+
+- **수정 완료**: 모든 Repository에 @Injectable() 적용
 
 - **파일**: `src/api/user/repositories/user.repository.ts`
 - **현상**: NestJS Provider로 등록되지만 `@Injectable()` 데코레이터 없음
 - **수정 방향**: 일부 Repository에 `@Injectable()` 추가 (일관성 확보)
 
-### 30. `get-insta-id.ts` 파일명과 함수명(`getLastSegment`) 불일치
+### ~~30. `get-insta-id.ts` 파일명과 함수명(`getLastSegment`) 불일치~~ ✅
+
+- **수정 완료**: shop/utils/get-last-segment.util.ts로 이름 변경
 
 - **파일**: `src/common/function/get-insta-id.ts`
 - **수정 방향**: 파일명을 `get-last-segment.ts`로 변경하거나 함수명 변경
@@ -226,6 +256,21 @@
 - **파일**: `src/common/pipe/validationPipe.pipe.ts:8`
 - **현상**: DTO에 정의되지 않은 필드가 에러 없이 무시됨
 - **수정 방향**: 활성화하여 예상치 못한 필드 전달 시 400 에러 반환
+
+---
+
+## 🔍 컨벤션 리팩토링 중 발견 (미수정 — 응답·동작이 바뀌어 별도 결정 필요)
+
+| # | 위치 | 현상 |
+|---|------|------|
+| A | `ShopRepository.countVisibleByKeyword` | `name LIKE OR location LIKE AND isVerified AND !isHidden` 우선순위 때문에 이름이 맞으면 미승인·숨김 샵도 개수에 포함 → 검색 `pageInfo.totalElements`가 실제보다 클 수 있음 |
+| B | `RecentSearchService.recordRecentSearch` | 목록을 `shop` 관계만 불러와 `oldest.user`가 항상 비어 있음 → 10개 초과분이 DB에서 지워지지 않음 |
+| C | `ShopSubmitTransactionService.deleteProductSubmission` | 제보 매핑만이 아니라 해당 샵의 판매목록 매핑을 전부(승인분 포함) 삭제 |
+| D | `ReviewService.findShopReviews` | 탈퇴로 user가 null인 리뷰가 비로그인 조회 시 `userReviews`·`otherReviews` 양쪽에 들어감 |
+| E | `AuthService.appleLogin` | ID Token 검증 실패(401)가 바깥 catch에서 500으로 바뀜 |
+| F | `UserFavoriteService.toggleFavorite` | 응답 `result`에 TypeORM `DeleteResult` 또는 저장 엔티티가 그대로 실림(Swagger는 result 없음으로 문서화) |
+| G | Swagger 응답 DTO | `GetNearbyShopResponseDto`(type·image·reportStatus) 등 문서 필드가 실제 응답과 다름 |
+| H | `JwtStrategy` | common 모듈이 `User` TypeORM 리포지토리를 직접 주입(UserService 주입 시 전역 모듈 순환 우려로 유지) |
 
 ---
 

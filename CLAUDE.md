@@ -24,18 +24,14 @@
 | Notice | 공지사항 관리 | `Notice` |
 | Feedback | 사용자 피드백 수집 | `Feedback` |
 | Admin | 관리자 로그인·사용자/제보/신고/피드백 관리·콘텐츠 숨김 처리 | `AdminUser` |
-| Common | AWS S3 업로드·Winston 로거·JWT 모듈·가드·필터·파이프·데코레이터 | (엔티티 없음) |
-
-### 미완성 모듈 (스텁)
-
-| 모듈 | 상태 |
-|------|------|
-| Wishlist | 컨트롤러만 존재 — 실제 기능은 User 모듈의 `UserFavorite`로 구현 |
-| RecentSearch | 서비스 파일 비어 있음 — 실제 기능은 Shop 모듈의 `RecentSearch`로 구현 |
+| Course | 코스 생성·수정·도장·공유 | `Course`, `CourseShop` |
+| Common | AWS S3 업로드·Winston 로거·JWT 모듈·가드·필터·인터셉터·파이프·데코레이터 | (엔티티 없음) |
 
 ## 프로젝트 구조 규칙
 
 ### 도메인 단위 모듈 구조 (현재 실제 구조)
+
+세부 규칙은 `.claude/rules/`(`project-structure.mdc`, `code-conventions.mdc`, `code-paragraphs.mdc`)를 따른다.
 
 ```
 src/
@@ -43,27 +39,40 @@ src/
 │   └── <domain>/
 │       ├── <domain>.module.ts
 │       ├── <domain>.controller.ts
-│       ├── <domain>.service.ts          # 또는 services/ 하위 분리
+│       ├── <domain>.service.ts          # 서비스가 하나일 때만. 2개 이상이면 services/
+│       ├── services/                    # <domain>.service.ts, <domain>-transaction.service.ts 등
 │       ├── repositories/
 │       ├── entities/
+│       ├── const/                       # *.const.ts (enum·상수·타입·도메인 규칙 순수 함수)
+│       ├── utils/                       # 도메인 규칙이 아닌 순수 함수
+│       ├── spec/                        # 소스 구조 미러링
 │       └── dto/
 │           ├── request/
 │           ├── response/
 │           └── query/
 ├── common/
-│   ├── aws/          # S3 업로드·Presigned URL
-│   ├── jwt/          # JWT 전략·가드 (JwtAuthGuard, OptionalAuthGuard)
+│   ├── aws/          # S3 업로드·삭제
+│   ├── jwt/          # JWT 전략·JwtAuthGuard
 │   ├── admin-jwt/    # 관리자 전용 JWT
 │   ├── logger/       # Winston 로거
-│   ├── filter/       # ExceptionFilter, SuccessResponseFilter
-│   ├── pipe/         # CustomValidationPipe, SanitizePipe
-│   ├── enum/         # AuthProvider, Role, SubmitType/Status, ReportType 등
-│   ├── deco/         # @GetUUID() 커스텀 데코레이터
-│   └── function/     # normalizePhoneNumber, getInstaId 등 유틸
+│   ├── const/        # 여러 도메인이 쓰는 enum (Role, SortOrder)
+│   ├── decorators/   # @GetUUID()
+│   ├── dto/          # SuccessResponseDTO, PageInfoDto, PaginationQueryDto
+│   ├── filters/      # ExceptionFilter
+│   ├── guards/       # OptionalAuthGuard
+│   ├── interceptors/ # SuccessResponseInterceptor
+│   └── pipes/        # CustomValidationPipe
+├── spec/             # AppModule 컴파일·API 계약 스냅샷 테스트
 ├── swagger/
 ├── app.module.ts
 └── main.ts
 ```
+
+### 도메인 간 협력
+
+- 다른 도메인의 데이터는 그 도메인의 **Service**로만 접근한다. 모듈 `exports`에는 Service만 올린다.
+- 트랜잭션은 `services/*-transaction.service.ts`가 `dataSource.transaction`으로 연다.
+- 순환 의존: `ShopService ↔ ReviewService`, `ShopService ↔ UserFavoriteService`는 `@Inject(forwardRef(...))`로 연결한다.
 
 ### 레이어드 아키텍처 (Controller → Service → Repository)
 
@@ -87,7 +96,7 @@ src/
 - JWT Access Token / Refresh Token (PassportJS)
 - 소셜 로그인: Google OAuth (Code → Access Token → UserInfo), Apple Sign-In (ID Token 검증)
 - Guards: `JwtAuthGuard` (필수 인증), `OptionalAuthGuard` (선택적 인증), `AdminJwtAuthGuard` (관리자 전용)
-  - 위치: `src/common/jwt/`, `src/common/admin-jwt/`
+  - 위치: `src/common/jwt/`, `src/common/admin-jwt/`, `src/common/guards/`
 - 인증 필요 API: `@UseGuards(JwtAuthGuard)`, `@ApiBearerAuth()`
 - 사용자 식별: `@GetUUID()` 커스텀 데코레이터로 JWT에서 UUID 추출
 
@@ -100,8 +109,8 @@ src/
 
 ## 응답·검증·DB
 
-- SuccessResponseFilter: `{ status, message, result }` 래핑
-- 전역 CustomValidationPipe: `class-validator` + `class-transformer` + SanitizePipe
+- SuccessResponseInterceptor: `{ status, message, result }` 래핑
+- 전역 CustomValidationPipe: `class-validator` + `class-transformer`
 - Rate Limiting: 10 req / 10s, 60s 차단 (Throttler)
 - DB: MySQL, TypeORM auto-sync
 - 환경: `NODE_ENV` 기준 (`dev` / `prd`)
