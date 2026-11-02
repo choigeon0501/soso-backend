@@ -1,0 +1,95 @@
+---
+alwaysApply: true
+description: 코드 단락(빈 줄) 스타일 - 논리 블록 구분 및 메서드 간 구분 (NestJS/TypeORM)
+globs: src/**/*.ts,src/**/*.tsx
+---
+
+# Code Paragraphs (빈 줄 / 단락 구분)
+
+이 프로젝트에서는 **빈 줄 한 줄**로 논리 단계를 구분한다. 비슷한 역할을 하는 코드끼리 묶고, 단계가 바뀔 때만 빈 줄을 넣는다.
+
+## 1. Service 메서드 내부 단락
+
+메서드 안에서는 **논리 블록 단위**로만 빈 줄을 넣는다.
+
+### 1.1 블록 구분 기준 (순서대로 적용)
+
+| 단계 | 내용 | 예시 | 다음에 빈 줄 |
+|------|------|------|----------------|
+| 입력 검증 | 파라미터/ID 유효성 검사 후 throw | `ParseIntPipe`, `if (!id) throw ...` | ✅ |
+| 조회 | Repository/Service 조회 | `findById`, `findUserWithFavoriteGenresById` 등 | ✅ |
+| 존재/유효성 검사 | 조회 결과 null 체크 후 throw | `if (!user) throw new NotFoundException(...)` | ✅ |
+| 추가 비즈니스 검증 | 중복 검사, 권한 검사 등 | `existsNickname`, `validateUserInCluster` 후 throw | ✅ |
+| 실제 수행 | create/update/delete 등 Repository·Service 호출 | `save`, `create`, `remove` 등 | (메서드 끝) |
+
+- **같은 단계 안**에 있는 코드(연속된 if-throw, 연속된 await 등)는 빈 줄 없이 이어 쓴다.
+- **단계가 바뀔 때만** 빈 줄 한 줄을 넣는다.
+
+### 1.2 예시 (NestJS/TypeORM 스타일)
+
+```ts
+async deleteBookmark(userId: number, venueId: number): Promise<void> {
+  const bookmark =
+    await this.venueBookmarkRepository.findByUserIdAndVenueId(userId, venueId);
+  if (!bookmark) {
+    throw new NotFoundException('북마크를 찾을 수 없습니다.');
+  }
+
+  await this.venueBookmarkRepository.remove(bookmark);
+}
+```
+
+```ts
+async updateUserProfile(
+  userId: number,
+  updateData: UpdateUserDto,
+): Promise<UpdateUserProfileResponseDto> {
+  const user =
+    await this.usersRepository.findUserWithFavoriteGenresById(userId);
+  if (!user) {
+    throw new NotFoundException('사용자를 찾을 수 없습니다.');
+  }
+
+  if (updateData.profileImage != null) {
+    if (updateData.profileImage.startsWith('http')) {
+      user.profileImage = updateData.profileImage;
+    } else {
+      user.profileImage = await this.processProfileImage(
+        updateData.profileImage,
+      );
+    }
+  }
+
+  if (updateData.favoriteGenres != null) {
+    user.favoriteGenres = await this.genresService.findOrCreateMany(
+      updateData.favoriteGenres,
+    );
+  }
+
+  await this.usersRepository.save(user);
+
+  return { id: user.id, profileImage: user.profileImage, ... };
+}
+```
+
+## 2. 메서드 간 구분
+
+- **메서드와 메서드 사이**에는 빈 줄 **한 줄**만 둔다.
+- 두 개 이상의 빈 줄은 사용하지 않는다.
+
+## 3. Controller
+
+- 각 엔드포인트(메서드) 사이에는 빈 줄 한 줄.
+- 데코레이터(`@ApiOperation`, `@ApiResponse`, `@Get`, `@Post` 등) 블록 내부는 붙여 쓴다.
+
+## 4. Repository
+
+- 메서드와 메서드 사이에 빈 줄 한 줄.
+- 메서드 내부가 짧으면(조회 한 번 + return 등) 단락을 나누지 않아도 된다.
+
+## 5. 요약
+
+1. **같은 논리 단계**: 빈 줄 없이 묶어서 작성.
+2. **단계가 바뀔 때**: 빈 줄 1개.
+3. **메서드 사이**: 빈 줄 1개.
+4. **빈 줄 2줄 이상**: 사용하지 않음.

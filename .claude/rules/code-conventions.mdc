@@ -1,0 +1,294 @@
+---
+alwaysApply: true
+description: 코드 컨벤션 — users 도메인을 기준으로 확정한 파일 구성·메서드 형태·이름 규칙. 다른 도메인은 이 기준에 맞춘다.
+globs: src/**/*.ts
+---
+
+# 코드 컨벤션 (users 기준)
+
+`src/users`가 기준이다. 이 문서에 적힌 것은 **확정된 규칙**이고, 다른 도메인을 손볼 때 이 문서와
+`src/users`를 함께 본다. 빈 줄 규칙은 `code-paragraphs.mdc`, 폴더 배치는 `project-structure.mdc`에 있고
+여기서는 그 둘이 다루지 않는 것만 적는다.
+
+레이어별로 나눠 적는다. 여러 레이어에 걸치는 규칙은 "공통"에 있다.
+
+---
+
+## 공통
+
+### 하위 폴더 이름은 복수형
+
+- 파일을 여럿 담는 폴더는 복수형이다 — `services`·`repositories`·`entities`·`decorators`·`exceptions`·`guards`·`utils`·
+  `validators`·`interceptors`·`filters`. 예외는 관례로 굳은 `dto`·`const`·`spec` 셋뿐이다.
+
+### 파일에는 클래스 하나만
+
+- `*.controller.ts`·`*.service.ts`·`*.repository.ts` 파일에는 **그 클래스 하나만** 둔다.
+- interface·type·enum·const·헬퍼 함수는 같은 파일에 두지 않는다. `const/`로 뺀다.
+  - 예: `VerifiedIdentity`·`AdminSignupStats`는 `users.service.ts`에 있었고 `const/`로 옮겼다
+    (`verified-identity.const.ts`, `admin-signup-stats.const.ts`).
+- `const/` 파일 하나는 **한 주제**를 담는다. 관련 있는 상수와 그 상수가 만드는 shape(interface)은 한 파일에 같이 둬도 된다.
+
+### 다른 도메인의 Repository를 주입하지 않는다
+
+- 다른 도메인의 데이터가 필요하면 **그 도메인의 Service**를 주입한다. Repository(`UsersRepository` 등)와
+  TypeORM 원시 리포지토리(`@InjectRepository(UserFollowModel)`)를 다른 도메인에서 직접 받지 않는다.
+- 엔티티를 가진 도메인이 주인이다. 차단(`UserBlockModel`)은 users 소유라 읽기·쓰기 API는 `UserBlockService`에 있고,
+  blocks 도메인은 그것을 앱 화면 단위로 묶는 façade다.
+- 모듈 `exports`에는 Service만 올린다. 리포지토리는 `providers`에만 둔다 — 저장소 전체가 그렇다.
+- 예외는 하나뿐이다 — **그 도메인의 Service를 주입하면 모듈 import가 순환이 되는 배치 읽기.**
+  읽기 전용이어야 하고, 파일 머리 `/** */`에 순환의 이유를 적는다. 지금 해당하는 곳은 없다(원본 정리 배치의
+  `ClusterCleanupRepository`가 유일했고 2026-10-01 크론과 함께 지웠다).
+  트랜잭션 서비스가 같은 트랜잭션의 `manager`로 다른 도메인 엔티티를 쓰는 것은 이 규칙 밖이다
+  (`ClusterTransactionService.deleteClusterWith`·`UserTransactionService.withdrawUser`의 신고 종결).
+
+### 조회 직후의 검사는 붙여 쓴다
+
+`const x = …;` 바로 다음 문장이 **`x`를 검사하는 `if`** 면 사이에 빈 줄을 넣지 않는다.
+검사 뒤에 다음 단계(수행·return)가 이어질 때만 빈 줄 한 줄이다.
+
+```ts
+async validateUserInCluster(userId: number, clusterId: number): Promise<void> {
+  const exists = await this.usersRepository.existsInCluster(userId, clusterId);
+  if (!exists) {
+    throw new NotFoundException('해당 클러스터에 존재하지 않은 유저입니다.');
+  }
+}
+
+async getUserById(userId: number) {
+  const user = await this.usersRepository.findById(userId);
+  if (!user) {
+    throw new NotFoundException('존재하지 않은 유저입니다.');
+  }
+
+  return user;
+}
+```
+
+`Promise.all` 결과나 `catch` 안의 `const driverError = …;` 뒤에 오는 `if`도 같다.
+
+### 주석 — 코드로 안 보이는 사실만, `/** */` 블록으로
+
+- 메서드 안의 주석도 `/** … */` 블록으로 쓴다. `//` 줄주석을 여러 줄 이어 붙이지 않는다.
+- 남기는 것은 **코드만 봐서는 알 수 없는 사실**뿐이다 — "왜 여기엔 분기가 없는가", "왜 정확 일치만 보는가" 같은 것.
+  한 사실에 한 줄, 보통 2~3줄 안에 끝난다.
+- 지운다: 이력·날짜("2026-01-25에 주석 처리된 뒤로"), 리팩토링 항목 번호("users E6", "clusters A5"),
+  과거 서술("예전에는 ~했다"), 다른 문서 참조("server-todo §9"), prd 현황("지금 111행 전부"),
+  메서드 이름을 되풀이하는 한 줄 JSDoc(`/** 알림 삭제 */`), 파라미터 사이에 낀 주석.
+- 메서드 위 `/** */`는 시그니처가 말하지 않는 것이 있을 때만 둔다.
+
+```ts
+/**
+ * 전화번호는 정규화 없이 저장된 문자열과 정확히 같을 때만 중복이다.
+ * 유니크 인덱스가 없어 DB가 race를 막지 않으므로 아래 catch에 전화번호 분기가 없다.
+ */
+const phoneNumberExists = await this.usersRepository.existsPhoneNumber(
+  body.phoneNumber,
+);
+```
+
+### 메서드 이름 — 접두사가 "없을 때 무엇을 하는지"를 말한다
+
+| 접두사 | 하는 일 | 없을 때 | 반환 | 예 |
+|---|---|---|---|---|
+| `find*` | 찾아본다 | **null** (throw 하지 않는다) | `T \| null`, `T[]` | 리포지토리 전부 · 서비스 `findActiveUser`, `findUserBySocialProvider` |
+| `get*` | 가져온다 | **throw** (`NotFoundException`) | `T` | `getUserById`, `getUserByIdWithDeleted` |
+| `validate*` | 있는지 검증만 한다 | **throw** | `void` | `validateUserInCluster` |
+| `exists*` | 있는지 알려준다 | `false` | `boolean` | `existsNickname`, `existsInCluster` |
+
+- Spring Data의 `findById()`(Optional) / `getById()`(없으면 예외) 구분과 같다.
+- **컬렉션을 돌려주면 서비스도 `find*`다** — 없으면 빈 배열이지 throw 가 아니다(`findBlockedUserIds`, `findUsersByIds`).
+  `getFollowers`처럼 대상 유저가 없을 때 404 를 던지면 그건 `get*`이 맞다.
+- **서비스 안에서 `find*` → `if (!x) throw` 를 인라인으로 써도 된다.** 같은 조회를 `get*` 하나로 묶는 것을 강제하지 않는다 —
+  묶으면 에러 문구가 하나로 고정되는데, 문구는 앱 계약이라 라우트마다 다를 수 있다.
+  단 **같은 대상에는 같은 문구**를 쓴다(유저 없음은 전부 "사용자를 찾을 수 없습니다.").
+- `exists*`는 단수 `exist*`를 쓰지 않고, 이름을 축약하지 않는다(`existPhoneNum` ✗ → `existsPhoneNumber` ○).
+
+---
+
+## Controller — `users.controller.ts` 그대로가 기준
+
+- 파일에는 컨트롤러 클래스 하나만(공통 규칙).
+- 메서드 본문은 **서비스 위임 한 줄**(`return this.xxxService.yyy(...)`). 분기·변환·검증을 넣지 않는다.
+- 인증 유저는 `@UserId() userId: number`로 받는다. `@User() user: UserModel`은 토큰 재발급처럼
+  `email`·`provider`까지 필요한 라우트(`auth` refresh)에만 쓴다.
+- 파라미터 순서: `@Param` / `@Query` / `@Body` 먼저, **`@UserId()`가 마지막**.
+- 경로의 id 파라미터는 항상 `ParseIntPipe`.
+- **클래스 데코레이터 순서**: `@ApiTags`(어드민은 `@ApiExcludeController`) → `@ApiBearerAuth` → `@UseGuards` →
+  `@Throttle` → `@Roles` → `@UseInterceptors` → `@Controller([구경로, 'api/v1/...'])`.
+  **`@Controller`가 항상 마지막이다.** 클래스 위 `/** */`는 데코레이터 사이가 아니라 전부의 위에 둔다.
+- **메서드 데코레이터 순서**: `@ApiOperation` → `@ApiResponse`(들) → `@UseGuards`·`@Throttle`·`@UseInterceptors` →
+  `@HttpCode` → HTTP 메서드 데코레이터(시그니처 바로 위). 라우트가 하나뿐이면 가드·스로틀은 클래스 레벨로 올린다.
+- `@ApiOperation.summary`는 한국어 + `API` 접미(예: `'내 프로필 조회 API'`). 모든 라우트에 `@ApiResponse` 200을 적는다.
+- 핸들러 이름은 **동사+대상**(`getVenues`, `followUser`)이고 짝은 대칭이다 — `like/unlike`, `bookmark/unbookmark`, `follow/unfollow`.
+  라우트 문자열은 계약이라 못 바꾸므로 이름이 라우트와 어긋났으면 이름을 라우트에 맞춘다(`invitations/:id/deny` → `denyVenueInvitation`).
+  컨트롤러 조회 핸들러는 항상 `get*`이다. 서비스 메서드는 서비스의 접두사 규칙을 따르므로 이름이 갈릴 수 있다
+  (`getVenues` → `venuesService.findVenues`, `getUsers` → `usersService.searchUsers`).
+- 라우트 위 `/** */`는 코드로 안 보이는 사실(예: "일부러 201 이다")에만 둔다. 메서드 이름을 되풀이하는 JSDoc은 두지 않는다.
+- **`@Res()` 핸들러는 위임 한 줄의 예외다.** 상태코드·헤더를 직접 써야 하므로 2~3줄이 된다 —
+  판단(404·만료·캐시 정책)은 서비스가 끝내고 컨트롤러엔 "그 결과를 응답에 싣는 일"만 남긴다
+  (share 의 `sendPage`, `GET /health`). `ResponseInterceptor` 봉투를 우회한다는 사실을 JSDoc 에 적는다.
+- 다른 도메인의 서비스를 컨트롤러가 직접 주입해 호출해도 된다(users가 `ClustersService`·`VenuesService`를 쓰듯).
+- **컨트롤러를 나누는 기준은 경로 접두다.** 고정 세그먼트로 갈리는 하위 리소스(`/clusters/records`, `/venues/invitations`)는
+  컨트롤러를 따로 두고, 모듈 `controllers` 배열에서 `:id` 라우트를 가진 컨트롤러보다 **앞에** 등록한다(spec 으로 순서를 고정).
+  같은 `:id` 아래의 액션(참여·좋아요·댓글·멤버)은 한 컨트롤러에 두되, 라우트가 8개 안팎을 넘어 파일의 1/3 이 되면 뗀다
+  (`cluster-songs`). 서비스 하나당 컨트롤러 하나로 맞추지 않는다 — users 는 서비스 3개를 한 컨트롤러가 쓴다.
+
+---
+
+## Service
+
+- 파일에는 서비스 클래스 하나만(공통 규칙).
+- **메서드 순서는 public → private.** private 헬퍼는 클래스 맨 아래에 두고, 여럿이면 호출되는 순서대로 둔다.
+  public 사이에 private이 끼면 어디까지가 외부 계약인지 읽으면서 세어야 한다.
+- **한 번만 쓸 코드를 메서드로 빼지 않는다.** 호출부가 한 곳뿐인 private은 그 자리에 인라인한다 — 이름을 붙여 얻는 것보다
+  읽는 사람이 한 번 더 뛰어야 하는 비용이 크다. 두 곳 이상에서 부를 때만 private으로 뺀다(`getFollowCounts`).
+  **단, 그 자체로 한 단계의 의미가 있고**(입력 정리 → 존재 확인 → 제외처럼 순서 있는 흐름) **인라인하면 호출부의 흐름이
+  묻힐 만큼 크면(≈30줄 이상) 뺀다.** 기준은 venues다 — `assertValidParent`(14줄)는 인라인했고 `resolveInviteeIds`(37줄)는 남겼다.
+  단일 책임을 기계적으로 적용해 쪼개지 않는다(`project-structure.mdc` 9절과 같은 결).
+- `get*`·`validate*`(없으면 throw)는 서비스에 둔다. 리포지토리에서 받은 null을 여기서 예외로 바꾼다.
+- 메서드 안의 단락은 `code-paragraphs.mdc` 1절 + 위 "조회 직후의 검사는 붙여 쓴다".
+- **`await`는 문장의 머리에만.** `const x = await …` / `const [a, b] = await Promise.all([…])` / `return await …` / `await …;`
+  형태로만 쓴다. 객체 리터럴의 값·함수 인자·조건식·삼항 안에 `await`를 끼워 넣지 않는다. 한 줄짜리라도 변수로 먼저 받는다.
+
+  ```ts
+  // ✗
+  favoriteGenres: await this.genresService.resolveMany(body.favoriteGenres),
+  // ○
+  const genres = await this.genresService.resolveMany(body.favoriteGenres);
+  …
+  favoriteGenres: genres,
+  ```
+
+---
+
+## Repository
+
+- 파일에는 리포지토리 클래스 하나만(공통 규칙).
+- **throw 하지 않는다.** 없으면 null·빈 배열·false를 돌려주므로 `get*`·`validate*`를 두지 않는다.
+  접두사는 `find*`·`exists*`·`count*`와 쓰기(`create`·`save`·`remove`·`delete`)만 쓴다.
+- **프로젝션은 된다, 판단은 안 된다.** 조회 결과의 모양을 반환형에 맞추는 것(`map((row) => row.id)`, `Number(row.count)`,
+  `new Set(ids)`, `[rows, total]`)은 리포지토리의 몫이다. 도메인 규칙으로 걸러내기·예외 던지기·다른 리포지토리/서비스 호출·
+  조회 결과에 따라 쿼리를 고르는 분기는 서비스로 올린다.
+- **`find*`가 배열·Set을 돌려주면 대상이 없어도 빈 컬렉션이다.** null은 단건 조회(`findById` 등)에서만 쓴다.
+  예: `findFavoriteGenreIds`는 유저가 없어도 `[]`, `findBlockedUserIdsByBlockerId`도 같다.
+- **빈 배열 가드는 리포지토리 몫이다.** `IN (:...ids)`에 빈 배열이 들어가면 TypeORM이 `IN ()`을 만들어 SQL 오류다.
+  id 목록을 받는 메서드는 `if (ids.length === 0) return [];`(또는 `new Set()`·`new Map()`)으로 시작한다 —
+  도메인 판단이 아니라 쿼리가 받을 수 없는 입력을 빈 결과로 바꾸는 것이라 서비스로 올리지 않는다.
+- **트랜잭션은 원칙적으로 `XxxTransactionService`가 연다.** 다만 **트랜잭션 자체가 그 서비스의 본 흐름이면
+  서비스가 직접 열어도 된다** — 락·중복 검사·저장을 한 덩이로 묶는 `ReportsService.insertGuardingDuplicate`,
+  리뷰 저장과 조치 집행을 묶는 `ReportsAdminService.createReview`, `ClusterEndService`·`ClusterTagsService`가 그렇다.
+  옮기면 서비스가 껍데기만 남는 경우가 기준이다. 리포지토리가 `transaction()`을 열어도 되는 경우는
+  **같은 도메인 테이블만 건드리고 도메인 판단이 없는 원자 갱신·삭제**뿐이다(`AppReleaseRepository.setMinimumSupported`). 다른 리포지토리·서비스 호출이나 분기가 섞이면 트랜잭션 서비스로 올린다.
+
+---
+
+## Module
+
+- `@Module` 키 순서: `imports` → `exports` → `controllers` → `providers`.
+- 리포지토리도 `providers`에 넣고, 다른 도메인이 쓰면 `exports`에 올린다.
+
+---
+
+## Entity
+
+- **조인 테이블은 FK 컬럼을 명시한다.** `@ManyToOne` + `@JoinColumn({ name })` 옆에 같은 이름의 `@Column() xxxId: number`를 둔다
+  (`UserFollowModel`의 `followerId`·`followingId`, `UserBlockModel`의 `blockerId`·`blockedId`).
+  관계 객체만 있으면 `where: { blocker: { id } }`처럼 중첩으로 써야 하고 QueryBuilder에선 raw 컬럼명을 문자열로 부르게 된다.
+  `@Unique`·`@Index`도 FK 컬럼 이름으로 건다. DB 컬럼명·제약은 그대로지만 **nullability 는 바뀐다** —
+  `@ManyToOne`만 있던 컬럼은 nullable 로 만들어졌고 `@Column()`은 NOT NULL 이 기본이라 `SET NOT NULL` DDL 이 따라온다
+  (venues 조인 5개 → ㉗). **고치기 전에 두 가지를 확인한다** — dev DB 에 그 컬럼의 NULL 행이 있는지,
+  그리고 새 엔티티로 `ds.driver.createSchemaBuilder().log()` 를 돌려 실제로 나오는 DDL 이 무엇인지.
+  `nullable: false` 관계였다면 DDL 은 0 이고, nullable 이었다면 `SET NOT NULL` 변경도 마이그레이션 파일에 포함한다. 2026-10-12부터 로컬·dev는 synchronize를 끄고 생성·검토·적용한다(`docs/database/migrations.md`). prd는 현재 릴리스의 수동 DDL을 별도로 유지한다.
+- 모든 엔티티는 `BaseModel`을 상속한다(CLAUDE.md §2). 예외는 **문자열이 곧 PK 인 마스터 테이블**뿐이다 —
+  `VenueTypeModel`(`'Club / DJ'` 가 id). 예외인 이유를 엔티티 위 `/** */`에 적는다.
+
+## DTO
+
+- 요청 DTO 이름: body는 `동사+대상+Dto`(`UpdateUserDto`), 쿼리는 `…QueryDto`(`SearchUsersQueryDto`). 응답은 `…ResponseDto`.
+- **응답 DTO에 `?`를 쓰지 않는다.** 키는 항상 나가고 없는 값은 `null`이다 — `bio: string | null`, `firstSongId: string | null`.
+  `?`는 "키가 빠질 수 있다"는 뜻이라 iOS 디코딩과 Swagger 양쪽에 다른 계약을 말한다.
+- 응답 DTO 파일에는 그 응답에서만 쓰는 중첩 클래스를 같이 둬도 된다(`get-my-clusters-response.dto.ts`의 `ClusterOwnerSummaryDto`).
+  다른 응답에서도 쓰이면 파일로 뺀다.
+- **응답 DTO 는 그 응답을 만드는 서비스의 도메인에 둔다.** 라우트가 다른 도메인 컨트롤러에 있어도 같다 —
+  `GET /users/me/clusters` 는 users 컨트롤러가 받지만 `ClustersService.findMyClusters` 가 만드는 `GetMyClustersResponseDto` 는
+  clusters 에 있고 컨트롤러가 import 한다.
+- 서비스는 `new XxxResponseDto()` 없이 **객체 리터럴을 DTO 타입으로 반환**한다. class-transformer 직렬화를 쓰지 않으므로 `new`는 의미가 없다.
+- 요청 DTO의 상한·패턴·에러 문구는 `const/`에 두고 데코레이터가 참조한다(`profile.const.ts`).
+  앱이 그대로 띄우는 문구는 계약이다(`EXTERNAL_LINK_SCHEME_MESSAGE`).
+- 검증보다 먼저 다듬을 값(`trim`)은 `@Transform`을 검증 데코레이터 위에 둔다.
+- **WebSocket DTO는 예외다.** 게이트웨이 하나의 이벤트는 `dto/request/websocket-events.dto.ts`(Client→Server)와
+  `dto/response/websocket-response.dto.ts`(Server→Client) 두 파일에 모아 둔다 — 소켓에는 Swagger가 없어서 이 파일이
+  곧 이벤트 카탈로그다. 클래스 이름은 `…EventDto`. **부분 갱신 페이로드(`cluster_updated`)에 한해 `?`를 쓴다** —
+  "바뀐 필드만 싣는다"가 계약이라 `| null`로 바꾸면 "안 바뀜"과 "null로 바뀜"이 구분되지 않는다. 그 외 이벤트는 `?` 없음.
+
+## Const
+
+- 파일명은 `*.const.ts`뿐이다(`project-structure.mdc` 6절). enum·interface도 같은 파일에 둔다.
+  `*.enum.ts`·`*.validator.ts`·접미사 없는 파일도 `*.const.ts`로 맞춘다 — `*.validator.ts`는 `common/validators/`의
+  class-validator 데코레이터 파일 이름이라 헷갈린다.
+- **도메인 규칙을 담은 순수 함수는 그 도메인 `const/`에 둔다** — venues의 "KST 06:00 하루"(`getVenueDayRange`·
+  `validateScheduledDate`). 여러 서비스가 쓰니 private이 아니고, 다른 도메인이 안 쓰니 `common/utils`도 아니다.
+  I/O·의존성 주입이 필요하면 함수가 아니라 서비스다.
+- **쓰는 도메인이 하나뿐이면 `common/`에 두지 않는다.** 여러 도메인이 쓸 것 같아도 실제 importer 가 한 도메인이면
+  그 도메인 `const/`가 자리다 — 클러스터 익명 닉네임(`clusters/const/anonymous-nickname.const.ts`)이 그 예다.
+- **도메인 규칙이 아닌 판정·파싱·해시 같은 순수 함수는 `utils/`에 둔다** — auth의 `extractBearerToken`·
+  `hashRefreshToken`·`parseClientIds`, reports·app-version의 `utils/`. `const/`에 두면 "값의 근거" 규칙이
+  함수에 딸려 오는 게 어색하다.
+- **enum 이름에 `Enum` 접미사를 붙이지 않는다** — `Provider`, `ClusterStatus`, `SongStatus`.
+- 상수의 **값의 근거**(앱 UI 값·prd 실측·컬럼 제약)는 그 상수 위 `/** */`에 남긴다. 실측 날짜·앱 파일명은
+  근거의 일부라 지우지 않는다 — 서비스 주석 규칙의 "이력·날짜 삭제"는 const에는 적용하지 않는다.
+
+## Spec
+
+- 위치는 `spec/` 아래 소스 구조 미러링(CLAUDE.md). **파일 하나 = 메서드 하나 또는 주제 하나** —
+  `users.service.create-user.spec.ts`, `user-transaction.service.withdraw.spec.ts`처럼 파일명에 주제를 붙인다.
+- **서비스는 `Test.createTestingModule` + `{ provide, useValue }`로 만든다.** `new Service(a, {} as never, …)` 위치 인자는 쓰지 않는다 —
+  생성자에 의존 하나가 끼면 그 서비스의 spec 전부가 깨지고, 어느 목이 어느 의존인지 이름으로 드러나지 않는다.
+  안 쓰는 의존은 `{ provide: X, useValue: {} }`로 채운다.
+
+  ```ts
+  async function build() {
+    const usersRepository = { findById: jest.fn() };
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: UsersRepository, useValue: usersRepository },
+        { provide: GenresService, useValue: {} },
+      ],
+    }).compile();
+    return { service: moduleRef.get(UsersService), usersRepository };
+  }
+  ```
+- 리포지토리 spec은 TypeORM `Repository` 목을 생성자에 직접 넣어도 된다(`buildRepo`) — 의존이 하나뿐이다.
+- spec 안의 `build*` 헬퍼는 파일마다 따로 둔다. 공통으로 빼지 않는다(`project-structure.mdc` 9절).
+
+## Exception
+
+- 폴더는 `exceptions/`. HTTP 예외는 Nest 표준(`NotFoundException` 등)을 그 자리에서 던지고 파일로 만들지 않는다.
+- 파일로 두는 것은 **HttpException이 아닌 내부 신호**뿐이다 — `Error`를 상속하고 `name`을 클래스명으로 둔다.
+  호출자가 잡아서 HTTP 응답으로 바꾼다(`ProviderAlreadyRegisteredException` → `AuthService`가 409 대신 로그인 응답으로).
+
+## Gateway · Scheduler
+
+컨트롤러도 서비스도 아닌 층이다. 기준은 `clusters.gateway.ts`·`clusters/schedulers/`.
+
+- **파일 하나에 클래스 하나**, 주석·`readonly`·private 위치는 Service 절을 그대로 따른다.
+- **게이트웨이는 소켓 I/O 층이다.** `@SubscribeMessage` 핸들러가 하는 일은 셋뿐이다 — 소켓에서 userId 를 꺼내고,
+  서비스에 위임하고, 결과를 `emit` 한다(룸 join/leave 포함). 존재·차단·멤버십 판단은 서비스(`validateClusterAccess`)에 있다.
+  실패는 `error` 이벤트로 돌려주므로 핸들러 안 `try/catch` 는 허용한다 — HTTP 와 달리 예외 필터가 없다.
+- **`notify*` 는 동기다.** `server.to(room).emit()` 은 Promise 를 돌려주지 않으므로 `async` 를 붙이지 않는다.
+  호출부도 `await` 하지 않는다 — 소켓은 방어선이 아니라 UX 보조라 실패해도 상태는 서비스가 지킨다.
+- 룸 이름 접두(`cluster_`·`user_`)·이벤트 이름 같은 상수는 클래스 필드가 아니라 **`const/`** 에 둔다.
+  `user_` 룸은 게이트웨이마다 따로 든다(clusters·chats) — 공통으로 빼지 않는다(`project-structure.mdc` 9절).
+- 이벤트 DTO 는 두 파일(`websocket-events.dto.ts`·`websocket-response.dto.ts`)에 모은다 — DTO 절의 예외.
+- **스케줄러는 `@Cron` 핸들러 하나가 서비스의 `sweep()` 을 부르고 결과를 로그로 남기는 것까지만 한다.** 판단·조회는 서비스.
+  cron 식은 `const/` 상수(`CLUSTER_END_SWEEP_CRON`), `timeZone: 'Asia/Seoul'` 명시.
+  핸들러 안 `try/catch` 는 필요하다 — cron 라이브러리가 rejected promise 를 Nest Logger 밖으로 흘린다.
+- **spec 은 서비스와 같이 `Test.createTestingModule`** 로 만든다. 게이트웨이는 `server` 를 목으로 주입하고 `notify*` 의 `emit` 인자를 본다.
+
+## Decorator
+
+- 폴더는 `decorators/`. 인증 유저 데코레이터 사용 규칙은 Controller 절(`@UserId()` 기본, `@User()`는 재발급용).
+
+---

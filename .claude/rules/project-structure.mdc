@@ -1,0 +1,207 @@
+---
+alwaysApply: true
+description: DDD + Layered architecture project structure for NestJS backend
+globs: src/**/*.ts,src/**/*.tsx
+---
+
+# Project Structure Guide (DDD + Layered Architecture)
+
+이 규칙은 NestJS 기반 백엔드에서 **도메인 주도 설계(DDD)** 와 **레이어드 아키텍처(controller → service → repository)** 를 일관되게 적용하기 위한 가이드입니다.
+
+## 1. 도메인 단위 모듈 구조
+
+- 각 도메인은 **하나의 상위 폴더/모듈**로 관리합니다.
+  - 예시: `users`, `clusters`, `venues`, `reports`, `blocks`, `anon-message` 등
+- 각 도메인 폴더 내부에는 다음 하위 폴더 및 파일을 둡니다:
+  - `*.controller.ts` · `*.gateway.ts` — 진입점은 폴더를 파지 않고 도메인 루트에 둡니다.
+  - `services/` — 서비스가 **2개 이상일 때만** 만듭니다. 하나면 `<domain>.service.ts`로 루트에 둡니다.
+  - `repositories/`
+  - `dto/` (아래 DTO 규칙 참조)
+  - `const/` (상수/타입/인터페이스/enum + **도메인 규칙의 순수 함수**)
+  - `entities/`
+  - `spec/` (테스트. 아래 규칙 참조)
+- 필요한 도메인만 추가로 둡니다 — `utils/`(도메인 규칙이 아닌 판정·파싱), `guards/`, `decorators/`,
+  `interceptors/`, `exceptions/`, `schedulers/`, `validators/`. **폴더 이름은 복수형입니다**
+  (예외는 `dto`·`const`·`spec`). 어느 것을 `const/`에 두고 어느 것을 `utils/`에 둘지는
+  `code-conventions.mdc`의 Const 절이 정합니다.
+
+### 1.1 테스트 배치
+
+- `*.spec.ts`는 소스 옆에 두지 않고 **도메인의 `spec/` 아래에 소스 구조를 그대로 미러링**합니다.
+  - `clusters/services/clusters.service.ts` → `clusters/spec/services/clusters.service.spec.ts`
+  - `clusters/clusters.controller.ts` → `clusters/spec/clusters.controller.spec.ts`
+- 도메인에 속하지 않는 전역 테스트(`app.module`·`api-versioning`)는 `src/spec/`에 둡니다.
+- 스냅샷(`__snapshots__/`)은 해당 spec 옆으로 함께 갑니다.
+- `nest g`는 spec을 소스 옆에 만듭니다. **생성 후 `spec/`으로 옮깁니다.**
+- 파일시스템을 훑는 테스트는 자기 위치에 의존하므로 `__dirname` 기준 경로를 확인합니다
+  (`src/spec/app.module.entities.spec.ts`가 그런 예입니다).
+
+## 2. 레이어드 아키텍처
+
+- **Controller → Service → Repository** 흐름을 반드시 지킵니다.
+  - Controller:
+    - HTTP 요청/응답 처리
+    - Swagger 데코레이터 적용 (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiBearerAuth` 등)
+    - 비즈니스 로직은 두지 않고 **Service 메서드 호출**만 담당
+  - Service:
+    - 도메인 비즈니스 로직의 중심
+    - 다른 도메인 Service와의 협력 지점
+    - Repository를 주입받아 데이터 조작, 트랜잭션 서비스 호출 등 수행
+  - Repository:
+    - **순수 데이터 접근 계층**
+    - TypeORM의 `@InjectRepository`를 사용하여 Entity Repository 주입
+    - CRUD 및 쿼리 로직만 포함하고, 도메인 비즈니스 규칙은 포함하지 않음
+
+## 3. Repository 규칙
+
+- 각 도메인의 `repositories/` 폴더에 Repository 클래스를 정의합니다.
+- TypeORM 기준:
+  - 반드시 `@InjectRepository(Entity)` 를 이용해 주입합니다.
+  - 예시:
+
+```ts
+export class UsersRepository {
+  constructor(
+    @InjectRepository(UserModel)
+    private readonly usersRepository: Repository<UserModel>,
+  ) {}
+
+  async findById(id: number): Promise<UserModel | null> {
+    return this.usersRepository.findOne({ where: { id } });
+  }
+}
+```
+
+- **Repository는 여러 개** 나올 수 있으며, 역할 단위(UsersRepository, UserBlockRepository 등)로 분리합니다.
+
+## 4. Entity 배치 규칙
+
+- `entities/` 폴더에는 해당 도메인과 밀접하게 연관된 엔티티를 배치합니다.
+  - 예: `users/entities/users.entity.ts`, `users/entities/user-block.entity.ts`
+  - 예: `clusters/entities/clusters.entity.ts`, `clusters/entities/user-cluster-block.entity.ts`
+- 서로 연관된 엔티티는 **같은 도메인 폴더 안에서 관리**합니다.
+  - Repository/Service는 이 엔티티들을 기준으로 동작해야 합니다.
+
+## 5. DTO 구조 및 네이밍 규칙
+
+- DTO는 항상 `dto/` 폴더 아래에 두고, **요청/응답을 분리**합니다.
+  - `dto/request/*.dto.ts` – 요청 DTO
+  - `dto/response/*.dto.ts` – 응답 DTO
+
+### 5.1 Request DTO
+
+- 네이밍: **동사 + 대상 + Dto**
+  - 예: `CreateUserDto`, `UpdateUserDto`, `CreateClusterDto`, `GetCommentsDto`
+- `class-validator`, `class-transformer`를 적극 활용하여 유효성 검사를 수행합니다.
+
+### 5.2 Response DTO
+
+- 네이밍: **{동사}{Target}{Detail}ResponseDto**. 조회는 `Get…`이 기본입니다(응답 DTO 60여 개 중 27개).
+  - 단일 객체: `GetUserProfileResponseDto`, `GetClusterDetailResponseDto`
+  - 리스트: `GetAllClusterResponseDto`, `GetBlockedUsersResponseDto`
+  - 조회가 아닌 동작의 응답은 그 동작을 그대로 씁니다 — `CreateClusterResponseDto`,
+    `AcceptChatRoomResponseDto`, `ReissueTokenResponseDto`.
+  - 다른 응답 안에 끼워 쓰는 조각은 동사를 붙이지 않습니다 — `ClusterOwnerResponseDto`.
+- 가능한 한 **도메인 응답 구조를 명시적으로 표현**하고, 불필요한 엔티티 전체 노출을 피합니다.
+
+## 6. const 폴더 규칙
+
+- 각 도메인 내 `const/` 폴더에는 enum·상수·타입·인터페이스·**도메인 규칙의 순수 함수**를 둡니다. 파일명은 **`*.const.ts` 하나**입니다 —
+  `*.type.ts`·`*.interface.ts`·`*.util.ts`로 나누지 않습니다. 한 파일은 한 주제를 담고, 그 주제의 상수와
+  그 상수가 만드는 shape(interface)은 같은 파일에 둡니다(`verified-identity.const.ts`, `admin-signup-stats.const.ts`).
+- 도메인과 직접 관련된 상수만을 배치하고, 범용 유틸은 공용 모듈(`common/` 등)로 이동합니다.
+
+## 7. Swagger 사용 규칙
+
+- **모든 public API**는 Swagger 데코레이터를 사용하여 문서화합니다.
+- Controller 메서드에는 다음을 기본으로 적용합니다.
+  - `@ApiTags('<Domain> API')` – Controller 단위
+  - `@ApiBearerAuth('access-token')` – 인증이 필요한 API
+  - `@ApiOperation({ summary: '...' })` – API 요약 설명
+  - `@ApiResponse({ status: 200/201, description: '...', type: ResponseDto, isArray?: true })` - 여기서 400이나 에러 관련된 건 정의하지마.
+- DTO의 각 필드에도 `@ApiProperty`/`@ApiPropertyOptional`을 통해 타입/예제를 명시합니다.
+- **`@ApiExcludeController`인 컨트롤러(어드민 전용)의 응답 DTO는 예외입니다.** 문서가 렌더링되지 않으므로
+  `class` + `@ApiProperty` 대신 `interface`로 적고 설명은 주석으로 남깁니다(admin·reports의 응답 DTO).
+
+## 8. 의존성 및 순환 참조
+
+- Service 간 순환 참조가 필요한 경우에만 `forwardRef`를 사용합니다.
+  - 예: `UsersService` ↔ `ClustersService`, `UsersService` ↔ `VenuesService`
+- Repository는 **다른 도메인 Repository나 Service에 직접 의존하지 않습니다.**
+  - 도메인 간 협력은 반드시 Service 레이어에서 처리합니다.
+
+## 9. 코드 분해와 중복
+
+이 저장소는 **1인 개발**입니다. 파일·간접층이 하나 느는 비용이 중복을 없애는 이득보다
+큰 경우가 많습니다. 아래 둘을 기본값으로 둡니다.
+
+### 9.1 중복을 어느 정도 허용합니다
+
+- 같은 조각이 여러 곳에 필요하다고 해서 **공통 함수·상수로 뽑지 않습니다.** 호출부마다
+  그대로 씁니다.
+- 특히 **조건 한두 줄**, **리포지토리 한 번 호출**, **순수 판정 함수**는 뽑을 값이 없습니다.
+- 빠뜨릴까 걱정되면 추상화가 아니라 **전수 검사 스펙**으로 막습니다. 조건이 걸려야 할
+  경로를 표로 세워 두면, 한 곳이 빠졌을 때 그 경로 이름으로 실패합니다.
+
+```ts
+// ❌ 비권장: 두 줄을 없애려고 파일과 이름을 새로 만든다
+// active-cluster.filter.ts
+export const activeClusterWhere = () => ({
+  status: ClusterStatus.ACTIVE,
+  createdAt: MoreThanOrEqual(getClusterActiveThresholdDate()),
+});
+
+// ✅ 권장: 호출부에 그대로 쓴다 (9곳이어도 그대로)
+where: {
+  id: clusterId,
+  status: ClusterStatus.ACTIVE,
+  createdAt: MoreThanOrEqual(getClusterActiveThresholdDate()),
+},
+```
+
+**예외 1** — 값이 아니라 **식별자 자체가 모듈 경계의 계약**일 때는 한 곳에 둡니다.
+`instanceof` 로 판별하는 예외 클래스가 그렇습니다. 복사하면 판별이 항상 실패합니다.
+
+**예외 2** — **글자가 같아야 하는 것이 요구사항일 때**는 상수 하나로 모읍니다. 신고 앵커 거절 문구
+(`ANCHOR_REJECT_MESSAGE`)가 그렇습니다 — 사유별로 문구가 갈리면 그 차이로 "존재하는 id"와 "특정 유저가 쓴 id"를
+알아낼 수 있어(열거 오라클), 같은 문구라는 사실 자체가 보안 요구사항입니다.
+
+### 9.2 한 번만 쓸 코드를 메서드로 빼지 않습니다
+
+- **호출부가 한 곳뿐인 `private` 메서드를 만들지 않습니다.** 단일 책임을 기계적으로
+  적용해 흐름을 쪼개면, 읽는 사람이 파일 안을 오르내려야 합니다.
+- 뺄 이유는 "재사용" 이나 "함수가 길어서" 가 아니라 **이름이 필요해서** 여야 합니다.
+  그 이름이 본문보다 많은 것을 말해 주지 않으면 빼지 않습니다.
+- 흐름의 단계 구분은 메서드가 아니라 **빈 줄과 주석**으로 합니다
+  (`code-paragraphs.mdc`).
+
+```ts
+// ❌ 비권장: 한 곳에서만 부르는 조각으로 흐름이 다섯 단계로 갈린다
+getChatRooms() → getChatRoomsByType() → getDMChatRooms()
+               → mapToChatRoomItemDto() → buildSenderDto()
+
+// ✅ 권장: 한 메서드 안에서 빈 줄로 단계를 나눈다
+```
+
+기준은 `src/users/` 입니다. 서비스 네 개(521·185·152·150줄)에 **호출부가 하나뿐인
+`private` 메서드가 없습니다.**
+
+---
+
+## 10. 조건문과 비동기 호출
+
+**`await`는 문장의 머리에만 씁니다** — 조건식·삼항·함수 인자·객체 리터럴 안에 넣지 않고 변수로 먼저 받습니다.
+규칙과 예시는 `code-conventions.mdc`의 Service 절에 있습니다. 변수 이름은 의도가 드러나게 짓습니다
+(`isReceiverBlockingSender`).
+
+## 11. 요약 원칙
+
+1. **DDD 기준 도메인 단위 폴더 구성**
+2. **Controller – Service – Repository 레이어 분리**
+3. **Repository는 CRUD/쿼리만, 비즈니스 로직은 Service에만**
+4. **DTO는 request/response 분리 및 일관된 네이밍 (`{Target}{Detail}ResponseDto`)**
+5. **Swagger로 모든 public API 문서화**
+6. **엔티티는 도메인별 `entities/` 에서 관리하고 Repository와 연동**
+7. **중복은 허용하고, 한 번만 쓸 코드는 메서드로 빼지 않는다**
+
+새로운 프로젝트에서도 이 구조를 그대로 따르도록 합니다.
