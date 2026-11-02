@@ -25,7 +25,7 @@ import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
-import { AuthIdentityRepository } from '../auth/repositories/auth-identity.repository';
+import { AuthService } from '../auth/services/auth.service';
 import { UserWithdrawalRepository } from './repositories/user-withdrawal.repository';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private userWithdrawalRepository: UserWithdrawalRepository,
-    private authIdentityRepository: AuthIdentityRepository,
+    private authService: AuthService,
     private awsService: AwsService,
     private reviewRepository: ReviewRepository,
     private userFavoriteRepository: UserFavoriteRepository,
@@ -48,7 +48,7 @@ export class UserService {
     const user = await this.userRepository.findUserByUUID(uuid);
     if (!user) throw new NotFoundException('Not Found User');
 
-    const userAuthIdentity = await this.authIdentityRepository.findAuthIdentityByUuid(uuid);
+    const userAuthIdentity = await this.authService.findAuthIdentityByUuid(uuid);
     if (!userAuthIdentity) throw new NotFoundException('Not Found User');
 
     return new UserProfileResponsesDTO(user, userAuthIdentity.provider);

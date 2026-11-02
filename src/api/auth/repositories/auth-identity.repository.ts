@@ -8,34 +8,17 @@ import { AuthProvider } from '../const/auth-provider.const';
 export class AuthIdentityRepository {
   constructor(
     @InjectRepository(AuthIdentity)
-    private authIdentityRepository: Repository<AuthIdentity>,
+    private readonly authIdentityRepository: Repository<AuthIdentity>,
   ) {}
 
-  async findAuthIdentityByUuid(uuid: string) {
-    return await this.authIdentityRepository.findOne({
-      where: {
-        user: {
-          uuid,
-        },
-      },
-    });
+  async findByUuid(uuid: string): Promise<AuthIdentity | null> {
+    return this.authIdentityRepository.findOne({ where: { user: { uuid } } });
   }
 
-  async findAuthIdentityByAuthProviderId(authProviderId: string, authProvider: AuthProvider) {
-    return await this.authIdentityRepository.findOne({
-      where: {
-        provider: authProvider,
-        providerUid: authProviderId,
-      },
+  async findByProviderUidWithUser(providerUid: string, provider: AuthProvider): Promise<AuthIdentity | null> {
+    return this.authIdentityRepository.findOne({
+      where: { provider, providerUid },
       relations: ['user'],
-    });
-  }
-
-  async createAuthIdentity(authProviderId: string, authProvider: AuthProvider, userUuid: string) {
-    return await this.authIdentityRepository.save({
-      provider: authProvider,
-      providerUid: authProviderId,
-      user: { uuid: userUuid },
     });
   }
 }
