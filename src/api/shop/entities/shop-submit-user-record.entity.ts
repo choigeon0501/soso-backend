@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, OneToMany } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Shop } from './shop.entity';
-import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
+import { SubmitStatus, SubmitType } from '../const/submit.const';
 import { ShopOperatingHour } from './shop-operating-hour.entity';
 import { ShopProductMapping } from './shop-product-mapping.entity';
 

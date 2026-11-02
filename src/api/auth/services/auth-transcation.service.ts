@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { AuthProvider } from '../../../common/enum/auth.enum';
+import { AuthProvider } from '../const/auth-provider.const';
 import { User } from '../../user/entities/user.entity';
 import { AuthIdentity } from '../entities/auth-identity.entity';
 

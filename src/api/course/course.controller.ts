@@ -18,8 +18,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
-import { GetUUID } from '../../common/deco/get-user.deco';
-import { SuccessNoResultResponseDTO, SuccessResponseDTO } from '../../common/response/response.dto';
+import { GetUUID } from '../../common/decorators/get-uuid.decorator';
+import { SuccessNoResultResponseDTO, SuccessResponseDTO } from '../../common/dto/success-response.dto';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/requests/create-course.dto';
 import { UpdateCourseDto } from './dto/requests/update-course.dto';

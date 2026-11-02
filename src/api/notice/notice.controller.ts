@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { NoticeService } from './notice.service';
-import { SuccessResponseDTO } from '../../common/response/response.dto';
+import { SuccessResponseDTO } from '../../common/dto/success-response.dto';
 import { ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { NoticeDTO } from './dto/notice-response.dto';
 

@@ -18,8 +18,8 @@ import {
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiExtraModels, ApiOkResponse, ApiOperation, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
-import { OptionalAuthGuard } from '../../common/gurad/optional-auth-guard.guard';
-import { GetUUID } from '../../common/deco/get-user.deco';
+import { OptionalAuthGuard } from '../../common/guards/optional-auth.guard';
+import { GetUUID } from '../../common/decorators/get-uuid.decorator';
 import { UpdateProfileDTO } from './dto/requests/user_requests.dto';
 import { WithdrawalReasonDTO, ValidateNickNameDTO } from './dto/query/user.dto';
 import { PaginationQueryDTO } from './dto/query/pagination.dto';
@@ -32,7 +32,7 @@ import { ReviewPaginationDTO } from './dto/query/review.dto';
 import { UserFavoritePageNationDTO } from './dto/query/wishlist.dto';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';
 import { UserFavoriteRecordDTO, UserFavoriteRecordItemDTO } from './dto/responses/user_favorite_responses.dto';
-import { SuccessResponseDTO, SuccessNoResultResponseDTO } from 'src/common/response/response.dto';
+import { SuccessResponseDTO, SuccessNoResultResponseDTO } from '../../common/dto/success-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Users')

@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, getSchemaPath, ApiExtraModels, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ShopService } from './shop.service';
-import { SuccessNoResultResponseDTO, SuccessResponseDTO } from 'src/common/response/response.dto';
-import { GetUUID } from '../../common/deco/get-user.deco';
-import { OptionalAuthGuard } from 'src/common/gurad/optional-auth-guard.guard';
+import { SuccessNoResultResponseDTO, SuccessResponseDTO } from '../../common/dto/success-response.dto';
+import { GetUUID } from '../../common/decorators/get-uuid.decorator';
+import { OptionalAuthGuard } from '../../common/guards/optional-auth.guard';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
 import { GetSearchPageShopDTO, GetShopWithin1KmDTO } from './dto/query/pagination.dto';
 import { SubmitNewProductsDto, SubmitNewShopDto, SubmitShopOperatingHoursDto } from './dto/requests/submit_shop_requests.dto';

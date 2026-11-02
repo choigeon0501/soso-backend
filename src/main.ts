@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as fs from 'fs';
-import { CustomValidationPipe } from './common/pipe/validationPipe.pipe';
+import { CustomValidationPipe } from './common/pipes/custom-validation.pipe';
 import { setupSwagger } from './swagger/swagger';
 import helmet from 'helmet';
 

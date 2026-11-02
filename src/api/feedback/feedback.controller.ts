@@ -2,8 +2,8 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { SaveFeedbackDTO } from './dto/feedback.dto';
 import { JwtAuthGuard } from '../../common/jwt/jwt-auth.guard';
-import { GetUUID } from '../../common/deco/get-user.deco';
-import { SuccessNoResultResponseDTO } from '../../common/response/response.dto';
+import { GetUUID } from '../../common/decorators/get-uuid.decorator';
+import { SuccessNoResultResponseDTO } from '../../common/dto/success-response.dto';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Feedback')

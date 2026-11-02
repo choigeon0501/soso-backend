@@ -18,7 +18,7 @@ import { RecentSearchResponsesDto } from './dto/responses/recent_search_response
 import { ShopSubmitRecord } from '../shop/entities/shop-submit-user-record.entity';
 import { UserTransactionsRepository } from './repositories/user-transactions.repository';
 import { ShopRecentSearchRepository } from '../shop/repositories/shop-recent-search.repository';
-import { SubmitType } from '../../common/enum/role.enum';
+import { SubmitType } from '../shop/const/submit.const';
 import { ShopSubmitTransactionsRepository } from '../shop/repositories/shop-submit-transactions.repository';
 import { ShopRepository } from '../shop/repositories/shop.repository';
 import { UserFavoriteRequestsDto } from './dto/requests/wishlist_requests.dto';

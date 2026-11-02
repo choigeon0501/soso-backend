@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ShopSubmitRecord } from '../../../shop/entities/shop-submit-user-record.entity';
 import { PageInfoDTO, PaginationResponsesDto } from './pagination_responses.dto';
-import { SubmitStatus, SubmitType } from '../../../../common/enum/role.enum';
-import { getSubmitCombinedStatus } from '../../../../common/function/get-submit-status-enum';
+import { SubmitStatus, SubmitType, getSubmitCombinedStatus } from '../../../shop/const/submit.const';
 
 export class ShopResponseDTO {
   @ApiProperty() id: number;

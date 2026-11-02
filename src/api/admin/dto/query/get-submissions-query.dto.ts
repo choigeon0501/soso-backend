@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIn, IsOptional } from 'class-validator';
-import { SubmitStatus } from '../../../../common/enum/role.enum';
+import { SubmitStatus } from '../../../shop/const/submit.const';
 
 export class GetSubmissionsQueryDto {
   @ApiPropertyOptional({

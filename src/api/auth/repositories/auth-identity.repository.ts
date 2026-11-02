@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthIdentity } from '../entities/auth-identity.entity';
-import { AuthProvider } from '../../../common/enum/auth.enum';
+import { AuthProvider } from '../const/auth-provider.const';
 
 @Injectable()
 export class AuthIdentityRepository {

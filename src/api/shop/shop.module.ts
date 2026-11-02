@@ -2,7 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ShopController } from './shop.controller';
 import { ShopService } from './shop.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Shop } from 'src/api/shop/entities/shop.entity';
+import { Shop } from './entities/shop.entity';
 import { ShopRepository } from './repositories/shop.repository';
 import { ReviewModule } from '../review/review.module';
 import { RegionModule } from '../region/region.module';

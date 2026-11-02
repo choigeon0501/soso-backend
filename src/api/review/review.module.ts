@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { Review } from 'src/api/review/entities/review.entity';
+import { Review } from './entities/review.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReviewRepository } from './repositories/review.repository';
 import { AwsModule } from '../../common/aws/aws.module';
-import { ReviewImage } from 'src/api/review/entities/review-image.entity';
+import { ReviewImage } from './entities/review-image.entity';
 import { ReviewService } from './review.service';
 import { ReviewBan } from './entities/review-ban.entity';
 import { ReviewBanRepository } from './repositories/review-ban.repository';

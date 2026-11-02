@@ -6,7 +6,7 @@ import { UserWithdrawal } from '../entities/user-withdrawal.entity';
 import { WithdrawalReasonDTO } from '../dto/query/user.dto';
 import { AwsService } from '../../../common/aws/aws.service';
 import { ShopSubmitRecord } from '../../shop/entities/shop-submit-user-record.entity';
-import { SubmitStatus } from '../../../common/enum/role.enum';
+import { SubmitStatus } from '../../shop/const/submit.const';
 import { Shop } from '../../shop/entities/shop.entity';
 import { ShopProductMapping } from '../../shop/entities/shop-product-mapping.entity';
 import { ShopOperatingHour } from '../../shop/entities/shop-operating-hour.entity';

@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ShopSubmitRecord } from 'src/api/shop/entities/shop-submit-user-record.entity';
-import { SubmitStatus, SubmitType } from '../../../common/enum/role.enum';
+import { ShopSubmitRecord } from '../entities/shop-submit-user-record.entity';
+import { SubmitStatus, SubmitType } from '../const/submit.const';
 
 export class ShopSubmitRepository {
   constructor(

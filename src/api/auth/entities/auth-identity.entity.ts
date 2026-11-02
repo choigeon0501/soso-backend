@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { AuthProvider } from '../../../common/enum/auth.enum';
+import { AuthProvider } from '../const/auth-provider.const';
 
 @Entity('auth_identities')
 @Unique(['provider', 'providerUid'])

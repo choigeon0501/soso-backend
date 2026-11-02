@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
-import { ReviewReportType, ShopReportType } from '../../../../common/enum/report.enum';
+import { ReviewReportType } from '../../../review/const/review-report-type.const';
+import { ShopReportType } from '../../const/shop-report-type.const';
 
 export class ShopReportDto {
   @ApiProperty({

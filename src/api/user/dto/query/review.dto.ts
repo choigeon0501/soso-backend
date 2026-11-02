@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { PaginationQueryDTO } from './pagination.dto';
-import { SortOrder } from '../../../../common/enum/sorting.enum';
+import { SortOrder } from '../../../../common/const/sort-order.const';
 
 export class ReviewPaginationDTO extends PaginationQueryDTO {
   @ApiPropertyOptional({ enum: SortOrder, default: 'DESC', required: true })

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { WithdrawalReasonCode } from '../../const/user-withdrawal-response-code.const.dt';
+import { WithdrawalReasonCode } from '../../const/user-withdrawal-response-code.const';
 
 export class WithdrawalReasonDTO {
   @ApiProperty({ description: '회원 탈퇴 이유', enum: WithdrawalReasonCode })

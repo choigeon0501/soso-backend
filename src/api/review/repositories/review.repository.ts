@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Review } from 'src/api/review/entities/review.entity';
+import { Review } from '../entities/review.entity';
 import { Repository } from 'typeorm';
-import { SortOrder } from '../../../common/enum/sorting.enum';
+import { SortOrder } from '../../../common/const/sort-order.const';
 
 export class ReviewRepository {
   constructor(
