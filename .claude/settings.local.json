@@ -12,7 +12,8 @@
       "WebFetch(*)",
       "mcp__icons8mcp__search_icons",
       "mcp__icons8mcp__get_icon_png_url",
-      "WebSearch"
+      "WebSearch",
+      "mcp__soso-mysql__mysql_query"
     ],
     "deny": []
   },
